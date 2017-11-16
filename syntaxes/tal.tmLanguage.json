@@ -1,0 +1,200 @@
+{
+	"name": "TAL",
+	"patterns": [
+		{
+			"include": "#comments"
+		},
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#storage_types"
+		},
+		{
+			"comment": "Match standalone '.ext' and '.sg'. Match '.' that is followed by a word and preceded by whitespace",
+			"match": "(?i)(?<=\\s)(\\.sg(?=\\s)|\\.ext(?=\\s)|\\.(?=\\w))",
+			"name": "storage.modifier.tal"
+		},
+		{
+			"comment": "Not a language constant, but it's usually defined",
+			"match": "(?i)\\b(?<!\\^)(true|false)(?!\\^)\\b",
+			"name": "constant.language.tal"
+		},
+		{
+			"include": "#operators"
+		},
+		{
+			"include": "#numbers"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#compiler_directive"
+		},
+		{
+			"include": "#lib_tal"
+		},
+ 		{
+  			"include": "#functions_tal"
+		}
+	],
+	"repository": {
+		"compiler_directive":{
+			"patterns": [
+				{
+					"comment": "Source code include. Match a line that starts ? followed by source keywork. End match with either end of line if there is no open braken. Or end match with closed braket.",
+					"match": "^\\?.*$",
+					"name": "meta.preprocessor"
+				}
+			]
+		},
+		"comments": {
+			"patterns": [
+				{
+					"comment": "Match text between double dash and end of line",
+					"name": "comment.line.tal",
+					"match": "-{2}.*$"
+				},
+				{
+					"comment": "Match text between explanation marks or explanation mark and end of line",
+					"name": "comment.line.tal",
+					"begin": "!",
+					"end": "(!|$)"
+				}
+			]
+		},
+		"keywords": {
+			"patterns": [
+				{
+					"name": "keyword.control.tal",
+					"match": "(?i)\\b(?<!\\^)(case|do|else|for|goto|if|label|of|otherwise|return|then|until|while)(?!\\^)\\b",
+					"comment": "Control flow keywords. Look behind to avoid matching ^keyword."
+				},
+				{
+					"name": "keyword.other.tal",
+					"match": "(?i)\\b(?<!\\^)(begin|end)(?!\\^)\\b",
+					"comment": "Look behind to avoid matching ^keyword."
+				},
+				{
+					"name": "keyword.tal",
+					"match": "(?i)\\b(?<!\\^)(by|call|callable|code|downto|drop|entry|external|forward|interrupt|main|to|priv|proc|resident|subproc|use|variable|extensible|words|bytes|scan|rscan|store|stack|name|block)(?!\\^)\\b",					
+					"comment": "Language keywords. Look behind to avoid matching ^keyword."
+				}
+			]
+		},
+		"numbers": {
+			"patterns": [
+				{
+					"match": "(?<=(\\(|\\[))((\\-\\+)*[0-9 ,\\:\\.\\+\\-\\*\\/]+)(?=(\\)|\\]))",
+					"name": "constant.numeric.tal",
+					"captures": {
+					"1": { "name": "keyword.start.bracket.tal" },
+					"2": { "name": "constant.numeric.tal" },
+					"3": { "name": "keyword.end.bracket.tal" }
+					},
+					"comment": "Match numerics inside () and []"
+				},
+				{
+					"match": "(?<=(\\.\\<))((\\-\\+)*[0-9 ,\\:\\.\\+\\-\\*\\/]+)(?=(\\>))",
+					"name": "constant.numeric.tal",
+					"captures": {
+					"1": { "name": "keyword.start.bracket.tal" },
+					"2": { "name": "constant.numeric.tal" },
+					"3": { "name": "keyword.end.bracket.tal" }
+					},
+					"comment": "Match numerics inside .<> bit operator"
+				},
+				{
+					"match": "((%(h|H)[0-9a-fA-F]([0-9a-fA-F']*[0-9a-fA-F])?)|(%(b|B)[01]([01']*[01])?)|(\\b([0-9]([0-9']*[0-9])?\\.?[0-9]*([0-9']*[0-9])?)|(\\.[0-9]([0-9']*[0-9])?))((e|E|l|L)(\\+|-)?[0-9]([0-9']*[0-9])?)?)(D|d|%D|%d|F|f|%F|%f)?\\b",
+					"name": "constant.numeric.tal"
+				}
+			]
+		},
+		"strings": {
+			"name": "string.quoted.double.tal",
+			"begin": "\"",
+			"beginCaptures": {
+				"0": {
+					"name": "punctuation.definition.string.begin.tal"
+				}
+			},
+			"end": "\"",
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.definition.string.end.tal"
+				}
+			}
+		},
+		"operators": {
+			"patterns": [
+				{
+					"match": "-|\\'-\\'",
+					"name": "keyword.operator.decrement.tal"
+				},
+				{
+					"match": "\\+|\\'\\+\\'",
+					"name": "keyword.operator.increment.tal"
+				},
+				{
+					"match": "<<|\\'<<\\'|>>|\\'>>\\'",
+					"name": "keyword.operator.bitwise.shift.tal"
+				},
+				{
+					"match": "<>|\\'<>\\'|<=|\\'<=\\'|>=|\\'>=\\'|=|\\'=\\'|<|\\'<\\'|>|\\'>\\'",
+					"name": "keyword.operator.comparison.tal"
+				},
+				{
+					"match": "(?i)\\b(?<!\\^)(not|and|or|lor|land|xor)(?!\\^)\\b",
+					"name": "keyword.operator.logical.tal"
+				},
+				{
+					"match": "\\'\\\\'",
+					"name": "keyword.operator.tal"
+				},
+				{
+					"match": ":=|\\':=\\'|=:|\\'=:\\'",
+					"name": "keyword.operator.assignment.tal"
+				},
+				{
+					"match": "\\*|\\'\\*\\'|/|\\'/\\'|&|@",
+					"name": "keyword.operator.tal"
+				}
+			]
+		},
+		"storage_types": {
+			"patterns": [
+				{
+					"match": "(?i)\\b(?<!\\^)(literal|define|string|int|unsigned|fixed|real|struct)(?!\\^)\\b",
+					"name": "storage.type.tal"
+				}
+			]
+		},
+		"functions_tal": {
+			"patterns": [
+				{
+					"match": "(?i)((?<=^subproc)|(?<=\\ssubproc)|(?<=^proc)|(?<=\\sproc))\\b\\s*([a-zA-Z0-9][a-zA-Z0-9\\^_]*)",
+					"name": "meta.function-declaration.tal",
+					"captures": {
+						"2": { "name": "entity.name.function.tal" }
+					},
+					"comment": "Match proc or subproc declaration. Look behind for proc that either starts at the start of the line or has a whitespace. Reason being \b matches carrot that is a valid character in TAL"
+				},
+				{
+					"match": "(?i)\\b(?<![\\.\\^\\$])([a-zA-Z0-9][a-zA-Z0-9\\^_]*)\\s*[\\(]",
+					"name": "meta.function.tal",
+					"captures": {
+						"1": { "name": "entity.name.function.tal" }
+					},
+					"comment": "Match callable: proc, subproc, define. It will also match structure definition."
+				}
+			]
+		},
+		"lib_tal": {
+			"comment": "Standard TAL functions start with a $",
+			"name": "entity.name.function.tal",
+			"match": "(?i)(?<!\\^)\\$(dbl|dbll|dblr|dfix|eflt|efltr|fix|fixd|fixi|fixl|fixr|flt|fltr|high|ifix|int|intr|lfix|udbl|ladr|xadr|alpha|numeric|special|lmax|lmin|max|min|carry|overflow|point|scale|bitlength|bitoffset|len|occurs|offset|type|abs|comp|optional|param|readclock|rp|usercode)(?!\\^)\\b"
+		}
+	},
+	"scopeName": "source.tal"
+}
