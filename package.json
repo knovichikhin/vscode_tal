@@ -1,0 +1,26 @@
+{
+    "name": "tandem-tal",
+    "displayName": "Tandem TAL",
+    "description": "Syntax highlighting for Transaction Application Language",
+    "version": "0.0.1",
+    "publisher": "KNovichikhin",
+    "engines": {
+        "vscode": "*"
+    },
+    "categories": [
+        "Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "tal",
+            "aliases": ["TAL", "tal"],
+            "extensions": [".tal"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "tal",
+            "scopeName": "source.tal",
+            "path": "./syntaxes/tal.tmLanguage.json"
+        }]
+    }
+}
