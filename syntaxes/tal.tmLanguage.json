@@ -193,7 +193,23 @@
 					"comment": "Match proc or subproc declaration. Look behind for proc that either starts at the start of the line or has a whitespace. Reason being \b matches carrot that is a valid character in TAL"
 				},
 				{
-					"match": "(?i)\\b(?<![\\.\\$])([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
+					"match": "(?i)\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]\\s*\\*+",
+					"name":"meta.ignore.tal",
+					"captures": {
+						"1": { "name": "meta.ignore.tal" }
+					},
+					"comment": "This is a structure template declaration. Do not flag as a function"
+				},
+				{
+					"match": "(?i)((?<=\\.ext)|(?<=\\.sg)|(?<=struct))\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
+					"name":"meta.ignore.tal",
+					"captures": {
+						"2": { "name": "meta.ignore.tal" }
+					},
+					"comment": "This is a structure declaration. Do not flag as a function"
+				},
+				{
+					"match": "(?i)\\b(?<![\\.\\$\\^])([a-zA-Z_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
 					"name": "meta.function.tal",
 					"captures": {
 						"1": { "name": "entity.name.function.tal" }
