@@ -46,6 +46,31 @@
 		"compiler_directive":{
 			"patterns": [
 				{
+					"comment": "Multiline TAL directive. Match multiline directive and highlight procs inside.",
+					"begin": "^\\?.*\\(",
+					"end": "\\)",
+					"name": "meta.preprocessor",
+					"patterns": [
+						{
+							"include": "#comments"
+						},
+						{
+							"match": "(?i)\\s*\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)[,]?",
+							"name": "meta.function-import.tal",
+							"captures": {
+								"1": { "name": "entity.name.function.tal" }
+							}
+						},
+						{
+							"match": "(?i)^(\\?)\\s*\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+							"name": "meta.function-import.tal",
+							"captures": {
+								"2": { "name": "entity.name.function.tal" }
+							}
+						}
+					]
+				},
+				{
 					"comment": "TAL directive line. Match a single line directive line.",
 					"begin": "^\\?",
 					"end": "$",
@@ -53,6 +78,9 @@
 					"patterns": [
 						{
 							"include": "#comments"
+						},
+						{
+							"include": "#strings"
 						}
 					]
 				}
@@ -205,7 +233,7 @@
 					"comment": "This is a structure declaration. Do not flag as a function"
 				},
 				{
-					"match": "(?i)(?:\\A|\\b)(?<![\\.\\$])([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
+					"match": "(?i)\\b(?<![\\.\\$])([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
 					"name": "meta.function.tal",
 					"captures": {
 						"1": { "name": "entity.name.function.tal" }
