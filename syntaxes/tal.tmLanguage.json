@@ -43,6 +43,18 @@
 		}
 	],
 	"repository": {
+		"punctuation-comma": {
+			"name": "punctuation.separator.comma.tal",
+			"match": ","
+		},
+		"punctuation-semicolon": {
+			"name": "punctuation.terminator.statement.tal",
+			"match": ";"
+		},
+		"punctuation-accessor": {
+			"name": "punctuation.accessor.tal",
+			"match": "[\\w\\^]\\.[\\w\\^]"
+		},
 		"compiler_directive":{
 			"patterns": [
 				{
@@ -55,7 +67,7 @@
 							"include": "#comments"
 						},
 						{
-							"match": "(?i)\\s*\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)[,]?",
+							"match": "(?i)\\s*\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
 							"name": "meta.function-import.tal",
 							"captures": {
 								"1": { "name": "entity.name.function.tal" }
@@ -67,6 +79,9 @@
 							"captures": {
 								"2": { "name": "entity.name.function.tal" }
 							}
+						},
+						{
+							"include": "#punctuation-comma"
 						}
 					]
 				},
