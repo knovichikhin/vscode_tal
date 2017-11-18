@@ -14,9 +14,13 @@
 			"include": "#storage_types"
 		},
 		{
-			"comment": "Match standalone '.ext' and '.sg'. Match '.' that is followed by a word and preceded by whitespace",
-			"match": "(?i)(?<=\\s)(\\.sg(?=\\s)|\\.ext(?=\\s)|\\.(?=\\w))",
-			"name": "storage.modifier.tal"
+			"comment": "Match standalone '.ext' and '.sg'. Match '.' that is followed by a word and preceded by whitespace. Ignore variable that follows because we don't want to highlight them yet.",
+			"match": "(?i)(?<=\\s|^)(\\.sg(?=\\s)|\\.ext(?=\\s)|\\.(?=\\w))\\s*([\\w\\^]+)",
+			"name": "meta.storage.modifier.tal",
+			"captures": {
+				"1": { "name": "storage.modifier.tal" },
+				"2": { "name": "meta.ignore.tal" }
+			}
 		},
 		{
 			"comment": "Not a language constant, but it's usually defined",
@@ -271,7 +275,7 @@
 					"comment": "This is a structure declaration. Do not flag as a function"
 				},
 				{
-					"match": "(?i)\\b(?<![\\.\\$])([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
+					"match": "(?i)\\b(?<![\\.\\$\\^])([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
 					"name": "meta.function.tal",
 					"captures": {
 						"1": { "name": "entity.name.function.tal" }
