@@ -219,7 +219,7 @@
 					"comment": "This is a structure declaration. Do not flag as a function"
 				},
 				{
-					"match": "(?i)\\b(?<![\\.\\$\\^])([a-zA-Z_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
+					"match": "(?i)(?:\\A|\\b)(?<![\\.\\$])([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
 					"name": "meta.function.tal",
 					"captures": {
 						"1": { "name": "entity.name.function.tal" }
