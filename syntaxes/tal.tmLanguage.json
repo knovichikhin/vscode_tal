@@ -46,9 +46,15 @@
 		"compiler_directive":{
 			"patterns": [
 				{
-					"comment": "Source code include. Match a line that starts ? followed by source keywork. End match with either end of line if there is no open braken. Or end match with closed braket.",
-					"match": "^\\?.*$",
-					"name": "meta.preprocessor"
+					"comment": "TAL directive line. Match a single line directive line.",
+					"begin": "^\\?",
+					"end": "$",
+					"name": "meta.preprocessor",
+					"patterns": [
+						{
+							"include": "#comments"
+						}
+					]
 				}
 			]
 		},
