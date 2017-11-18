@@ -5,6 +5,9 @@
 			"include": "#comments"
 		},
 		{
+			"include": "#compiler_directive"
+		},
+		{
 			"include": "#keywords"
 		},
 		{
@@ -30,7 +33,7 @@
 			"include": "#strings"
 		},
 		{
-			"include": "#compiler_directive"
+			"include": "#illegal_tal"
 		},
 		{
 			"include": "#lib_tal"
@@ -167,6 +170,15 @@
 				{
 					"match": "(?i)\\b(?<!\\^)(literal|define|string|int|unsigned|fixed|real|struct)(?!\\^)\\b",
 					"name": "storage.type.tal"
+				}
+			]
+		},
+		"illegal_tal": {
+			"patterns":[
+				{
+					"comment": "TAL does not allow identifiers that begin with numbers",
+					"match": "\\b(?<!\\^)(\\d[\\w\\^]+)\\b",
+					"name": "invalid.illegal.tal"
 				}
 			]
 		},
