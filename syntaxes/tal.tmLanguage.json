@@ -160,7 +160,7 @@
 					"name": "keyword.operator.assignment.tal"
 				},
 				{
-					"match": "\\*|\\'\\*\\'|/|\\'/\\'|&|@",
+					"match": "\\*|\\'\\*\\'|/|\\'/\\'|&|@|->",
 					"name": "keyword.operator.tal"
 				}
 			]
