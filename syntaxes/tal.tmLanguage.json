@@ -59,7 +59,19 @@
 			"patterns": [
 				{
 					"comment": "Multiline TAL directive. Match multiline directive and highlight procs inside.",
-					"begin": "^\\?.*\\(",
+					"begin": "^\\?(.*)\\(",
+					"beginCaptures": {
+						"1": {
+							"patterns": [
+								{
+									"include": "#compiler_directive_keyword"
+								},
+								{
+									"include": "#punctuation-comma"
+								}
+							]
+						}
+					},
 					"end": "\\)",
 					"name": "meta.preprocessor",
 					"patterns": [
@@ -92,14 +104,25 @@
 					"name": "meta.preprocessor",
 					"patterns": [
 						{
-							"include": "#comments"
+							"include": "#compiler_directive_keyword"
+						},
+						{
+							"include": "#punctuation-comma"
 						},
 						{
 							"include": "#strings"
+						},
+						{
+							"include": "#comments"
 						}
 					]
 				}
 			]
+		},
+		"compiler_directive_keyword": {
+			"name": "keyword.preprocessor.tal",
+			"match": "(?i)\\b(?<!\\^)(assertion|begincompilation|decs|definetog|dumpcons|(end)?if|ifnot|page|rp|section|source|(no)?list|(no)?code|inspect|symbols|(no)?(l)?map|gmap|(no)?crossref|innerlist|search)(?!\\^)\\b",
+			"comment": "Compiler directive keywords. Look behind to avoid matching ^keyword."
 		},
 		"comments": {
 			"patterns": [
