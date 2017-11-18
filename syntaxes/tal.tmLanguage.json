@@ -185,7 +185,7 @@
 		"functions_tal": {
 			"patterns": [
 				{
-					"match": "(?i)((?<=^subproc)|(?<=\\ssubproc)|(?<=^proc)|(?<=\\sproc))\\b\\s*([a-zA-Z0-9][a-zA-Z0-9\\^_]*)",
+					"match": "(?i)((?<=^subproc)|(?<=\\ssubproc)|(?<=^proc)|(?<=\\sproc))\\b\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
 					"name": "meta.function-declaration.tal",
 					"captures": {
 						"2": { "name": "entity.name.function.tal" }
@@ -193,7 +193,7 @@
 					"comment": "Match proc or subproc declaration. Look behind for proc that either starts at the start of the line or has a whitespace. Reason being \b matches carrot that is a valid character in TAL"
 				},
 				{
-					"match": "(?i)\\b(?<![\\.\\^\\$])([a-zA-Z0-9][a-zA-Z0-9\\^_]*)\\s*[\\(]",
+					"match": "(?i)\\b(?<![\\.\\$])([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
 					"name": "meta.function.tal",
 					"captures": {
 						"1": { "name": "entity.name.function.tal" }
