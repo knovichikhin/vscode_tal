@@ -89,26 +89,6 @@
 		"numbers": {
 			"patterns": [
 				{
-					"match": "(?<=(\\(|\\[))((\\-\\+)*[0-9 ,\\:\\.\\+\\-\\*\\/]+)(?=(\\)|\\]))",
-					"name": "constant.numeric.tal",
-					"captures": {
-					"1": { "name": "keyword.start.bracket.tal" },
-					"2": { "name": "constant.numeric.tal" },
-					"3": { "name": "keyword.end.bracket.tal" }
-					},
-					"comment": "Match numerics inside () and []"
-				},
-				{
-					"match": "(?<=(\\.\\<))((\\-\\+)*[0-9 ,\\:\\.\\+\\-\\*\\/]+)(?=(\\>))",
-					"name": "constant.numeric.tal",
-					"captures": {
-					"1": { "name": "keyword.start.bracket.tal" },
-					"2": { "name": "constant.numeric.tal" },
-					"3": { "name": "keyword.end.bracket.tal" }
-					},
-					"comment": "Match numerics inside .<> bit operator"
-				},
-				{
 					"match": "((%(h|H)[0-9a-fA-F]([0-9a-fA-F']*[0-9a-fA-F])?)|(%(b|B)[01]([01']*[01])?)|(\\b([0-9]([0-9']*[0-9])?\\.?[0-9]*([0-9']*[0-9])?)|(\\.[0-9]([0-9']*[0-9])?))((e|E|l|L)(\\+|-)?[0-9]([0-9']*[0-9])?)?)(D|d|%D|%d|F|f|%F|%f)?\\b",
 					"name": "constant.numeric.tal"
 				}
