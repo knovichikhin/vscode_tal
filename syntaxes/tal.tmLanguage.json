@@ -231,7 +231,7 @@
 		"lib_tal": {
 			"comment": "Standard TAL functions start with a $",
 			"name": "entity.name.function.tal",
-			"match": "(?i)(?<!\\^)\\$(dbl|dbll|dblr|dfix|eflt|efltr|fix|fixd|fixi|fixl|fixr|flt|fltr|high|ifix|int|intr|lfix|udbl|ladr|xadr|alpha|numeric|special|lmax|lmin|max|min|carry|overflow|point|scale|bitlength|bitoffset|len|occurs|offset|type|abs|comp|optional|param|readclock|rp|usercode)(?!\\^)\\b"
+			"match": "(?i)(?<![\\^_%$#])\\$(dbl|dbll|dblr|dfix|eflt|efltr|fix|fixd|fixi|fixl|fixr|flt|fltr|high|ifix|int|intr|lfix|udbl|ladr|xadr|alpha|numeric|special|lmax|lmin|max|min|carry|overflow|point|scale|bitlength|bitoffset|len|occurs|offset|type|abs|comp|optional|param|readclock|rp|usercode)(?!\\^)\\b"
 		}
 	},
 	"scopeName": "source.tal"
