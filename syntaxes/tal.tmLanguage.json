@@ -179,6 +179,16 @@
 					"comment": "TAL does not allow identifiers that begin with numbers",
 					"match": "\\b(?<!\\^)(\\d[\\w\\^]+)\\b",
 					"name": "invalid.illegal.tal"
+				},
+				{
+					"comment": "Identifiers longer than 31 are not allowed",
+					"match": "\\s*[\\w\\^]{32,}",
+					"name": "invalid.illegal.tal"
+				},
+				{
+					"comment": "% are not allowed in the middle of an identifier",
+					"match": "\\s*[\\w\\^]+\\%[\\w\\^]+",
+					"name": "invalid.illegal.tal"
 				}
 			]
 		},
