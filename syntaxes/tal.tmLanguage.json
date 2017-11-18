@@ -130,7 +130,7 @@
 				},
 				{
 					"name": "keyword.tal",
-					"match": "(?i)\\b(?<!\\^)(by|call|callable|code|downto|drop|entry|external|forward|interrupt|main|to|priv|proc|resident|subproc|use|variable|extensible|words|bytes|scan|rscan|store|stack|name|block)(?!\\^)\\b",					
+					"match": "(?i)\\b(?<!\\^)(by|call|callable|code|downto|drop|entry|external|forward|interrupt|main|to|priv|proc|resident|subproc|use|variable|extensible|words|bytes|scan|rscan|store|stack|name|block|target)(?!\\^)\\b",					
 					"comment": "Language keywords. Look behind to avoid matching ^keyword."
 				}
 			]
@@ -260,7 +260,7 @@
 		"lib_tal": {
 			"comment": "Standard TAL functions start with a $",
 			"name": "entity.name.function.tal",
-			"match": "(?i)(?<![\\^_%$#])\\$(dbl|dbll|dblr|dfix|eflt|efltr|fix|fixd|fixi|fixl|fixr|flt|fltr|high|ifix|int|intr|lfix|udbl|ladr|xadr|alpha|numeric|special|lmax|lmin|max|min|carry|overflow|point|scale|bitlength|bitoffset|len|occurs|offset|type|abs|comp|optional|param|readclock|rp|usercode)(?!\\^)\\b"
+			"match": "(?i)(?<![\\^_%$#])\\$(dbl|dbll|dblr|dfix|eflt|efltr|fix|fixd|fixi|fixl|fixr|flt|fltr|high|ifix|int|intr|lfix|udbl|ladr|xadr|alpha|numeric|special|lmax|lmin|max|min|carry|overflow|point|scale|bitlength|bitoffset|len|occurs|offset|type|abs|comp|optional|param|readclock|rp|usercode|axadr|bounds|switches|)(?!\\^)\\b"
 		}
 	},
 	"scopeName": "source.tal"
