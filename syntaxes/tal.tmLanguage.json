@@ -44,6 +44,12 @@
 		},
  		{
   			"include": "#functions_tal"
+		},
+ 		{
+  			"include": "#punctuation_accessor"
+		},
+ 		{
+  			"include": "#punctuation_semicolon"
 		}
 	],
 	"repository": {
@@ -56,8 +62,11 @@
 			"match": ";"
 		},
 		"punctuation_accessor": {
-			"name": "punctuation.accessor.tal",
-			"match": "[\\w\\^]\\.[\\w\\^]"
+			"name": "meta.punctuation.accessor.tal",
+			"match": "[\\w\\^](\\.)[\\w\\^]",
+			"captures": {
+				"1": { "name": "punctuation.accessor.tal" }
+			}
 		},
 		"compiler_directive":{
 			"patterns": [
