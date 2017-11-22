@@ -47,15 +47,15 @@
 		}
 	],
 	"repository": {
-		"punctuation-comma": {
+		"punctuation_comma": {
 			"name": "punctuation.separator.comma.tal",
 			"match": ","
 		},
-		"punctuation-semicolon": {
+		"punctuation_semicolon": {
 			"name": "punctuation.terminator.statement.tal",
 			"match": ";"
 		},
-		"punctuation-accessor": {
+		"punctuation_accessor": {
 			"name": "punctuation.accessor.tal",
 			"match": "[\\w\\^]\\.[\\w\\^]"
 		},
@@ -71,7 +71,7 @@
 									"include": "#compiler_directive_keyword"
 								},
 								{
-									"include": "#punctuation-comma"
+									"include": "#punctuation_comma"
 								}
 							]
 						}
@@ -97,7 +97,7 @@
 							}
 						},
 						{
-							"include": "#punctuation-comma"
+							"include": "#punctuation_comma"
 						}
 					]
 				},
@@ -111,7 +111,7 @@
 							"include": "#compiler_directive_keyword"
 						},
 						{
-							"include": "#punctuation-comma"
+							"include": "#punctuation_comma"
 						},
 						{
 							"include": "#strings"
