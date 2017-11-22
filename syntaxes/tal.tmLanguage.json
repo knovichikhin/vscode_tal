@@ -154,7 +154,7 @@
 		},
 		"compiler_directive_keyword": {
 			"name": "keyword.preprocessor.tal",
-			"match": "(?i)\\b(?<!\\^)(assertion|begincompilation|decs|definetog|dumpcons|(end)?if|ifnot|page|rp|section|source|(no)?list|(no)?code|inspect|symbols|(no)?(l)?map|gmap|(no)?crossref|innerlist|search)(?!\\^)\\b",
+			"match": "(?i)\\b(?<!\\^)(assertion|begincompilation|decs|definetog|dumpcons|(end)?if|ifnot|page|extendstack|compact|rp|section|source|(no)?list|(no)?code|inspect|symbols|(no)?(l)?map|gmap|(no)?crossref|innerlist|search)(?!\\^)\\b",
 			"comment": "Compiler directive keywords. Look behind to avoid matching ^keyword."
 		},
 		"comments": {
