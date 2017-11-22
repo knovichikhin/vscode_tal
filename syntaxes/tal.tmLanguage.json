@@ -313,6 +313,9 @@
 							"include": "#punctuation_comma"
 						},
 						{
+							"include": "#lib_tal"
+						},
+						{
 							"include": "#functions_tal"
 						},
 						{
@@ -333,7 +336,7 @@
 		"lib_tal": {
 			"comment": "Standard TAL functions start with a $",
 			"name": "entity.name.function.tal",
-			"match": "(?i)(?<![\\^_%$#])\\$(dbl|dbll|dblr|dfix|eflt|efltr|fix|fixd|fixi|fixl|fixr|flt|fltr|high|ifix|int|intr|lfix|udbl|ladr|xadr|alpha|numeric|special|lmax|lmin|max|min|carry|overflow|point|scale|bitlength|bitoffset|len|occurs|offset|type|abs|comp|optional|param|readclock|rp|usercode|axadr|bounds|switches|)(?!\\^)\\b"
+			"match": "(?i)(?<![\\^_%$#])(\\$dbl|\\$dbll|\\$dblr|\\$dfix|\\$eflt|\\$efltr|\\$fix|\\$fixd|\\$fixi|\\$fixl|\\$fixr|\\$flt|\\$fltr|\\$high|\\$ifix|\\$int|\\$intr|\\$lfix|\\$udbl|\\$ladr|\\$xadr|\\$alpha|\\$numeric|\\$special|\\$lmax|\\$lmin|\\$max|\\$min|\\$carry|\\$overflow|\\$point|\\$scale|\\$bitlength|\\$bitoffset|\\$len|\\$occurs|\\$offset|\\$type|\\$abs|\\$comp|\\$optional|\\$param|\\$readclock|\\$rp|\\$usercode|\\$axadr|\\$bounds|\\$switches)(?!\\^)\\b"
 		},
 		"attributes": {
 			"match": "([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
