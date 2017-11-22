@@ -14,13 +14,33 @@
 			"include": "#storage_types"
 		},
 		{
-			"comment": "Match standalone '.ext' and '.sg'. Match '.' that is followed by a word and preceded by whitespace. Ignore variable that follows because we don't want to highlight them yet.",
-			"match": "(?i)(?<=\\s|^)(\\.sg(?=\\s)|\\.ext(?=\\s)|\\.(?=\\w))\\s*([\\w\\^]+)",
-			"name": "meta.storage.modifier.tal",
-			"captures": {
-				"1": { "name": "storage.modifier.tal" },
-				"2": { "name": "meta.ignore.tal" }
-			}
+			"patterns": [
+				{
+					"comment": "Match standalone '.ext' and '.sg'. Match '.' that is followed by a word and preceded by whitespace. Ignore variable that follows because we don't want to highlight them yet.",
+					"match": "(?i)(?<=\\s|^)(\\.sg(?=\\s)|\\.ext(?=\\s)|\\.(?=\\w))\\s*([\\w\\^]+)",
+					"name": "meta.storage.modifier.tal",
+					"captures": {
+						"1": { "name": "storage.modifier.tal" },
+						"2": { "name": "meta.ignore.tal" }
+					}
+				},
+				{
+					"match": "(?i)\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]\\s*\\*+",
+					"name":"meta.ignore.tal",
+					"captures": {
+						"1": { "name": "meta.ignore.tal" }
+					},
+					"comment": "This is a structure template declaration. Do not flag as a function"
+				},
+				{
+					"match": "(?i)((?<=\\.ext)|(?<=\\.sg)|(?<=struct))\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
+					"name":"meta.ignore.tal",
+					"captures": {
+						"2": { "name": "meta.ignore.tal" }
+					},
+					"comment": "This is a structure declaration. Do not flag as a function"
+				}
+			]
 		},
 		{
 			"comment": "Not a language constant, but it's usually defined",
@@ -260,35 +280,52 @@
 		"functions_tal": {
 			"patterns": [
 				{
-					"match": "(?i)((?<=^subproc)|(?<=\\ssubproc)|(?<=^proc)|(?<=\\sproc))\\b\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
-					"name": "meta.function-declaration.tal",
-					"captures": {
+					"begin": "(?i)((?<=^subproc)|(?<=\\ssubproc)|(?<=^proc)|(?<=\\sproc))\\b\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+					"beginCaptures": {
 						"2": { "name": "entity.name.function.tal" }
 					},
+					"end": "(\\)|;)",
+					"name": "meta.function-declaration.tal",
+					"patterns": [
+						{
+							"include": "#comments"
+						},
+						{
+							"include": "#punctuation_comma"
+						},
+						{
+							"include": "#attributes"
+						}
+					],
 					"comment": "Match proc or subproc declaration. Look behind for proc that either starts at the start of the line or has a whitespace. Reason being \b matches carrot that is a valid character in TAL"
 				},
 				{
-					"match": "(?i)\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]\\s*\\*+",
-					"name":"meta.ignore.tal",
-					"captures": {
-						"1": { "name": "meta.ignore.tal" }
-					},
-					"comment": "This is a structure template declaration. Do not flag as a function"
-				},
-				{
-					"match": "(?i)((?<=\\.ext)|(?<=\\.sg)|(?<=struct))\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
-					"name":"meta.ignore.tal",
-					"captures": {
-						"2": { "name": "meta.ignore.tal" }
-					},
-					"comment": "This is a structure declaration. Do not flag as a function"
-				},
-				{
-					"match": "(?i)\\b(?<![\\.\\$\\^])([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
-					"name": "meta.function.tal",
-					"captures": {
+					"begin": "(?i)\\b(?<![\\.\\$\\^])([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
+					"beginCaptures": {
 						"1": { "name": "entity.name.function.tal" }
 					},
+					"end": "\\)",
+					"patterns": [
+						{
+							"include": "#comments"
+						},
+						{
+							"include": "#punctuation_comma"
+						},
+						{
+							"include": "#functions_tal"
+						},
+						{
+							"include": "#attributes"
+						},
+						{
+							"include": "#numbers"
+						},
+						{
+							"include": "#strings"
+						}
+					],
+					"name": "meta.function.tal",
 					"comment": "Match callable: proc, subproc, define. It will also match structure definition."
 				}
 			]
@@ -297,6 +334,10 @@
 			"comment": "Standard TAL functions start with a $",
 			"name": "entity.name.function.tal",
 			"match": "(?i)(?<![\\^_%$#])\\$(dbl|dbll|dblr|dfix|eflt|efltr|fix|fixd|fixi|fixl|fixr|flt|fltr|high|ifix|int|intr|lfix|udbl|ladr|xadr|alpha|numeric|special|lmax|lmin|max|min|carry|overflow|point|scale|bitlength|bitoffset|len|occurs|offset|type|abs|comp|optional|param|readclock|rp|usercode|axadr|bounds|switches|)(?!\\^)\\b"
+		},
+		"attributes": {
+			"match": "([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+			"name": "entity.variable.tal"
 		}
 	},
 	"scopeName": "source.tal"
