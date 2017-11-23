@@ -326,6 +326,9 @@
 						},
 						{
 							"include": "#strings"
+						},
+						{
+							"include": "#operators"
 						}
 					],
 					"name": "meta.function.tal",
