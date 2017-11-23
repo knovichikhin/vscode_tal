@@ -2,7 +2,7 @@
     "name": "tal",
     "displayName": "Tandem TAL",
     "description": "Syntax highlighting for Transaction Application Language",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "publisher": "KNovichikhin",
     "engines": {
         "vscode": "*"
@@ -10,17 +10,35 @@
     "categories": [
         "Languages"
     ],
+    "license": "./LICENSE",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/manoutoftime/vscode_tal.git"
+    },
+    "bugs": {
+        "url": "https://github.com/manoutoftime/vscode_tal/issues",
+        "email": "konstantin.novichikhin@gmail.com"
+    },
     "contributes": {
-        "languages": [{
-            "id": "tal",
-            "aliases": ["TAL", "tal"],
-            "extensions": [".tal"],
-            "configuration": "./language-configuration.json"
-        }],
-        "grammars": [{
-            "language": "tal",
-            "scopeName": "source.tal",
-            "path": "./syntaxes/tal.tmLanguage.json"
-        }]
+        "languages": [
+            {
+                "id": "tal",
+                "aliases": [
+                    "TAL",
+                    "tal"
+                ],
+                "extensions": [
+                    ".tal"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "tal",
+                "scopeName": "source.tal",
+                "path": "./syntaxes/tal.tmLanguage.json"
+            }
+        ]
     }
 }
