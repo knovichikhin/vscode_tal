@@ -176,7 +176,7 @@
 			"patterns": [
 				{
 					"name": "keyword.control.tal",
-					"match": "(?i)\\b(?<!\\^)(case|do|else|for|goto|if|label|of|otherwise|return|then|until|while)(?!\\^)\\b",
+					"match": "(?i)\\b(?<!\\^)(call|case|do|else|for|goto|if|label|of|otherwise|return|then|until|while|to|downto|by|proc|subproc)(?!\\^)\\b",
 					"comment": "Control flow keywords. Look behind to avoid matching ^keyword."
 				},
 				{
@@ -186,7 +186,7 @@
 				},
 				{
 					"name": "keyword.tal",
-					"match": "(?i)\\b(?<!\\^)(by|call|callable|code|downto|drop|entry|external|forward|interrupt|main|to|priv|proc|resident|subproc|use|variable|extensible|words|bytes|scan|rscan|store|stack|name|block|target)(?!\\^)\\b",					
+					"match": "(?i)\\b(?<!\\^)(callable|code|drop|entry|external|forward|interrupt|main|priv|resident|use|variable|extensible|words|bytes|scan|rscan|store|stack|name|block|target)(?!\\^)\\b",
 					"comment": "Language keywords. Look behind to avoid matching ^keyword."
 				}
 			]
