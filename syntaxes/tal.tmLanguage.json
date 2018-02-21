@@ -310,6 +310,9 @@
 							"include": "#comments"
 						},
 						{
+							"include": "#compiler_directive"
+						},
+						{
 							"include": "#punctuation_comma"
 						},
 						{

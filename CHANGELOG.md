@@ -1,5 +1,8 @@
 # Change Log
 
+## [0.0.4] - 2018-02-18
+- Highlight compiler directives inside function calls.
+
 ## [0.0.3] - 2017-12-04
 - Change keywords call, to, downto, by, proc and subproc from generic to control.
 
