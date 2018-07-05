@@ -1,4 +1,9 @@
-# Change Log
+# Change Log\
+## [0.0.6] - 2018-07-05
+- Remove <> from surrounding pairs - it's not intuitive when editing operators.
+- Remove ' from auto closing pairs - it's not intuitive when editing operators.
+- Remove <> from brackets. There is no need for indentation in this scenario.
+
 
 ## [0.0.5] - 2018-07-04
 - Literal preceded by keyword subproc/proc and ^ was incorrectly considered a procedure.
