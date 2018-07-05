@@ -2,6 +2,7 @@
 
 ## [0.0.5] - 2018-07-04
 - Literal preceded by keyword subproc/proc and ^ was incorrectly considered a procedure.
+- Built-in TAL functions were not recognised as function calls inside functions.
 
 ## [0.0.4] - 2018-02-18
 - Highlight compiler directives inside function calls.

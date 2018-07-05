@@ -300,6 +300,47 @@
 					"comment": "Match proc or subproc declaration. Look behind for proc that either starts at the start of the line or has a whitespace. Reason being \b matches carrot that is a valid character in TAL"
 				},
 				{
+					"begin": "(?i)(?<![\\^_%$#])(\\$dbl|\\$dbll|\\$dblr|\\$dfix|\\$eflt|\\$efltr|\\$fix|\\$fixd|\\$fixi|\\$fixl|\\$fixr|\\$flt|\\$fltr|\\$high|\\$ifix|\\$int|\\$intr|\\$lfix|\\$udbl|\\$ladr|\\$xadr|\\$alpha|\\$numeric|\\$special|\\$lmax|\\$lmin|\\$max|\\$min|\\$point|\\$scale|\\$bitlength|\\$bitoffset|\\$len|\\$occurs|\\$offset|\\$type|\\$abs|\\$comp|\\$optional|\\$param|\\$usercode|\\$axadr|\\$bounds)(?!\\^)\\s*[\\(]",
+					"beginCaptures": {
+						"1": { "name": "entity.name.function.tal.standard_param" }
+					},
+					"end": "\\)",
+					"patterns": [
+						{
+							"include": "#comments"
+						},
+						{
+							"include": "#compiler_directive"
+						},
+						{
+							"include": "#punctuation_comma"
+						},
+						{
+							"include": "#functions_tal"
+						},
+						{
+							"include": "#lib_tal"
+						},
+						{
+							"include": "#keywords"
+						},
+						{
+							"include": "#attributes"
+						},
+						{
+							"include": "#numbers"
+						},
+						{
+							"include": "#strings"
+						},
+						{
+							"include": "#operators"
+						}
+					],
+					"name": "meta.function.tal.standard",
+					"comment": "Standard TAL functions start with a $. These functions require parameters."
+				},
+				{
 					"begin": "(?i)\\b(?<![\\.\\$\\^])([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
 					"beginCaptures": {
 						"1": { "name": "entity.name.function.tal" }
@@ -316,10 +357,13 @@
 							"include": "#punctuation_comma"
 						},
 						{
+							"include": "#functions_tal"
+						},
+						{
 							"include": "#lib_tal"
 						},
 						{
-							"include": "#functions_tal"
+							"include": "#keywords"
 						},
 						{
 							"include": "#attributes"
@@ -340,9 +384,9 @@
 			]
 		},
 		"lib_tal": {
-			"comment": "Standard TAL functions start with a $",
-			"name": "entity.name.function.tal",
-			"match": "(?i)(?<![\\^_%$#])(\\$dbl|\\$dbll|\\$dblr|\\$dfix|\\$eflt|\\$efltr|\\$fix|\\$fixd|\\$fixi|\\$fixl|\\$fixr|\\$flt|\\$fltr|\\$high|\\$ifix|\\$int|\\$intr|\\$lfix|\\$udbl|\\$ladr|\\$xadr|\\$alpha|\\$numeric|\\$special|\\$lmax|\\$lmin|\\$max|\\$min|\\$carry|\\$overflow|\\$point|\\$scale|\\$bitlength|\\$bitoffset|\\$len|\\$occurs|\\$offset|\\$type|\\$abs|\\$comp|\\$optional|\\$param|\\$readclock|\\$rp|\\$usercode|\\$axadr|\\$bounds|\\$switches)(?!\\^)\\b"
+			"comment": "Standard TAL functions start with a $. These functions do not require parameters.",
+			"name": "entity.name.function.tal.standard_no_param",
+			"match": "(?i)(?<![\\^_%$#])(\\$carry|\\$overflow|\\$readclock|\\$rp|\\$switches)(?!\\^)\\b"
 		},
 		"attributes": {
 			"match": "([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
