@@ -280,7 +280,7 @@
 		"functions_tal": {
 			"patterns": [
 				{
-					"begin": "(?i)((?<=^subproc)|(?<=\\ssubproc)|(?<=^proc)|(?<=\\sproc))\\b\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+					"begin": "(?i)((?<=^subproc)|(?<=\\ssubproc)|(?<=^proc)|(?<=\\sproc))(?!\\^)\\b\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
 					"beginCaptures": {
 						"2": { "name": "entity.name.function.tal" }
 					},

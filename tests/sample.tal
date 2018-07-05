@@ -1,0 +1,40 @@
+!TAL Programmer's Guide. Appendix A. Example A-1
+!Global data declarations:
+INT .out_file_name[0:11];
+
+?PUSHLIST, NOLIST, SOURCE $SYSTEM.SYSTEM.EXTDECS (CLOSE,
+? INITIALIZER, OPEN, WRITEX)        !Include system procedures,
+                                    !but suppress their listings
+?POPLIST                            !Resume listing
+
+PROC startup_proc (rucb, passthru, message, msglen, match)
+    VARIABLE;                       !Declare STARTUP_PROC
+    INT .rucb, .passthru, .message, msglen, match;
+    BEGIN
+    out_file_name ':=' message[21] FOR 12 WORDS;
+                                    !Move statement
+    END;                            !End STARTUP_PROC
+
+PROC myproc MAIN;                   !Declare MYPROC
+    BEGIN
+    INT out_file_number;
+    STRING .EXT buffer[0:79];       !Array for output message
+    INT length;                     !Length of output message
+
+    CALL INITIALIZER ( ! rucb !, ! passthru !, startup_proc,
+       ! paramsproc !, ! assignproc !, ! flags ! );
+
+                                    !Get OUT file name
+    CALL OPEN (out_file_name , out_file_number);
+                                    !Open OUT file; get number
+    buffer ':=' "Hello, World";     !Move statement
+    length := 12;                   !Assignment statement
+    CALL WRITEX (out_file_number, buffer, length);
+                                    !Write message to OUT file
+    CALL CLOSE (out_file_number);   !Close OUT file
+    END;                            !End MYPROC
+
+! v0.5
+! subproc/proc followed by ^ is incorrectly considered a procedure.
+if proc^foo = 0 then
+if subproc^foo = 0 then
