@@ -1,0 +1,32 @@
+! Compilter directives
+! meta.preprocessor
+! keyword.preprocessor.tal
+?cpu TNS/II
+?assertion
+?begincompilation
+?decs
+?definetog
+?dumpcons
+?endif
+?if
+?ifnot
+?page
+?extendstack
+?compact
+?rp
+?section
+?source?
+?nolist
+?list
+?nocode
+?code
+?inspect
+?symbols
+?nolmap
+?nomap
+?map
+?gmap
+?nocrossref
+?crossref
+?innerlist
+?search
