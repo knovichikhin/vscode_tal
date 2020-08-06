@@ -1,4 +1,9 @@
 # Change Log\
+## [0.0.7] - 2020-08-05
+- Flag CPU compiler directive as keyword.preprocessor.tal
+- Flag open parenthesis ( as punctuation.parenthesis.begin.tal
+- Flag close parenthesis ) as punctuation.parenthesis.end.tal
+
 ## [0.0.6] - 2018-07-05
 - Remove <> from surrounding pairs - it's not intuitive when editing operators.
 - Remove ' from auto closing pairs - it's not intuitive when editing operators.
