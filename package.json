@@ -16,7 +16,7 @@
         "vscode": "*"
     },
     "categories": [
-        "Languages"
+        "Programming Languages"
     ],
     "license": "./LICENSE",
     "repository": {
