@@ -271,8 +271,24 @@
 					"name": "storage.type.tal"
 				},
 				{
-					"comment": "These storage types may include additional parameters, such as int(16)",
-					"match": "(?i)\\b(?<!\\^)(int|unsigned|fixed|real)(?!\\^)((\\s*\\(\\s*[-\\w*]+\\)){1}|\\b)",
+					"comment": "These storage types may include additional parameters. int can be int, int(16), int(32), int(64) or int(literal)",
+					"match": "(?i)\\b(?<!\\^)int(?!\\^)((\\s*\\(\\s*(16|32|64|([a-zA-Z\\^_][a-zA-Z0-9\\^_]*))\\s*\\))|\\b)",
+					"name": "storage.type.tal"
+				},
+				{
+					"comment": "These storage types may include additional parameters. real can be real, real(32), real(64) or real(literal)",
+					"match": "(?i)\\b(?<!\\^)real(?!\\^)((\\s*\\(\\s*(32|64|([a-zA-Z\\^_][a-zA-Z0-9\\^_]*))\\s*\\))|\\b)",
+					"name": "storage.type.tal"
+				},
+				{
+					"comment": "These storage types may include additional parameters. fixed can be fixed, fixed(*), fixed(-19) or fixed(19)",
+					"match": "(?i)\\b(?<!\\^)fixed(?!\\^)((\\s*\\(\\s*(\\*|-?[0-9]{1,2})\\s*\\))|\\b)",
+					"name": "storage.type.tal"
+				},
+				{
+					"temp": "([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+					"comment": "These storage types may include additional parameters, unsigned can be unsigned(1), unsigned(31) or unsigned(literal)",
+					"match": "(?i)\\b(?<!\\^)unsigned(?!\\^)((\\s*\\(\\s*([0-9]{1,2}|([a-zA-Z\\^_][a-zA-Z0-9\\^_]*))\\s*\\))|\\b)",
 					"name": "storage.type.tal"
 				}
 			]
@@ -399,6 +415,11 @@
 					],
 					"name": "meta.function.tal",
 					"comment": "Match callable: proc, subproc, define. It will also match structure definition."
+				},
+				{
+					"comment": "Plain function preceded by call keyword",
+					"match": "(?i)((?<=^call)|(?<=\\scall))(?!\\^)\\b\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+					"name": "entity.name.function.tal"
 				}
 			]
 		},

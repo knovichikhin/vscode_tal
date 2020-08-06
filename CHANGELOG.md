@@ -1,6 +1,7 @@
-# Change Log\
+# Change Log
 ## [0.0.8] - 2020-08-06
 - Flag entire storage type int, unsigned, fixed and real as storage.type.tal including width and floating point
+- Flag literals preceded by call keyword as entity.name.function.tal
 
 ## [0.0.7] - 2020-08-05
 - Flag CPU compiler directive as keyword.preprocessor.tal
