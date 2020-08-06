@@ -34,15 +34,26 @@
 ! Storage Types
 ! storage.type.tal
 unsigned(10) foo;
-unsigned(10-15) foo;
+unsigned (10) foo;
+unsigned(10 ) foo;
+unsigned    (15) foo;
 int foo;
 int(16) foo;
+int (16) foo;
 int(32) foo;
+int    (32 ) foo;
 int(64) foo;
+int        (64 ) foo;
+int (_literals^are^ok) foo;
 fixed foo;
 fixed(3) foo;
-fixed(-3) foo;
+fixed(-3 ) foo;
+fixed    (-3) foo;
+fixed(*) foo;
+real foo;
+real(32) foo;
 real(64) foo;
+real (64) foo;
 literal foo_l;
 define foo_d(x) = bar((x) + 1)#;
 string char;
@@ -52,3 +63,23 @@ struct .foo(bar);
 struct foo(bar);
 struct .foo(bar);
 struct .ext foo(bar);
+
+int(15) foo; ! invalid
+int(0_not_ok) ! invalid
+real(16) foo; ! invalid
+real(0_not_ok) ! invalid
+fixed(166) foo; ! invalid
+fixed(*2) foo; ! invalid
+fixed(literal_are_not_ok_with_fixed) foo; ! invalid
+fixed(0_not_ok) foo; ! invalid
+unsigned foo; ! invalid
+unsigned(123) foo; ! invalid
+unsigned(0_not_ok) ! invalid
+unsigned(1-2) foo; ! invalid
+
+! Function
+call foo;
+call foo();
+foo();
+call foo(p1, 2);
+call foo(foo(p1, foo(2)));
