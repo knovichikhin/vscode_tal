@@ -267,7 +267,12 @@
 		"storage_types": {
 			"patterns": [
 				{
-					"match": "(?i)\\b(?<!\\^)(literal|define|string|int|unsigned|fixed|real|struct)(?!\\^)\\b",
+					"match": "(?i)\\b(?<!\\^)(literal|define|string|struct)(?!\\^)\\b",
+					"name": "storage.type.tal"
+				},
+				{
+					"comment": "These storage types may include additional parameters, such as int(16)",
+					"match": "(?i)\\b(?<!\\^)(int|unsigned|fixed|real)(?!\\^)((\\s*\\(\\s*[-\\w*]+\\)){1}|\\b)",
 					"name": "storage.type.tal"
 				}
 			]

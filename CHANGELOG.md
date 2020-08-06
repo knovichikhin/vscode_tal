@@ -1,4 +1,7 @@
 # Change Log\
+## [0.0.8] - 2020-08-06
+- Flag entire storage type int, unsigned, fixed and real as storage.type.tal including width and floating point
+
 ## [0.0.7] - 2020-08-05
 - Flag CPU compiler directive as keyword.preprocessor.tal
 - Flag open parenthesis ( as punctuation.parenthesis.begin.tal
