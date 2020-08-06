@@ -62,17 +62,31 @@
 		{
 			"include": "#lib_tal"
 		},
- 		{
-  			"include": "#functions_tal"
+		{
+			"include": "#functions_tal"
 		},
- 		{
-  			"include": "#punctuation_accessor"
+		{
+			"include": "#punctuation_accessor"
 		},
- 		{
-  			"include": "#punctuation_semicolon"
+		{
+			"include": "#punctuation_semicolon"
+		},
+		{
+			"include": "#punctuation_paren_begin"
+		},
+		{
+			"include": "#punctuation_paren_end"
 		}
 	],
 	"repository": {
+		"punctuation_paren_begin": {
+			"name": "punctuation.parenthesis.begin.tal",
+			"match": "\\("
+		},
+		"punctuation_paren_end": {
+			"name": "punctuation.parenthesis.end.tal",
+			"match": "\\)"
+		},
 		"punctuation_comma": {
 			"name": "punctuation.separator.comma.tal",
 			"match": ","
