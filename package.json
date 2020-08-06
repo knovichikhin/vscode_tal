@@ -2,8 +2,15 @@
     "name": "tal",
     "displayName": "Tandem TAL",
     "description": "Syntax highlighting for Transaction Application Language",
-    "version": "0.0.6",
-    "keywords": ["tal", "tandem", "languages", "tmLanguage", "TextMate", "TAL-tmLanguage"],
+    "version": "0.0.7",
+    "keywords": [
+        "tal",
+        "tandem",
+        "languages",
+        "tmLanguage",
+        "TextMate",
+        "TAL-tmLanguage"
+    ],
     "publisher": "KNovichikhin",
     "engines": {
         "vscode": "*"
