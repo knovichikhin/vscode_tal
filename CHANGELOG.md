@@ -1,4 +1,8 @@
 # Change Log
+## [0.0.9] - 2020-08-06
+- Update wordPattern definition to consider ^ symbol a part of a word
+- Update extension description with instructions to update editor.wordSeparators to exclude ^
+
 ## [0.0.8] - 2020-08-06
 - Flag entire storage type int, unsigned, fixed and real as storage.type.tal including width and floating point
 - Flag literals preceded by call keyword as entity.name.function.tal
