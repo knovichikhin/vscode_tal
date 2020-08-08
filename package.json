@@ -16,7 +16,8 @@
         "vscode": "*"
     },
     "categories": [
-        "Programming Languages"
+        "Programming Languages",
+        "Snippets"
     ],
     "license": "./LICENSE",
     "repository": {
@@ -46,6 +47,12 @@
                 "language": "tal",
                 "scopeName": "source.tal",
                 "path": "./syntaxes/tal.tmLanguage.json"
+            }
+        ],
+        "snippets": [
+            {
+              "language": "tal",
+              "path": "./snippets/tal.json"
             }
         ]
     }
