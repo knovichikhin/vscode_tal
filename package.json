@@ -2,7 +2,7 @@
     "name": "tal",
     "displayName": "Tandem TAL",
     "description": "Syntax highlighting for Transaction Application Language",
-    "version": "0.0.9",
+    "version": "0.1.0",
     "keywords": [
         "tal",
         "tandem",
@@ -51,8 +51,8 @@
         ],
         "snippets": [
             {
-              "language": "tal",
-              "path": "./snippets/tal.json"
+                "language": "tal",
+                "path": "./snippets/tal.json"
             }
         ]
     }
