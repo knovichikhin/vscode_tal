@@ -1,4 +1,7 @@
 # Change Log
+## [0.1.0] - 2020-08-07
+- Added snippets for for loop, while loop, begin/end, case, use, scan, rscan and if.
+
 ## [0.0.9] - 2020-08-06
 - Update wordPattern definition to consider ^ symbol a part of a word
 - Update extension description with instructions to update editor.wordSeparators to exclude ^
