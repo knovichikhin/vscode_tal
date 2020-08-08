@@ -83,3 +83,11 @@ call foo();
 foo();
 call foo(p1, 2);
 call foo(foo(p1, foo(2)));
+foo(bar(for)for)
+foo($len(for)for)
+foo($switches(for)for)
+foo($switches bar(for)for)
+
+! subproc/proc followed by ^ is incorrectly considered a procedure.
+if proc^foo = 0 then
+if subproc^foo = 0 then

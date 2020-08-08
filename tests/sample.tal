@@ -33,14 +33,3 @@ PROC myproc MAIN;                   !Declare MYPROC
                                     !Write message to OUT file
     CALL CLOSE (out_file_number);   !Close OUT file
     END;                            !End MYPROC
-
-! v0.5
-! subproc/proc followed by ^ is incorrectly considered a procedure.
-if proc^foo = 0 then
-if subproc^foo = 0 then
-
-! function call inside function call did not work correctly with built-in tal functions
-foo(bar(for)for)
-foo($len(for)for)
-foo($switches(for)for)
-foo($switches bar(for)for)
