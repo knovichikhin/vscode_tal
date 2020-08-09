@@ -54,6 +54,11 @@
                 "language": "tal",
                 "path": "./snippets/tal.json"
             }
-        ]
+        ],
+        "configurationDefaults": {
+            "[tal]": {
+                "editor.wordSeparators": "`~!@#$%&*()-=+[{]}\\|;:'\",.<>/?"
+            }
+        }
     }
 }
