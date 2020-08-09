@@ -1,4 +1,7 @@
 # Change Log
+## [0.1.1] - 2020-08-09
+- Added default TAL configuration to exclude ^ from editor.wordSeparators
+
 ## [0.1.0] - 2020-08-07
 - Added snippets for for loop, while loop, begin/end, case, use, scan, rscan and if.
 
