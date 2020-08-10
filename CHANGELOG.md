@@ -1,4 +1,7 @@
 # Change Log
+## [0.2.1] - 2020-08-09
+- Update manifest to clean up the package.
+
 ## [0.2.0] - 2020-08-09
 - Added completions for most TAL built-in functions, such as $len. The feature can be disabled by settting `tal.enableTalFunctionCompletion` to `false`.
 
