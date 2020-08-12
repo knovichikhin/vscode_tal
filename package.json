@@ -2,7 +2,7 @@
     "name": "tal",
     "displayName": "Tandem TAL",
     "description": "Syntax highlighting for Transaction Application Language",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "keywords": [
         "tal",
         "tandem",
