@@ -79,6 +79,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
         let stack: number = 0; // begin increases stack. end decreases stack. 0=end of proc
         const subprocSymbols: vscode.DocumentSymbol[] = [];
         let procSymbolDetail: string = '';
+        let procSymbolKind: vscode.SymbolKind = vscode.SymbolKind.Class
 
         // Start parsing proc at the line after the proc line
         let i: number = lineNum + 1 < document.lineCount ? lineNum + 1 : lineNum;
@@ -101,6 +102,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
                  * They do not have a body. So, there won't be any begin/end.
                  */
                 procSymbolDetail = result[1].toLowerCase();
+                procSymbolKind = vscode.SymbolKind.Interface;
                 break;
             } else {
                 /**
@@ -123,13 +125,33 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
         let procSymbol = new vscode.DocumentSymbol(
             procName,
             procSymbolDetail,
-            vscode.SymbolKind.Class,
+            procSymbolKind,
             new vscode.Range(
                 new vscode.Position(lineNum, 0),
                 new vscode.Position(i, document.lineAt(i).text.length)
             ),
             document.lineAt(lineNum).range
         );
+
+        // If there is at least 1 subproc and proc body has at least 1 line, mark start of proc body separately
+        if (subprocSymbols.length > 0 &&
+            subprocSymbols[subprocSymbols.length - 1].range.end.line + 1 <= i) {
+            const lastSubproc = subprocSymbols[subprocSymbols.length - 1];
+            subprocSymbols.push(new vscode.DocumentSymbol(
+                'main: ' + procName,
+                '',
+                vscode.SymbolKind.Function,
+                new vscode.Range(
+                    new vscode.Position(lastSubproc.range.end.line + 1, 0),
+                    new vscode.Position(i, document.lineAt(i).text.length)
+                ),
+                new vscode.Range(
+                    new vscode.Position(lastSubproc.range.end.line + 1, 0),
+                    new vscode.Position(lastSubproc.range.end.line + 1, document.lineAt(lastSubproc.range.end.line + 1).text.length)
+                )
+            ));
+        }
+
         procSymbol.children = subprocSymbols;
         return procSymbol;
     }
