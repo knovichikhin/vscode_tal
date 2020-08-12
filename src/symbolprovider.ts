@@ -7,7 +7,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
     procRe = new RegExp(''
         // Optional data type, e.g. int, int(16), fixed(*), int(foo)
         + /^\s*((?:string|int|unsigned|fixed|real)(?:\s*\(\s*(?:[0-9]{1,2}|\*|[a-zA-Z\^_][a-zA-Z0-9\^_]*)\s*\))?)?/.source
-        // proc | subproc keyword
+        // proc keyword
         + /\s*(proc)\s+/.source
         // proc name identifier
         + /([a-zA-Z\^_][a-zA-Z0-9\^_]*)/.source,
@@ -19,20 +19,31 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
     subprocRe = new RegExp(''
         // Optional data type, e.g. int, int(16), fixed(*), int(foo)
         + /^\s*((?:string|int|unsigned|fixed|real)(?:\s*\(\s*(?:[0-9]{1,2}|\*|[a-zA-Z\^_][a-zA-Z0-9\^_]*)\s*\))?)?/.source
-        // proc | subproc keyword
+        // subproc keyword
         + /\s*(subproc)\s+/.source
-        // proc name identifier
+        // subproc name identifier
         + /([a-zA-Z\^_][a-zA-Z0-9\^_]*)/.source,
         'i');
 
     /**
+     * Match proc boundary keywords begin/end/external/forward.
+     * Match forward/external keywords to detect forward proc declarations.
+     * These are reserved keywords. They can't be declared as variables.
+     * So, simply searching for them is sufficient to determine
+     * where things beging and end.
+     */
+    procBoundaryRe = RegExp(''
+        + /\b(?<!\^)(begin|end|external|forward)(?!\^)\b/.source,
+        'i');
+
+    /**
      * Match begin/end keywords.
-     * Begin/End are reserved keywords. They can't be declared as variables.
-     * So, simply searching for begin/end keyword is sufficient to determine
+     * These are reserved keywords. They can't be declared as variables.
+     * So, simply searching for them is sufficient to determine
      * where things beging and end.
      */
     beginEndRe = RegExp(''
-        + /(?<!\^)(begin|end)(?!\^)/.source,
+        + /\b(?<!\^)(begin|end)(?!\^)\b/.source,
         'i');
 
     public async provideDocumentSymbols(document: vscode.TextDocument, canceltoken: vscode.CancellationToken): Promise<vscode.DocumentSymbol[]> {
@@ -67,6 +78,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
     private _mapProc(document: vscode.TextDocument, lineNum: number, procName: string): vscode.DocumentSymbol {
         let stack: number = 0; // begin increases stack. end decreases stack. 0=end of proc
         const subprocSymbols: vscode.DocumentSymbol[] = [];
+        let procSymbolDetail: string = '';
 
         // Start parsing proc at the line after the proc line
         let i: number = lineNum + 1 < document.lineCount ? lineNum + 1 : lineNum;
@@ -74,7 +86,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
             let line: string = document.lineAt(i).text;
             line = this._removeComments(line);
 
-            let result = line.match(this.beginEndRe) || ['', ''];
+            let result = line.match(this.procBoundaryRe) || ['', ''];
             if (result[1].toLowerCase() === 'begin') {
                 stack += 1;
             } else if (result[1].toLowerCase() === 'end') {
@@ -82,6 +94,14 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
                 if (stack <= 0) {
                     break;
                 }
+            } else if (result[1].toLowerCase() === 'external' ||
+                       result[1].toLowerCase() === 'forward') {
+                /**
+                 * These are external or forward proc declarations.
+                 * They do not have a body. So, there won't be any begin/end.
+                 */
+                procSymbolDetail = result[1].toLowerCase();
+                break;
             } else {
                 /**
                  * result[1] = storage type
@@ -102,7 +122,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
 
         let procSymbol = new vscode.DocumentSymbol(
             procName,
-            '',
+            procSymbolDetail,
             vscode.SymbolKind.Class,
             new vscode.Range(
                 new vscode.Position(lineNum, 0),
