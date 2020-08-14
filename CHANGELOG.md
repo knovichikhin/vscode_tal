@@ -1,4 +1,7 @@
 # Change Log
+## [0.3.2] - 2020-08-13
+- Do not insert TAL built-in functions as snippets.
+
 ## [0.3.1] - 2020-08-12
 - Detect external and forward proc declarations.
 - If a proc has subprocs, mark start of proc body after the last subproc.
