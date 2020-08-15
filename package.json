@@ -39,7 +39,18 @@
                 "extensions": [
                     ".tal"
                 ],
-                "configuration": "./language-configuration.json"
+                "configuration": "./language_configuration/tal.json"
+            },
+            {
+                "id": "tacl",
+                "aliases": [
+                    "TACL",
+                    "tacl"
+                ],
+                "extensions": [
+                    ".tacl"
+                ],
+                "configuration": "./language_configuration/tacl.json"
             }
         ],
         "grammars": [
@@ -47,12 +58,21 @@
                 "language": "tal",
                 "scopeName": "source.tal",
                 "path": "./syntaxes/tal.tmLanguage.json"
+            },
+            {
+                "language": "tacl",
+                "scopeName": "source.tacl",
+                "path": "./syntaxes/tacl.tmLanguage.json"
             }
         ],
         "snippets": [
             {
                 "language": "tal",
                 "path": "./snippets/tal.json"
+            },
+            {
+                "language": "tacl",
+                "path": "./snippets/tacl.json"
             }
         ],
         "configuration": {
@@ -73,6 +93,9 @@
         "configurationDefaults": {
             "[tal]": {
                 "editor.wordSeparators": "`~!@#$%&*()-=+[{]}\\|;:'\",.<>/?"
+            },
+            "[tacl]": {
+                "editor.wordSeparators": "`~!@$%&*()-=+[{]}\\|;:'\",.<>/?"
             }
         }
     },
