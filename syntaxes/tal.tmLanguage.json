@@ -106,9 +106,12 @@
 			"patterns": [
 				{
 					"comment": "Multiline TAL directive. Match multiline directive and highlight procs inside.",
-					"begin": "^\\?(.*)\\(",
+					"begin": "^(\\?)(.*)\\(",
 					"beginCaptures": {
 						"1": {
+							"name": "keyword.preprocessor.tal"
+						},
+						"2": {
 							"patterns": [
 								{
 									"include": "#compiler_directive_keyword"
@@ -124,6 +127,10 @@
 					"patterns": [
 						{
 							"include": "#comments"
+						},
+						{
+							"match": "^(\\?)",
+							"name": "keyword.preprocessor.tal"
 						},
 						{
 							"match": "(?i)\\s*\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
@@ -146,7 +153,12 @@
 				},
 				{
 					"comment": "TAL directive line. Match a single line directive line.",
-					"begin": "^\\?",
+					"begin": "^(\\?)",
+					"beginCaptures": {
+						"1": {
+							"name": "keyword.preprocessor.tal"
+						}
+					},
 					"end": "$",
 					"name": "meta.preprocessor",
 					"patterns": [
