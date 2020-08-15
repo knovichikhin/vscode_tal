@@ -1,0 +1,33 @@
+== TACL Programming Guide:
+== Starting and Sending Requests to a TACL Server
+?SECTION runsrv MACRO
+#FRAME
+#PUSH err_var write_var temp_var rslt
+== ** The following code starts the server process **
+== Start the background TACL process, $mrt, if it is not
+== already running. The IN file is $RECEIVE.
+[#IF NOT [#PROCESSEXISTS $mrt] |THEN|
+    TACL /IN $receive, OUT [#MYTERM], NAME $mrt, NOWAIT/
+]
+== ** The following code accesses the TACL server **
+== Open the TACL server process ($mrt)
+#SET rslt [#REQUESTER /WAIT/ WRITE $mrt err_var write_var]
+[#IF rslt = 0 |THEN|
+    #OUTPUT $mrt opened successfully
+|ELSE|
+    #OUTPUT $mrt not open; file error [file1_err]
+    #RETURN
+]
+
+[#LOOP |DO|
+    #SET temp_var [#INPUT Enter Command:]
+    [#IF [#MATCH EXIT [#SHIFTSTRING /UP/ [temp_var]]] |THEN|
+        #SET #INPUTEOF -1
+    |ELSE|
+        == Send a command to the background TACL
+        #APPENDV write_var temp_var
+    ]
+|UNTIL| [#INPUTEOF]
+]
+SINK [#REQUESTER CLOSE write_var]
+#UNFRAME
