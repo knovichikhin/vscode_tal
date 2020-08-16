@@ -1,4 +1,7 @@
 # Change Log
+## [0.4.0] - 2020-08-15
+- Added support for TACL syntax.
+
 ## [0.3.2] - 2020-08-13
 - Do not insert TAL built-in functions as snippets.
 
