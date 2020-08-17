@@ -91,3 +91,11 @@ foo($switches bar(for)for)
 ! subproc/proc followed by ^ is incorrectly considered a procedure.
 if proc^foo = 0 then
 if subproc^foo = 0 then
+
+! Compiler directives
+! preprocessor with imbedded brackets
+?page "display time (for log records)"
+
+! multi line preprocessor
+?pushlist, nolist, source (file_OPEN_,
+?                          file_close_)

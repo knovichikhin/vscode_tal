@@ -1,4 +1,7 @@
 # Change Log
+## [0.4.1] - 2020-08-17
+- Reorder compiler directives to match single lines first (Avoid embedded parentheses triggering multi-line).
+
 ## [0.4.0] - 2020-08-15
 - Added support for TACL syntax.
 

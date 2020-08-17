@@ -105,6 +105,31 @@
 		"compiler_directive":{
 			"patterns": [
 				{
+					"comment": "TAL directive line. Match a single line directive line.",
+					"begin": "^(\\?)",
+					"beginCaptures": {
+						"1": {
+							"name": "keyword.preprocessor.tal"
+						}
+					},
+					"end": "$",
+					"name": "meta.preprocessor",
+					"patterns": [
+						{
+							"include": "#compiler_directive_keyword"
+						},
+						{
+							"include": "#punctuation_comma"
+						},
+						{
+							"include": "#strings"
+						},
+						{
+							"include": "#comments"
+						}
+					]
+				},
+				{
 					"comment": "Multiline TAL directive. Match multiline directive and highlight procs inside.",
 					"begin": "^(\\?)(.*)\\(",
 					"beginCaptures": {
@@ -148,31 +173,6 @@
 						},
 						{
 							"include": "#punctuation_comma"
-						}
-					]
-				},
-				{
-					"comment": "TAL directive line. Match a single line directive line.",
-					"begin": "^(\\?)",
-					"beginCaptures": {
-						"1": {
-							"name": "keyword.preprocessor.tal"
-						}
-					},
-					"end": "$",
-					"name": "meta.preprocessor",
-					"patterns": [
-						{
-							"include": "#compiler_directive_keyword"
-						},
-						{
-							"include": "#punctuation_comma"
-						},
-						{
-							"include": "#strings"
-						},
-						{
-							"include": "#comments"
 						}
 					]
 				}
