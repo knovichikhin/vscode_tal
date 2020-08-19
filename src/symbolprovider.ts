@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
 
+
 export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
     /**
-     * Matche proc declaration
+     * Match proc declaration
      */
-    procRe = new RegExp(''
+    private procRe = new RegExp(''
         // Optional data type, e.g. int, int(16), fixed(*), int(foo)
         + /^\s*((?:string|int|unsigned|fixed|real)(?:\s*\(\s*(?:[0-9]{1,2}|\*|[a-zA-Z\^_][a-zA-Z0-9\^_]*)\s*\))?)?/.source
         // proc keyword
@@ -16,7 +17,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
     /**
      * Match subproc declaration
      */
-    subprocRe = new RegExp(''
+    private subprocRe = new RegExp(''
         // Optional data type, e.g. int, int(16), fixed(*), int(foo)
         + /^\s*((?:string|int|unsigned|fixed|real)(?:\s*\(\s*(?:[0-9]{1,2}|\*|[a-zA-Z\^_][a-zA-Z0-9\^_]*)\s*\))?)?/.source
         // subproc keyword
@@ -26,14 +27,14 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
         'i');
 
     /**
-     * Match proc boundary keywords begin/end/external/forward.
+     * Forward proc declarations.
      * Match forward/external keywords to detect forward proc declarations.
      * These are reserved keywords. They can't be declared as variables.
      * So, simply searching for them is sufficient to determine
-     * where things beging and end.
+     * that this proc does not have a body.
      */
-    procBoundaryRe = RegExp(''
-        + /\b(?<!\^)(begin|end|external|forward)(?!\^)\b/.source,
+    private forwardProcRe = RegExp(''
+        + /\b(?<!\^)(external|forward)(?!\^)\b/.source,
         'i');
 
     /**
@@ -42,162 +43,348 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
      * So, simply searching for them is sufficient to determine
      * where things beging and end.
      */
-    beginEndRe = RegExp(''
-        + /\b(?<!\^)(begin|end)(?!\^)\b/.source,
+    private beginRe = RegExp(''
+        + /\b(?<!\^)(begin)(?!\^)\b/.source,
+        'ig');
+    private endRe = RegExp(''
+        + /\b(?<!\^)(end)(?!\^)\b/.source,
+        'ig');
+
+    /**
+     * Match "?section section_name".
+     * Only one "?section" directive can appear on a source line.
+     * This section continues until the next section or until EOF.
+     */
+    private sectionRe = new RegExp(''
+        // ?section identifier
+        + /^\?\s*section\s+/.source
+        // Section name
+        + /([a-zA-Z\^_][a-zA-Z0-9\^_]*)/.source,
+        'i');
+
+    /**
+     * Match "?page "optional heading"".
+     * "?page" directive can appear alongside other directives
+     * on the same source line. Although, this is not generally
+     * the case for the sake of code clarity.
+     * Page does not have a range. It's a single line directive.
+     */
+    private pageRe = new RegExp(''
+        // ?page identifier
+        + /^\?\s*(page)\s*/.source
+        // Optional heading
+        + /(?:\"([^\"]*)\")/.source,
         'i');
 
     public async provideDocumentSymbols(document: vscode.TextDocument, canceltoken: vscode.CancellationToken): Promise<vscode.DocumentSymbol[]> {
-        const symbols: vscode.DocumentSymbol[] = [];
+        const procSymbols: vscode.DocumentSymbol[] = []; // Procs and subproc symbols
+        const sectionSymbols: vscode.DocumentSymbol[] = []; // Sections and pages symbols
+        let lineNum: number = 0;
 
-        for (let i = 0; i < document.lineCount; i++) {
-            const line = document.lineAt(i).text;
-            /**
-             * result[1] = storage type
-             * result[2] = proc keyword
-             * result[3] = proc name
-             */
-            let result = line.match(this.procRe) || ['', '', '', ''];
-            if (result[2].toLowerCase() === 'proc') {
-                const procSymbol: vscode.DocumentSymbol = this._mapProc(document, i, result[3]);
-                i = procSymbol.range.end.line; // get the last line where mapping stopped
-                symbols.push(procSymbol);
+        for (lineNum = 0; lineNum < document.lineCount; lineNum++) {
+            const line = document.lineAt(lineNum).text;
+
+            // Look for procs/subprocs while skipping lines.
+            if (this._mapProc(document, lineNum, line, procSymbols)) {
+                lineNum = procSymbols[procSymbols.length - 1].range.end.line; // get the last line where mapping stopped
+            } else {
+                // Look for a section. Otherwise, look for a page.
+                if (!this._mapSection(document, lineNum, line, sectionSymbols)) {
+                    this._mapPage(document, lineNum, line, sectionSymbols);
+                }
             }
         }
-        return symbols;
+
+        // If a document has procs/subprocs then present those.
+        // If, however, it's a document without procs then present sections/pages instead.
+        if (procSymbols.length > 0) {
+            return procSymbols;
+        }
+
+        // If a section is already started then by encountering EOF
+        // it must must end
+        if (sectionSymbols.length > 0) {
+            sectionSymbols[sectionSymbols.length - 1].range = new vscode.Range(
+                sectionSymbols[sectionSymbols.length - 1].range.start,
+                new vscode.Position(lineNum - 1, document.lineAt(lineNum - 1).text.length));
+        }
+
+        return sectionSymbols;
     }
 
     /**
      * Step through proc. Find its 'begin' and 'end'.
      * Locate subprocs inside.
      *
-     * @param document vscode TextDocument
-     * @param lineNum Line number in `document` where proc was found
-     * @param procName Proc name that will go to DocumentSymbol
-     * @return proc DocumentSymbol with subproc children (if any) attached
+     * @param document Document being parsed
+     * @param lineNum Document's current  line number
+     * @param line Document's current line instance
+     * @param procSymbols An array of proc symbols
+     * @return Returns true if proc symbol is found. Return false, otherwise.
      */
-    private _mapProc(document: vscode.TextDocument, lineNum: number, procName: string): vscode.DocumentSymbol {
+    private _mapProc(document: vscode.TextDocument, lineNum: number, line: string, procSymbols: vscode.DocumentSymbol[]): boolean {
         let stack: number = 0; // begin increases stack. end decreases stack. 0=end of proc
-        const subprocSymbols: vscode.DocumentSymbol[] = [];
-        let procSymbolDetail: string = '';
-        let procSymbolKind: vscode.SymbolKind = vscode.SymbolKind.Class
+        let endNum: number = 0;
+        let result: string[] = [];
+
+        /**
+         * Match proc start
+         * result[1] = storage type
+         * result[2] = proc keyword
+         * result[3] = proc name
+         */
+        result = line.match(this.procRe) || ['', '', '', ''];
+        if (result[2].toLowerCase() !== 'proc') {
+            return false;
+        }
+
+        let procSymbol: vscode.DocumentSymbol = new vscode.DocumentSymbol(
+            result[3],
+            '',
+            vscode.SymbolKind.Class,
+            document.lineAt(lineNum).range,
+            document.lineAt(lineNum).range
+        );
+        procSymbols.push(procSymbol);
+
+        // proc + external/forward declaration on the same line
+        result = line.match(this.forwardProcRe) || ['', ''];
+        if (result[1].toLowerCase() === 'external' ||
+            result[1].toLowerCase() === 'forward') {
+            /**
+             * These are external or forward proc declarations.
+             * They do not have a body. So, there won't be any begin/end.
+             */
+            procSymbol.detail = result[1].toLowerCase();
+            procSymbol.kind = vscode.SymbolKind.Interface;
+            return true;
+        }
+
+        // End parsing here if this is the end of the document
+        if (lineNum + 1 >= document.lineCount) {
+            return true;
+        }
 
         // Start parsing proc at the line after the proc line
-        let i: number = lineNum + 1 < document.lineCount ? lineNum + 1 : lineNum;
-        for (; i < document.lineCount; i++) {
-            let line: string = document.lineAt(i).text;
+        for (lineNum += 1; lineNum < document.lineCount; lineNum++) {
+            line = document.lineAt(lineNum).text;
             line = this._removeComments(line);
 
-            let result = line.match(this.procBoundaryRe) || ['', ''];
-            if (result[1].toLowerCase() === 'begin') {
-                stack += 1;
-            } else if (result[1].toLowerCase() === 'end') {
-                stack -= 1;
+            // External and forward procs do not have begin/end body.
+            // Therefore, once at least 1 begin is found external and forward
+            // produce a compiler error.
+            if (stack <= 0) {
+                result = line.match(this.forwardProcRe) || ['', ''];
+                if (result[1].toLowerCase() === 'external' ||
+                    result[1].toLowerCase() === 'forward') {
+                    /**
+                     * These are external or forward proc declarations.
+                     * They do not have a body. So, there won't be any begin/end.
+                     */
+                    procSymbol.detail = result[1].toLowerCase();
+                    procSymbol.kind = vscode.SymbolKind.Interface;
+                    break;
+                }
+            }
+
+            // Get number of begins on the line
+            stack += (line.match(this.beginRe) || []).length;
+
+            // Get number of ends on the line and terminate proc stack only if any ends are found.
+            // This is to avoid exiting procs where begin/end are not immediately found.
+            endNum = (line.match(this.endRe) || []).length;
+            if (endNum > 0) {
+                stack -= endNum
+
+                // If the stack is 0 or negative then the subproc is complete
                 if (stack <= 0) {
                     break;
                 }
-            } else if (result[1].toLowerCase() === 'external' ||
-                       result[1].toLowerCase() === 'forward') {
-                /**
-                 * These are external or forward proc declarations.
-                 * They do not have a body. So, there won't be any begin/end.
-                 */
-                procSymbolDetail = result[1].toLowerCase();
-                procSymbolKind = vscode.SymbolKind.Interface;
-                break;
-            } else {
-                /**
-                 * result[1] = storage type
-                 * result[2] = proc keyword
-                 * result[3] = proc name
-                 */
-                result = line.match(this.subprocRe) || ['', '', '', ''];
-                if (result[2].toLowerCase() === 'subproc') {
-                    const subprocSymbol = this._mapSubproc(document, i, result[3]);
-                    i = subprocSymbol.range.end.line; // get the last line where mapping stopped
-                    subprocSymbols.push(subprocSymbol);
-                }
+            }
+
+            // Look for subprocs while skipping lines.
+            if (this._mapSubproc(document, lineNum, line, procSymbol)) {
+                lineNum = procSymbol.children[procSymbol.children.length - 1].range.end.line; // get the last line where mapping stopped
             }
         }
 
-        // In case nothing was found, point to the last line of the document.
-        i = i === document.lineCount ? i - 1 : i;
+        // In case of EOF, point to the last line of the document.
+        lineNum = lineNum === document.lineCount ? lineNum - 1 : lineNum;
 
-        let procSymbol = new vscode.DocumentSymbol(
-            procName,
-            procSymbolDetail,
-            procSymbolKind,
-            new vscode.Range(
-                new vscode.Position(lineNum, 0),
-                new vscode.Position(i, document.lineAt(i).text.length)
-            ),
-            document.lineAt(lineNum).range
+        procSymbol.range = new vscode.Range(
+                procSymbol.range.start,
+                new vscode.Position(lineNum, document.lineAt(lineNum).text.length)
         );
 
-        // If there is at least 1 subproc and proc body has at least 1 line, mark start of proc body separately
-        if (subprocSymbols.length > 0 &&
-            subprocSymbols[subprocSymbols.length - 1].range.end.line + 1 <= i) {
-            const lastSubproc = subprocSymbols[subprocSymbols.length - 1];
-            subprocSymbols.push(new vscode.DocumentSymbol(
-                'main: ' + procName,
+        // If there is at least 1 subproc and proc body has at least 1 line,
+        // mark start of proc body separately
+        if (procSymbol.children.length > 0 &&
+            procSymbol.children[procSymbol.children.length - 1].range.end.line + 1 <= lineNum) {
+            const lastSubproc = procSymbol.children[procSymbol.children.length - 1];
+            procSymbol.children.push(new vscode.DocumentSymbol(
+                'main: ' + procSymbol.name,
                 '',
                 vscode.SymbolKind.Function,
                 new vscode.Range(
                     new vscode.Position(lastSubproc.range.end.line + 1, 0),
-                    new vscode.Position(i, document.lineAt(i).text.length)
+                    new vscode.Position(lineNum, document.lineAt(lineNum).text.length)
                 ),
-                new vscode.Range(
-                    new vscode.Position(lastSubproc.range.end.line + 1, 0),
-                    new vscode.Position(lastSubproc.range.end.line + 1, document.lineAt(lastSubproc.range.end.line + 1).text.length)
-                )
+                document.lineAt(lastSubproc.range.end.line + 1).range
             ));
         }
 
-        procSymbol.children = subprocSymbols;
-        return procSymbol;
+        return true;
     }
 
     /**
-     * Step through subproc. Find its 'begin' and 'end'.
+     * Step through proc. Find its 'begin' and 'end'.
+     * Locate subprocs inside.
      *
-     * @param document vscode TextDocument
-     * @param lineNum Line number in `document` where subproc was found
-     * @param procName Subproc name that will go to DocumentSymbol
-     * @return subproc DocumentSymbol
+     * @param document Document being parsed
+     * @param lineNum Document's current  line number
+     * @param line Document's current line instance
+     * @param procSymbol A proc symbol to attach subprocs to
+     * @return Returns true if subproc symbol is found. Return false, otherwise.
      */
-    private _mapSubproc(document: vscode.TextDocument, lineNum: number, subprocName: string): vscode.DocumentSymbol {
+    private _mapSubproc(document: vscode.TextDocument, lineNum: number, line: string, procSymbol: vscode.DocumentSymbol): boolean {
         let stack: number = 0; // begin increases stack. end decreases stack. 0=end of proc
+        let endNum: number = 0;
+        let result: string[] = [];
 
-        // Start parsing proc at the line after the proc line
-        let i: number = lineNum + 1 < document.lineCount ? lineNum + 1 : lineNum;
-        for (; i < document.lineCount; i++) {
-            let line: string = document.lineAt(i).text;
+        /**
+         * result[1] = storage type
+         * result[2] = subproc keyword
+         * result[3] = subproc name
+         */
+        result = line.match(this.subprocRe) || ['', '', '', ''];
+        if (result[2].toLowerCase() !== 'subproc') {
+            return false;
+        }
+
+        let subprocSymbol: vscode.DocumentSymbol = new vscode.DocumentSymbol(
+            result[3],
+            '',
+            vscode.SymbolKind.Method,
+            document.lineAt(lineNum).range,
+            document.lineAt(lineNum).range
+        );
+        procSymbol.children.push(subprocSymbol);
+
+        // End parsing here if this is the end of the document
+        if (lineNum + 1 >= document.lineCount) {
+            return true;
+        }
+
+        // Start parsing subproc at the line after the subproc line
+        for (lineNum += 1; lineNum < document.lineCount; lineNum++) {
+            let line: string = document.lineAt(lineNum).text;
             line = this._removeComments(line);
 
-            let result = line.match(this.beginEndRe) || ['', ''];
-            if (result[1].toLowerCase() === 'begin') {
-                stack += 1;
-            } else if (result[1].toLowerCase() === 'end') {
-                stack -= 1;
+            // Get number of begins on the line
+            stack += (line.match(this.beginRe) || []).length;
+
+            // Get number of ends on the line and terminate subproc stack only if any ends are found
+            // This is to skip lines without any begins/ends right after the subproc declaration
+            // without exiting out of the subproc parsing.
+            endNum = (line.match(this.endRe) || []).length;
+            if (endNum > 0) {
+                stack -= endNum
+
+                // If the stack is 0 or negative then the subproc is complete
                 if (stack <= 0) {
                     break;
                 }
             }
         }
 
-        // In case nothing was found, point to the last line of the document.
-        i = i === document.lineCount ? i - 1 : i;
+        // In case of EOF, point to the last line of the document.
+        lineNum = lineNum === document.lineCount ? lineNum - 1 : lineNum;
 
-        let subprocSymbol = new vscode.DocumentSymbol(
-            subprocName,
-            '',
-            vscode.SymbolKind.Function,
-            new vscode.Range(
-                new vscode.Position(lineNum, 0),
-                new vscode.Position(i, document.lineAt(i).text.length)
-            ),
-            document.lineAt(lineNum).range
+        subprocSymbol.range = new vscode.Range(
+                subprocSymbol.range.start,
+                new vscode.Position(lineNum, document.lineAt(lineNum).text.length)
         );
-        return subprocSymbol;
+
+        return true;
+    }
+
+    /**
+     * Detect and collect section symbol.
+     *
+     * @param document Document being parsed
+     * @param lineNum Document's current  line number
+     * @param line Document's current line instance
+     * @param sectionSymbols An array of section symbols
+     * @return Returns true if section symbol is found. Return false, otherwise.
+     */
+    private _mapSection(document: vscode.TextDocument, lineNum: number, line: string, sectionSymbols: vscode.DocumentSymbol[]): boolean {
+        /**
+         * Match section line
+         * result[1] = section name
+         */
+        const result = line.match(this.sectionRe) || ['', ''];
+        if (result[1] !== '') {
+            // If one section already started then by encountering new section
+            // the previous section must end. Update previous item range.
+            if (sectionSymbols.length > 0) {
+                sectionSymbols[sectionSymbols.length - 1].range = new vscode.Range(
+                    sectionSymbols[sectionSymbols.length - 1].range.start,
+                    new vscode.Position(lineNum - 1, document.lineAt(lineNum - 1).text.length));
+            }
+
+            // Add new section
+            const sectionSymbol = new vscode.DocumentSymbol(
+                result[1],
+                '',
+                vscode.SymbolKind.Package,
+                document.lineAt(lineNum).range,
+                document.lineAt(lineNum).range
+            );
+            sectionSymbols.push(sectionSymbol);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Detect and collect page symbol.
+     *
+     * @param document Document being parsed
+     * @param lineNum Document's current  line number
+     * @param line Document's current line instance
+     * @param sectionSymbols An array of section symbols
+     * @return Returns true if page symbol is found. Return false, otherwise.
+     */
+    private _mapPage(document: vscode.TextDocument, lineNum: number, line: string, sectionSymbols: vscode.DocumentSymbol[]): boolean {
+        /**
+         * Match page line
+         * result[1] = page keyword
+         * result[2] = optional page heading
+         */
+        const result = line.match(this.pageRe) || ['', '', ''];
+        if (result[2] !== '') {
+            // A new page
+            const page = new vscode.DocumentSymbol(
+                result[2],
+                '',
+                vscode.SymbolKind.String,
+                document.lineAt(lineNum).range,
+                document.lineAt(lineNum).range
+            );
+
+            // If in the middle of a section then this page is belongs to the last section
+            if (sectionSymbols.length > 0) {
+                sectionSymbols[sectionSymbols.length - 1].children.push(page);
+            // Otherwise, this page appears by itself
+            } else {
+                sectionSymbols.push(page);
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
