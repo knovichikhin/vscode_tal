@@ -1,4 +1,8 @@
 # Change Log
+## [0.4.1] - 2020-08-19
+- Correct behaviour of ?page directives containing brackets embedded within quotes. See PR #9.
+- Added missing compiler directives: fixup, nofixup, datapages, int32index, noint32index, pushint32index, popint32index, warn, nowarn, errorfile, saveabend, nosaveabend, inhibitxx, noinhibitxx, nogmap, highrequesters, highpin, runnamed, errors, fmap, nofmap, pushlist, poplist, resettog, settog, check, nocheck, pushcheck, popcheck, syntax, suppress, nosuppress, nosymbols, noinnerlist, pushinnerlist, popinnerlist, nocompact, pushmap, popmap.
+
 ## [0.4.0] - 2020-08-15
 - Added support for TACL syntax.
 
