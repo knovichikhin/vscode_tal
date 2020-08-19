@@ -180,7 +180,7 @@
 				},
 				{
 					"name": "keyword.preprocessor.tal",
-					"match": "(?i)\\b(?<!\\^)(assertion|begincompilation|cpu|decs|definetog|dumpcons|(end)?if|ifnot|extendstack|compact|rp|section|source|(no)?list|(no)?code|inspect|symbols|(no)?(l)?map|gmap|(no)?crossref|innerlist|search)(?!\\^)\\b",
+					"match": "(?i)\\b(?<!\\^)(assertion|begincompilation|cpu|decs|datapages|(define|set|reset)tog|dumpcons|env|errors|errorfile|(no)?(fixup|saveabend|code|crossref|inhibitxx|warn|suppress|symbols|compact)|(end)?if|ifnot|(no|push|pop)?(check|list|int32index|innerlist|map)|extendstack|rp|section|source|inspect|syntax|(no)?(l|g|f)map|high(requesters|pin)|runnamed|search)(?!\\^)\\b",
 					"comment": "Compiler directive keywords. Look behind to avoid matching ^keyword."
 				}
 			]
