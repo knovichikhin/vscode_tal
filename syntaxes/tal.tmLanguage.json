@@ -102,35 +102,65 @@
 				"1": { "name": "punctuation.accessor.tal" }
 			}
 		},
-		"compiler_directive":{
+		"compiler_directive": {
+			"comment": "TAL directive",
+			"begin": "^(\\?)",
+			"beginCaptures": {
+				"1": {
+					"name": "keyword.preprocessor.tal"
+				}
+			},
+			"end": "$",
+			"name": "meta.preprocessor.tal",
 			"patterns": [
 				{
-					"comment": "Multiline TAL directive. Match multiline directive and highlight procs inside.",
-					"begin": "^(\\?)(.*)\\(",
-					"beginCaptures": {
+					"include": "#punctuation_comma"
+				},
+				{
+					"include": "#strings"
+				},
+				{
+					"include": "#comments"
+				},
+				{
+					"include": "#compiler_directive_keyword"
+				}
+			]
+		},
+		"compiler_directive_keyword": {
+			"patterns": [
+				{
+					"comment": "?page directive that is followed by a string",
+					"match": "(?i)\\b(?<!\\^)(page)(?!\\^)\\b\\s*(\"[^\"]*\")?",
+					"captures": {
 						"1": {
 							"name": "keyword.preprocessor.tal"
 						},
 						"2": {
-							"patterns": [
-								{
-									"include": "#compiler_directive_keyword"
-								},
-								{
-									"include": "#punctuation_comma"
-								}
-							]
+							"name": "string.quoted.double.tal"
 						}
-					},
+					}
+				},
+				{
+					"comment": "Multiline TAL directive. Match multiline directive and highlight procs inside.",
+					"begin": "\\(",
 					"end": "\\)",
-					"name": "meta.preprocessor",
+					"name": "meta.preprocessor.multiline-directive.tal",
 					"patterns": [
 						{
 							"include": "#comments"
 						},
 						{
-							"match": "^(\\?)",
-							"name": "keyword.preprocessor.tal"
+							"match": "(?i)^(\\?)\\s*\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+							"name": "meta.function-import.tal",
+							"captures": {
+								"1": { "name": "keyword.preprocessor.tal" },
+								"2": { "name": "entity.name.function.tal" }
+							}
+						},
+						{
+							"match": "(?i)^[^\\?]?\\s*\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+							"name": "invalid.illegal.tal"
 						},
 						{
 							"match": "(?i)\\s*\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
@@ -140,11 +170,8 @@
 							}
 						},
 						{
-							"match": "(?i)^(\\?)\\s*\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
-							"name": "meta.function-import.tal",
-							"captures": {
-								"2": { "name": "entity.name.function.tal" }
-							}
+							"match": "^(\\?)",
+							"name": "keyword.preprocessor.tal"
 						},
 						{
 							"include": "#punctuation_comma"
@@ -152,36 +179,11 @@
 					]
 				},
 				{
-					"comment": "TAL directive line. Match a single line directive line.",
-					"begin": "^(\\?)",
-					"beginCaptures": {
-						"1": {
-							"name": "keyword.preprocessor.tal"
-						}
-					},
-					"end": "$",
-					"name": "meta.preprocessor",
-					"patterns": [
-						{
-							"include": "#compiler_directive_keyword"
-						},
-						{
-							"include": "#punctuation_comma"
-						},
-						{
-							"include": "#strings"
-						},
-						{
-							"include": "#comments"
-						}
-					]
+					"name": "keyword.preprocessor.tal",
+					"match": "(?i)\\b(?<!\\^)(assertion|begincompilation|cpu|decs|definetog|dumpcons|(end)?if|ifnot|extendstack|compact|rp|section|source|(no)?list|(no)?code|inspect|symbols|(no)?(l)?map|gmap|(no)?crossref|innerlist|search)(?!\\^)\\b",
+					"comment": "Compiler directive keywords. Look behind to avoid matching ^keyword."
 				}
 			]
-		},
-		"compiler_directive_keyword": {
-			"name": "keyword.preprocessor.tal",
-			"match": "(?i)\\b(?<!\\^)(assertion|begincompilation|cpu|decs|definetog|dumpcons|(end)?if|ifnot|page|extendstack|compact|rp|section|source|(no)?list|(no)?code|inspect|symbols|(no)?(l)?map|gmap|(no)?crossref|innerlist|search)(?!\\^)\\b",
-			"comment": "Compiler directive keywords. Look behind to avoid matching ^keyword."
 		},
 		"comments": {
 			"patterns": [
