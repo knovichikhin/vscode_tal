@@ -12,6 +12,6 @@ export function activate(context: vscode.ExtensionContext) {
     // Register document breadcrumbs provider if tal.enableDocumentSymbol is turned on
     if (vscode.workspace.getConfiguration('tal').get('enableDocumentSymbol') === true) {
         const talSymbolProvider = vscode.languages.registerDocumentSymbolProvider('tal', new TALDocumentSymbolProvider());
-        context.subscriptions.push();
+        context.subscriptions.push(talSymbolProvider);
     }
 }
