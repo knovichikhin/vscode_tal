@@ -1,10 +1,16 @@
 # Change Log
+## [0.4.3] - 2020-08-20
+- Thanks [cnxguy](https://github.com/cnxguy). Enhanced TACL process parsing. Added defines support. See [PR #10](https://github.com/manoutoftime/vscode_tal/pull/10).
+  - System names working
+  - Lengths now match Nonstop constraints ($s for example now valid)
+  - Special case $0, $receive handled (due to length limits)
+
 ## [0.4.2] - 2020-08-19
 - Improve how procs/subprocs are tracked. Detect multiple begin/end keywords per line to determine accurate function scope.
 - Provide section/page symbols for files without procs/subprocs.
 
 ## [0.4.1] - 2020-08-19
-- Thanks [cnxguy](https://github.com/cnxguy). Correct behaviour of ?page directives containing brackets embedded within quotes. See [PR #9](https://github.com/manoutoftime/vscode_tal/pull/9).
+- Thanks [cnxguy](https://github.com/cnxguy). Correct behaviour of ?page directives containing brackets embedded within quotes. See [PR #8](https://github.com/manoutoftime/vscode_tal/pull/8) and [PR #9](https://github.com/manoutoftime/vscode_tal/pull/9).
 - Added missing compiler directives: fixup, nofixup, datapages, int32index, noint32index, pushint32index, popint32index, warn, nowarn, errorfile, saveabend, nosaveabend, inhibitxx, noinhibitxx, nogmap, highrequesters, highpin, runnamed, errors, fmap, nofmap, pushlist, poplist, resettog, settog, check, nocheck, pushcheck, popcheck, syntax, suppress, nosuppress, nosymbols, noinnerlist, pushinnerlist, popinnerlist, nocompact, pushmap, popmap.
 
 ## [0.4.0] - 2020-08-15
