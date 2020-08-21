@@ -1,536 +1,536 @@
 {
-	"name": "TACL",
-	"patterns": [
-		{
-			"include": "#comments"
-		},
-		{
-			"include": "#compiler_directive"
-		},
-		{
-			"include": "#defines"
-		},
-		{
-			"include": "#keywords"
-		},
-		{
-			"include": "#macro_arguments"
-		},
-		{
-			"include": "#function_call_std_lib"
-		},
-		{
-			"include": "#numbers"
-		},
-		{
-			"include": "#strings"
-		},
-		{
-			"include": "#operators"
-		},
-		{
-			"include": "#process"
-		},
-		{
-			"include": "#structure_declaration"
-		},
-		{
-			"include": "#other_def_declaration"
-		},
-		{
-			"include": "#punctuation_accessor"
-		},
-		{
-			"include": "#punctuation_paren_begin"
-		},
-		{
-			"include": "#punctuation_paren_end"
-		},
-		{
-			"include": "#line_continuation_character"
-		}
-	],
-	"repository": {
-		"punctuation_paren_begin": {
-			"name": "punctuation.parenthesis.begin.tacl",
-			"match": "\\("
-		},
-		"punctuation_paren_end": {
-			"name": "punctuation.parenthesis.end.tacl",
-			"match": "\\)"
-		},
-		"punctuation_comma": {
-			"name": "punctuation.separator.comma.tacl",
-			"match": ","
-		},
-		"punctuation_accessor": {
-			"name": "meta.punctuation.accessor.tacl",
-			"match": "[\\w\\^](\\.)[\\w\\^]",
-			"captures": {
-				"1": { "name": "punctuation.accessor.tacl" }
-			}
-		},
-		"punctuation_semicolon": {
-			"name": "punctuation.terminator.statement.tal",
-			"match": ";"
-		},
-		"compiler_directive":{
-			"patterns": [
-				{
-					"comment": "TACL directive line. ?blank appears by itself.",
-					"match": "(?i)^(\\?blank)(?!\\^)\\b",
-					"name": "keyword.preprocessor.tacl"
-				},
-				{
-					"comment": "TACL directive line. ?format has a single argument.",
-					"match": "(?i)^(\\?format)(?!\\^)\\b\\s*\\b(?<!\\^)(plain|quoted|tacl)(?!\\^)\\b",
-					"name": "keyword.preprocessor.tacl"
-				},
-				{
-					"comment": "TACL directive line. ?section has two arguments: variable name and variable type.",
-					"match": "(?i)^(\\?section)(?!\\^)\\b\\s*\\b(?<!\\^)([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)(?!\\^)\\b\\s*\\b(?<!\\^)(text|alias|macro|routine|struct|directory|delta)(?!\\^)\\b",
-					"captures": {
-						"1": {
-							"name": "keyword.preprocessor.tacl"
-						},
-						"2": {
-							"name": "entity.name.function.tacl"
-						},
-						"3": {
-							"name": "keyword.preprocessor.tacl"
-						}
-					}
-				},
-				{
-					"comment": "TACL directive line. ?tacl has a single argument.",
-					"match": "(?i)^(\\?tacl)(?!\\^)\\b\\s*\\b(?<!\\^)(text|alias|macro|routine|struct|directory|delta)(?!\\^)\\b",
-					"name": "keyword.preprocessor.tacl"
-				}
-			]
-		},
-		"line_continuation_character": {
-			"patterns": [
-				{
-					"match": "(\\&)\\n",
-					"captures": {
-						"1": {
-							"name": "constant.character.escape.line-continuation.tacl"
-						}
-					}
-				}
-			]
-		},
-		"comments": {
-			"patterns": [
-				{
-					"comment": "Match text between double equal signs and end of line without line continuation character",
-					"name": "comment.block.tacl",
-					"begin": "==",
-					"end": "[^\\&]$",
-					"patterns": [
-						{
-							"include": "#line_continuation_character"
-						}
-					]
-				},
-				{
-					"comment": "Match text between braces. If there is a line break in the middle then it has to have a line break character &",
-					"name": "comment.block.tacl",
-					"begin": "\\{",
-					"end": "([^\\&]$|\\})",
-					"patterns": [
-						{
-							"include": "#line_continuation_character"
-						},
-						{
-							"comment": "Text between braces is a comment. However, a comment cannot have another open brace.",
-							"match": "\\{",
-							"name": "invalid.illegal.tacl"
-						}
-					]
-				},
-				{
-					"comment": "Match text between COMMENT and end of line",
-					"name": "comment.block.tacl",
-					"begin": "^\\s*\\b(?<!\\^)(comment)(?!\\^)\\b",
-					"end": "[^\\&]$",
-					"patterns": [
-						{
-							"include": "#line_continuation_character"
-						},
-						{
-							"comment": "Comments within comments are illegal.",
-							"match": "\\{.*\\}",
-							"name": "invalid.illegal.tacl"
-						}
-					]
-				}
-			]
-		},
-		"structure_declaration": {
-			"comment": "Match a structure declaration, such as [#def foo struct ...]",
-			"name": "meta.struct.declaration.tacl",
-			"begin": "(?i)\\[\\s*(#def)\\s+([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s+\\b(struct)(?!\\^)\\b",
-			"beginCaptures": {
-				"1": {
-					"name": "keyword.control.tacl"
-				},
-				"2": {
-					"name": "variable.tacl"
-				},
-				"3": {
-					"name": "entity.name.type.tacl"
-				}
-			},
-			"end": "\\]",
-			"patterns": [
-				{
-					"include": "#comments"
-				},
-				{
-					"include": "#punctuation_semicolon"
-				},
-				{
-					"comment": "Structure storage declaration: type identifier ... value ... ;",
-					"name": "meta.struct.type-declaration.tacl",
-					"begin": "(?i)\\b(?<!\\^)(bool|byte|char|crtpid|device|enum|fname|fname32|int|int2|int4|phandle|ssid|struct|subvol|transid|tstamp|uint|username|bool|uint)(?!\\^)\\b\\s+([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
-					"beginCaptures": {
-						"1": {
-							"name": "storage.type.tal"
-						},
-						"2": {
-							"name": "variable.tacl"
-						}
-					},
-					"end": "(;)",
-					"endCaptures": {
-						"1": {
-							"name": "punctuation.terminator.statement.tal"
-						}
-					},
-					"patterns": [
-						{
-							"include": "#comments"
-						},
-						{
-							"comment": "Like other-structure declaration or redefinitions",
-							"match": "(?i)\\b(?<!\\^)(redefines)(?!\\^)\\b\\s+([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
-							"captures": {
-								"1": {
-									"name": "keyword.other.tacl"
-								},
-								"2": {
-									"name": "variable.tacl"
-								}
-							}
-						},
-						{
-							"match": "(?i)\\b(?<!\\^)(value)(?!\\^)\\b",
-							"name": "keyword.other.tacl"
-						},
-						{
-							"include": "#numbers"
-						},
-						{
-							"include": "#strings"
-						}
-					]
-				},
-				{
-					"comment": "Filler type",
-					"match": "(?i)\\b(?<!\\^)(filler)(?!\\^)\\b\\s+([0-9]*)",
-					"captures": {
-						"1": {
-							"name": "storage.type.tal"
-						},
-						"2": {
-							"name": "constant.numeric.tacl"
-						}
-					}
-				},
-				{
-					"name": "keyword.other.tacl",
-					"match": "(?i)\\b(?<!\\^)(begin|end)(?!\\^)\\b",
-					"comment": "Basic structure keywords."
-				},
-				{
-					"comment": "Like other-structure declaration or redefinitions",
-					"match": "(?i)\\b(?<!\\^)(like)(?!\\^)\\b\\s+([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
-					"captures": {
-						"1": {
-							"name": "keyword.other.tacl"
-						},
-						"2": {
-							"name": "variable.tacl"
-						}
-					}
-				},
-				{
-					"include": "#structure_declaration"
-				}
-			]
-		},
-		"other_def_declaration": {
-			"comment": "Match a other #def declaration, such as [#def foo text ...]",
-			"name": "meta.struct-declaration.tacl",
-			"match": "(?i)\\[\\s*(#def)\\s+([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s+\\b(macro|alias|delta|text|directory|routine)(?!\\^)\\b\\s*(\\|body\\|)?",
-			"captures": {
-				"1": {
-					"name": "keyword.control.tacl"
-				},
-				"2": {
-					"name": "variable.tacl"
-				},
-				"3": {
-					"name": "entity.name.type"
-				},
-				"4": {
-					"name": "keyword.control.tacl"
-				}
-			}
-		},
-		"keywords": {
-			"patterns": [
-				{
-					"name": "keyword.control.tacl",
-					"match": "(?i)#(case|loop|if|return|result|def)(?!\\^)\\b",
-					"comment": "Control flow keywords that start with # symbol."
-				},
-				{
-					"name": "keyword.control.tacl",
-					"match": "(?i)\\|(else|then|otherwise|do|until|while|[^|]*)\\|",
-					"comment": "These are labels within #if, #loop, #case that are enclose in ||"
-				},
-				{
-					"name": "keyword.other.tacl",
-					"match": "(?i)(?<!\\S)#(un)?frame(?!\\S)\\b",
-					"comment": "Match #frame and #unframe"
-				}
-			]
-		},
-		"process": {
-			"patterns": [
-				{
-					"comment": "Special process, [\\system.]$0",
-					"name": "constant.other.tacl",
-					"match": "(?:)(\\\\[a-zA-Z][a-zA-Z0-9]{0,7}\\.)?\\$0"
-				},
-				{
-					"comment": "Special case $recieve",
-					"name": "constant.other.tacl",
-					"match": "(?:)\\$receive"
-				},
-				{
-					"comment": "Process names, [\\system.]$prcs",
-					"name": "constant.other.tacl",
-					"match": "(?:)(\\\\[a-zA-Z][a-zA-Z0-9]{0,7}\\.)?\\$[a-zA-Z][a-zA-Z0-9]{0,4}"
-				}
-			]
-		},
-		"defines": {
-			"comment": "Defines",
-			"name": "entity.name.type",
-			"match": "(?:)\\=[a-zA-Z][a-zA-Z0-9\\-\\_\\^]{1,23}"
-		},
-		"numbers": {
-			"patterns": [
-				{
-					"match": "(?<!\\^)[+-]?[0-9]+\\b",
-					"name": "constant.numeric.tacl"
-				}
-			]
-		},
-		"strings": {
-			"name": "string.quoted.double.tacl",
-			"begin": "\"",
-			"beginCaptures": {
-				"0": {
-					"name": "punctuation.definition.string.begin.tacl"
-				}
-			},
-			"end": "\"",
-			"endCaptures": {
-				"0": {
-					"name": "punctuation.definition.string.end.tacl"
-				}
-			},
-			"patterns": [
-				{
-					"include": "#line_continuation_character"
-				}
-			]
-		},
-		"operators": {
-			"patterns": [
-				{
-					"match": "-",
-					"name": "keyword.operator.decrement.tacl"
-				},
-				{
-					"match": "\\'\\+\\'",
-					"name": "keyword.operator.concatenation.tacl"
-				},
-				{
-					"match": "\\+",
-					"name": "keyword.operator.increment.tacl"
-				},
-				{
-					"comment": "'>', '!>', '<', '!<', '>=', '!>=', '<=', '!<=', '=', '!', '<>', '!<>'",
-					"match": "\\'>\\'|\\'!>\\'|\\'<\\'|\\'!<\\'|\\'>=\\'|\\'!>=\\'|\\'<=\\'|\\'!<=\\'|\\'=\\'|\\'!\\'|\\'<>\\'|\\'!<>\\'",
-					"name": "keyword.operator.comparison-strings.tacl"
-				},
-				{
-					"match": ">|<|>=|<=|=|<>",
-					"name": "keyword.operator.comparison-integer.tacl"
-				},
-				{
-					"match": "(?i)\\b(?<!\\^)(not|and|or)(?!\\^)\\b",
-					"name": "keyword.operator.logical.tacl"
-				},
-				{
-					"comment": "*. Exclude division / because TACL functions and tandem program calls use this for parameter separators.",
-					"match": "\\*",
-					"name": "keyword.operator.tacl"
-				}
-			]
-		},
-		"macro_arguments": {
-			"patterns": [
-				{
-					"comment": "%0%, %n%, %*%",
-					"match": "%([0-9]+|\\*)%",
-					"name": "keyword.operator.macro.tacl"
-				},
-				{
-					"comment": "%1 to 2%, %1 to *%, %1 to 2 by 3%, %1 to * by 3%",
-					"match": "(?i)%[1-9][0-9]*\\s+to\\s+([1-9]+|\\*)(\\s+by\\s+[1-9]+)?%",
-					"name": "keyword.operator.macro.tacl"
-				}
-			]
-		},
-		"illegal_tacl": {
-			"patterns":[
-				{
-					"comment": "TAL does not allow identifiers that begin with numbers",
-					"match": "\\b(?<!\\^)(\\d[\\w\\^]+)\\b",
-					"name": "invalid.illegal.tacl"
-				},
-				{
-					"comment": "Identifiers longer than 31 are not allowed",
-					"match": "\\s*[\\w\\^]{32,}",
-					"name": "invalid.illegal.tacl"
-				},
-				{
-					"comment": "% are not allowed in the middle of an identifier",
-					"match": "\\s*[\\w\\^]+\\%[\\w\\^]+",
-					"name": "invalid.illegal.tacl"
-				}
-			]
-		},
-		"function_call_std_lib": {
-			"patterns":[
-				{
-					"comment": "Standard TACL function #output that appears by itself. This is a special case because I can't figure out how to make line continuation work properly when #output appears by itself.",
-					"match": "(?i)(?<!\\^)(#output)(?!\\^)$",
-					"name": "entity.name.function.tacl"
-				},
-				{
-					"comment": "Standard TACL function #output is special because it's followed by plain text with exception of macro character and other functions.",
-					"name": "meta.function-call.output.tacl",
-					"begin": "(?i)(?<!\\^)(#output)(?!\\^)\\b\\s*(?:(\\/)([^\\/]+)(\\/))?",
-					"beginCaptures": {
-						"1": {
-							"name": "entity.name.function.tacl"
-						},
-						"2": {
-							"name": "punctuation.definition.parameters.tacl"
-						},
-						"3": {
-							"name": "variable.tacl"
-						},
-						"4": {
-							"name": "punctuation.definition.parameters.tacl"
-						}
-					},
-					"end": "[^\\&]$",
-					"patterns": [
-						{
-							"include": "#comments"
-						},
-						{
-							"include": "#function_call_std_lib"
-						},
-						{
-							"include": "#macro_arguments"
-						},
-						{
-							"include": "#line_continuation_character"
-						}
-					]
-				},
-				{
-					"comment": "Standard TACL function #param is special because it's followed by a param that can include dash.",
-					"name": "meta.function-call.param.tacl",
-					"match": "(?i)(?<!\\^)(#param)(?!\\^)\\b\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_\\-]*)",
-					"captures": {
-						"1": {
-							"name": "entity.name.function.tacl"
-						},
-						"2": {
-							"name": "variable.tacl"
-						}
-					}
-				},
-				{
-					"comment": "Standard TACL functions that start with a # and have an argument list",
-					"name": "meta.function-call.tacl",
-					"begin": "(?i)(?<!\\^)(#[a-zA-Z]*)(?!\\^)\\b\\s*(\\/)",
-					"beginCaptures": {
-						"1": {
-							"name": "entity.name.function.tacl"
-						},
-						"2": {
-							"name": "punctuation.definition.parameters.tacll"
-						}
-					},
-					"end": "(\\/)",
-					"endCaptures": {
-						"1": {
-							"name": "punctuation.definition.parameters.tacl"
-						}
-					},
-					"patterns": [
-						{
-							"include": "#function_call_std_lib"
-						},
-						{
-							"comment": "If two words appear in argument list e.g. /value var/ then the first one is a keyword and the second one is a variable or literal",
-							"match" : "([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)(\\s+[a-zA-Z\\^_][a-zA-Z0-9\\^_]*)?",
-							"captures": {
-								"1": {
-									"name": "keyword.other.tacl"
-								},
-								"2": {
-									"name": "variable.tacl"
-								}
-							}
-						},
-						{
-							"include": "#punctuation_comma"
-						}
-					]
-				},
-				{
-					"comment": "Standard TACL functions that start with a #",
-					"name": "entity.name.function.tacl",
-					"match": "(?i)(?<!\\^)(#[a-zA-Z]*)(?!\\^)\\b"
-				}
-			]
-		},
-		"attributes": {
-			"match": "([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
-			"name": "variable.tacl"
-		}
-	},
-	"scopeName": "source.tacl"
+    "name": "TACL",
+    "patterns": [
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#compiler_directive"
+        },
+        {
+            "include": "#defines"
+        },
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#macro_arguments"
+        },
+        {
+            "include": "#function_call_std_lib"
+        },
+        {
+            "include": "#numbers"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#operators"
+        },
+        {
+            "include": "#process"
+        },
+        {
+            "include": "#structure_declaration"
+        },
+        {
+            "include": "#other_def_declaration"
+        },
+        {
+            "include": "#punctuation_accessor"
+        },
+        {
+            "include": "#punctuation_paren_begin"
+        },
+        {
+            "include": "#punctuation_paren_end"
+        },
+        {
+            "include": "#line_continuation_character"
+        }
+    ],
+    "repository": {
+        "punctuation_paren_begin": {
+            "name": "punctuation.parenthesis.begin.tacl",
+            "match": "\\("
+        },
+        "punctuation_paren_end": {
+            "name": "punctuation.parenthesis.end.tacl",
+            "match": "\\)"
+        },
+        "punctuation_comma": {
+            "name": "punctuation.separator.comma.tacl",
+            "match": ","
+        },
+        "punctuation_accessor": {
+            "name": "meta.punctuation.accessor.tacl",
+            "match": "[\\w\\^](\\.)[\\w\\^]",
+            "captures": {
+                "1": { "name": "punctuation.accessor.tacl" }
+            }
+        },
+        "punctuation_semicolon": {
+            "name": "punctuation.terminator.statement.tal",
+            "match": ";"
+        },
+        "compiler_directive":{
+            "patterns": [
+                {
+                    "comment": "TACL directive line. ?blank appears by itself.",
+                    "match": "(?i)^(\\?blank)(?!\\^)\\b",
+                    "name": "keyword.preprocessor.tacl"
+                },
+                {
+                    "comment": "TACL directive line. ?format has a single argument.",
+                    "match": "(?i)^(\\?format)(?!\\^)\\b\\s*\\b(?<!\\^)(plain|quoted|tacl)(?!\\^)\\b",
+                    "name": "keyword.preprocessor.tacl"
+                },
+                {
+                    "comment": "TACL directive line. ?section has two arguments: variable name and variable type.",
+                    "match": "(?i)^(\\?section)(?!\\^)\\b\\s*\\b(?<!\\^)([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)(?!\\^)\\b\\s*\\b(?<!\\^)(text|alias|macro|routine|struct|directory|delta)(?!\\^)\\b",
+                    "captures": {
+                        "1": {
+                            "name": "keyword.preprocessor.tacl"
+                        },
+                        "2": {
+                            "name": "entity.name.function.tacl"
+                        },
+                        "3": {
+                            "name": "keyword.preprocessor.tacl"
+                        }
+                    }
+                },
+                {
+                    "comment": "TACL directive line. ?tacl has a single argument.",
+                    "match": "(?i)^(\\?tacl)(?!\\^)\\b\\s*\\b(?<!\\^)(text|alias|macro|routine|struct|directory|delta)(?!\\^)\\b",
+                    "name": "keyword.preprocessor.tacl"
+                }
+            ]
+        },
+        "line_continuation_character": {
+            "patterns": [
+                {
+                    "match": "(\\&)\\n",
+                    "captures": {
+                        "1": {
+                            "name": "constant.character.escape.line-continuation.tacl"
+                        }
+                    }
+                }
+            ]
+        },
+        "comments": {
+            "patterns": [
+                {
+                    "comment": "Match text between double equal signs and end of line without line continuation character",
+                    "name": "comment.block.tacl",
+                    "begin": "==",
+                    "end": "[^\\&]$",
+                    "patterns": [
+                        {
+                            "include": "#line_continuation_character"
+                        }
+                    ]
+                },
+                {
+                    "comment": "Match text between braces. If there is a line break in the middle then it has to have a line break character &",
+                    "name": "comment.block.tacl",
+                    "begin": "\\{",
+                    "end": "([^\\&]$|\\})",
+                    "patterns": [
+                        {
+                            "include": "#line_continuation_character"
+                        },
+                        {
+                            "comment": "Text between braces is a comment. However, a comment cannot have another open brace.",
+                            "match": "\\{",
+                            "name": "invalid.illegal.tacl"
+                        }
+                    ]
+                },
+                {
+                    "comment": "Match text between COMMENT and end of line",
+                    "name": "comment.block.tacl",
+                    "begin": "^\\s*\\b(?<!\\^)(comment)(?!\\^)\\b",
+                    "end": "[^\\&]$",
+                    "patterns": [
+                        {
+                            "include": "#line_continuation_character"
+                        },
+                        {
+                            "comment": "Comments within comments are illegal.",
+                            "match": "\\{.*\\}",
+                            "name": "invalid.illegal.tacl"
+                        }
+                    ]
+                }
+            ]
+        },
+        "structure_declaration": {
+            "comment": "Match a structure declaration, such as [#def foo struct ...]",
+            "name": "meta.struct.declaration.tacl",
+            "begin": "(?i)\\[\\s*(#def)\\s+([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s+\\b(struct)(?!\\^)\\b",
+            "beginCaptures": {
+                "1": {
+                    "name": "keyword.control.tacl"
+                },
+                "2": {
+                    "name": "variable.tacl"
+                },
+                "3": {
+                    "name": "entity.name.type.tacl"
+                }
+            },
+            "end": "\\]",
+            "patterns": [
+                {
+                    "include": "#comments"
+                },
+                {
+                    "include": "#punctuation_semicolon"
+                },
+                {
+                    "comment": "Structure storage declaration: type identifier ... value ... ;",
+                    "name": "meta.struct.type-declaration.tacl",
+                    "begin": "(?i)\\b(?<!\\^)(bool|byte|char|crtpid|device|enum|fname|fname32|int|int2|int4|phandle|ssid|struct|subvol|transid|tstamp|uint|username|bool|uint)(?!\\^)\\b\\s+([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+                    "beginCaptures": {
+                        "1": {
+                            "name": "storage.type.tal"
+                        },
+                        "2": {
+                            "name": "variable.tacl"
+                        }
+                    },
+                    "end": "(;)",
+                    "endCaptures": {
+                        "1": {
+                            "name": "punctuation.terminator.statement.tal"
+                        }
+                    },
+                    "patterns": [
+                        {
+                            "include": "#comments"
+                        },
+                        {
+                            "comment": "Like other-structure declaration or redefinitions",
+                            "match": "(?i)\\b(?<!\\^)(redefines)(?!\\^)\\b\\s+([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+                            "captures": {
+                                "1": {
+                                    "name": "keyword.other.tacl"
+                                },
+                                "2": {
+                                    "name": "variable.tacl"
+                                }
+                            }
+                        },
+                        {
+                            "match": "(?i)\\b(?<!\\^)(value)(?!\\^)\\b",
+                            "name": "keyword.other.tacl"
+                        },
+                        {
+                            "include": "#numbers"
+                        },
+                        {
+                            "include": "#strings"
+                        }
+                    ]
+                },
+                {
+                    "comment": "Filler type",
+                    "match": "(?i)\\b(?<!\\^)(filler)(?!\\^)\\b\\s+([0-9]*)",
+                    "captures": {
+                        "1": {
+                            "name": "storage.type.tal"
+                        },
+                        "2": {
+                            "name": "constant.numeric.tacl"
+                        }
+                    }
+                },
+                {
+                    "name": "keyword.other.tacl",
+                    "match": "(?i)\\b(?<!\\^)(begin|end)(?!\\^)\\b",
+                    "comment": "Basic structure keywords."
+                },
+                {
+                    "comment": "Like other-structure declaration or redefinitions",
+                    "match": "(?i)\\b(?<!\\^)(like)(?!\\^)\\b\\s+([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+                    "captures": {
+                        "1": {
+                            "name": "keyword.other.tacl"
+                        },
+                        "2": {
+                            "name": "variable.tacl"
+                        }
+                    }
+                },
+                {
+                    "include": "#structure_declaration"
+                }
+            ]
+        },
+        "other_def_declaration": {
+            "comment": "Match a other #def declaration, such as [#def foo text ...]",
+            "name": "meta.struct-declaration.tacl",
+            "match": "(?i)\\[\\s*(#def)\\s+([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s+\\b(macro|alias|delta|text|directory|routine)(?!\\^)\\b\\s*(\\|body\\|)?",
+            "captures": {
+                "1": {
+                    "name": "keyword.control.tacl"
+                },
+                "2": {
+                    "name": "variable.tacl"
+                },
+                "3": {
+                    "name": "entity.name.type"
+                },
+                "4": {
+                    "name": "keyword.control.tacl"
+                }
+            }
+        },
+        "keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.control.tacl",
+                    "match": "(?i)#(case|loop|if|return|result|def)(?!\\^)\\b",
+                    "comment": "Control flow keywords that start with # symbol."
+                },
+                {
+                    "name": "keyword.control.tacl",
+                    "match": "(?i)\\|(else|then|otherwise|do|until|while|[^|]*)\\|",
+                    "comment": "These are labels within #if, #loop, #case that are enclose in ||"
+                },
+                {
+                    "name": "keyword.other.tacl",
+                    "match": "(?i)(?<!\\S)#(un)?frame(?!\\S)\\b",
+                    "comment": "Match #frame and #unframe"
+                }
+            ]
+        },
+        "process": {
+            "patterns": [
+                {
+                    "comment": "Special process, [\\system.]$0",
+                    "name": "constant.other.tacl",
+                    "match": "(?:)(\\\\[a-zA-Z][a-zA-Z0-9]{0,7}\\.)?\\$0"
+                },
+                {
+                    "comment": "Special case $recieve",
+                    "name": "constant.other.tacl",
+                    "match": "(?:)\\$receive"
+                },
+                {
+                    "comment": "Process names, [\\system.]$prcs",
+                    "name": "constant.other.tacl",
+                    "match": "(?:)(\\\\[a-zA-Z][a-zA-Z0-9]{0,7}\\.)?\\$[a-zA-Z][a-zA-Z0-9]{0,4}"
+                }
+            ]
+        },
+        "defines": {
+            "comment": "Defines",
+            "name": "entity.name.type",
+            "match": "(?:)\\=[a-zA-Z][a-zA-Z0-9\\-\\_\\^]{1,23}"
+        },
+        "numbers": {
+            "patterns": [
+                {
+                    "match": "(?<!\\^)[+-]?[0-9]+\\b",
+                    "name": "constant.numeric.tacl"
+                }
+            ]
+        },
+        "strings": {
+            "name": "string.quoted.double.tacl",
+            "begin": "\"",
+            "beginCaptures": {
+                "0": {
+                    "name": "punctuation.definition.string.begin.tacl"
+                }
+            },
+            "end": "\"",
+            "endCaptures": {
+                "0": {
+                    "name": "punctuation.definition.string.end.tacl"
+                }
+            },
+            "patterns": [
+                {
+                    "include": "#line_continuation_character"
+                }
+            ]
+        },
+        "operators": {
+            "patterns": [
+                {
+                    "match": "-",
+                    "name": "keyword.operator.decrement.tacl"
+                },
+                {
+                    "match": "\\'\\+\\'",
+                    "name": "keyword.operator.concatenation.tacl"
+                },
+                {
+                    "match": "\\+",
+                    "name": "keyword.operator.increment.tacl"
+                },
+                {
+                    "comment": "'>', '!>', '<', '!<', '>=', '!>=', '<=', '!<=', '=', '!', '<>', '!<>'",
+                    "match": "\\'>\\'|\\'!>\\'|\\'<\\'|\\'!<\\'|\\'>=\\'|\\'!>=\\'|\\'<=\\'|\\'!<=\\'|\\'=\\'|\\'!\\'|\\'<>\\'|\\'!<>\\'",
+                    "name": "keyword.operator.comparison-strings.tacl"
+                },
+                {
+                    "match": ">|<|>=|<=|=|<>",
+                    "name": "keyword.operator.comparison-integer.tacl"
+                },
+                {
+                    "match": "(?i)\\b(?<!\\^)(not|and|or)(?!\\^)\\b",
+                    "name": "keyword.operator.logical.tacl"
+                },
+                {
+                    "comment": "*. Exclude division / because TACL functions and tandem program calls use this for parameter separators.",
+                    "match": "\\*",
+                    "name": "keyword.operator.tacl"
+                }
+            ]
+        },
+        "macro_arguments": {
+            "patterns": [
+                {
+                    "comment": "%0%, %n%, %*%",
+                    "match": "%([0-9]+|\\*)%",
+                    "name": "keyword.operator.macro.tacl"
+                },
+                {
+                    "comment": "%1 to 2%, %1 to *%, %1 to 2 by 3%, %1 to * by 3%",
+                    "match": "(?i)%[1-9][0-9]*\\s+to\\s+([1-9]+|\\*)(\\s+by\\s+[1-9]+)?%",
+                    "name": "keyword.operator.macro.tacl"
+                }
+            ]
+        },
+        "illegal_tacl": {
+            "patterns":[
+                {
+                    "comment": "TAL does not allow identifiers that begin with numbers",
+                    "match": "\\b(?<!\\^)(\\d[\\w\\^]+)\\b",
+                    "name": "invalid.illegal.tacl"
+                },
+                {
+                    "comment": "Identifiers longer than 31 are not allowed",
+                    "match": "\\s*[\\w\\^]{32,}",
+                    "name": "invalid.illegal.tacl"
+                },
+                {
+                    "comment": "% are not allowed in the middle of an identifier",
+                    "match": "\\s*[\\w\\^]+\\%[\\w\\^]+",
+                    "name": "invalid.illegal.tacl"
+                }
+            ]
+        },
+        "function_call_std_lib": {
+            "patterns":[
+                {
+                    "comment": "Standard TACL function #output that appears by itself. This is a special case because I can't figure out how to make line continuation work properly when #output appears by itself.",
+                    "match": "(?i)(?<!\\^)(#output)(?!\\^)$",
+                    "name": "entity.name.function.tacl"
+                },
+                {
+                    "comment": "Standard TACL function #output is special because it's followed by plain text with exception of macro character and other functions.",
+                    "name": "meta.function-call.output.tacl",
+                    "begin": "(?i)(?<!\\^)(#output)(?!\\^)\\b\\s*(?:(\\/)([^\\/]+)(\\/))?",
+                    "beginCaptures": {
+                        "1": {
+                            "name": "entity.name.function.tacl"
+                        },
+                        "2": {
+                            "name": "punctuation.definition.parameters.tacl"
+                        },
+                        "3": {
+                            "name": "variable.tacl"
+                        },
+                        "4": {
+                            "name": "punctuation.definition.parameters.tacl"
+                        }
+                    },
+                    "end": "[^\\&]$",
+                    "patterns": [
+                        {
+                            "include": "#comments"
+                        },
+                        {
+                            "include": "#function_call_std_lib"
+                        },
+                        {
+                            "include": "#macro_arguments"
+                        },
+                        {
+                            "include": "#line_continuation_character"
+                        }
+                    ]
+                },
+                {
+                    "comment": "Standard TACL function #param is special because it's followed by a param that can include dash.",
+                    "name": "meta.function-call.param.tacl",
+                    "match": "(?i)(?<!\\^)(#param)(?!\\^)\\b\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_\\-]*)",
+                    "captures": {
+                        "1": {
+                            "name": "entity.name.function.tacl"
+                        },
+                        "2": {
+                            "name": "variable.tacl"
+                        }
+                    }
+                },
+                {
+                    "comment": "Standard TACL functions that start with a # and have an argument list",
+                    "name": "meta.function-call.tacl",
+                    "begin": "(?i)(?<!\\^)(#[a-zA-Z]*)(?!\\^)\\b\\s*(\\/)",
+                    "beginCaptures": {
+                        "1": {
+                            "name": "entity.name.function.tacl"
+                        },
+                        "2": {
+                            "name": "punctuation.definition.parameters.tacll"
+                        }
+                    },
+                    "end": "(\\/)",
+                    "endCaptures": {
+                        "1": {
+                            "name": "punctuation.definition.parameters.tacl"
+                        }
+                    },
+                    "patterns": [
+                        {
+                            "include": "#function_call_std_lib"
+                        },
+                        {
+                            "comment": "If two words appear in argument list e.g. /value var/ then the first one is a keyword and the second one is a variable or literal",
+                            "match" : "([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)(\\s+[a-zA-Z\\^_][a-zA-Z0-9\\^_]*)?",
+                            "captures": {
+                                "1": {
+                                    "name": "keyword.other.tacl"
+                                },
+                                "2": {
+                                    "name": "variable.tacl"
+                                }
+                            }
+                        },
+                        {
+                            "include": "#punctuation_comma"
+                        }
+                    ]
+                },
+                {
+                    "comment": "Standard TACL functions that start with a #",
+                    "name": "entity.name.function.tacl",
+                    "match": "(?i)(?<!\\^)(#[a-zA-Z]*)(?!\\^)\\b"
+                }
+            ]
+        },
+        "attributes": {
+            "match": "([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+            "name": "variable.tacl"
+        }
+    },
+    "scopeName": "source.tacl"
 }

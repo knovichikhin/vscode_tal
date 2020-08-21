@@ -1,451 +1,451 @@
 {
-	"name": "TAL",
-	"patterns": [
-		{
-			"include": "#comments"
-		},
-		{
-			"include": "#compiler_directive"
-		},
-		{
-			"include": "#keywords"
-		},
-		{
-			"include": "#storage_types"
-		},
-		{
-			"patterns": [
-				{
-					"comment": "Match standalone '.ext' and '.sg'. Match '.' that is followed by a word and preceded by whitespace. Ignore variable that follows because we don't want to highlight them yet.",
-					"match": "(?i)(?<=\\s|^)(\\.sg(?=\\s)|\\.ext(?=\\s)|\\.(?=\\w))\\s*([\\w\\^]+)",
-					"name": "meta.storage.modifier.tal",
-					"captures": {
-						"1": { "name": "storage.modifier.tal" },
-						"2": { "name": "meta.ignore.tal" }
-					}
-				},
-				{
-					"match": "(?i)\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]\\s*\\*+",
-					"name":"meta.ignore.tal",
-					"captures": {
-						"1": { "name": "meta.ignore.tal" }
-					},
-					"comment": "This is a structure template declaration. Do not flag as a function"
-				},
-				{
-					"match": "(?i)((?<=\\.ext)|(?<=\\.sg)|(?<=struct))\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
-					"name":"meta.ignore.tal",
-					"captures": {
-						"2": { "name": "meta.ignore.tal" }
-					},
-					"comment": "This is a structure declaration. Do not flag as a function"
-				}
-			]
-		},
-		{
-			"comment": "Not a language constant, but it's usually defined",
-			"match": "(?i)\\b(?<!\\^)(true|false)(?!\\^)\\b",
-			"name": "constant.language.tal"
-		},
-		{
-			"include": "#operators"
-		},
-		{
-			"include": "#numbers"
-		},
-		{
-			"include": "#strings"
-		},
-		{
-			"include": "#illegal_tal"
-		},
-		{
-			"include": "#lib_tal"
-		},
-		{
-			"include": "#functions_tal"
-		},
-		{
-			"include": "#punctuation_accessor"
-		},
-		{
-			"include": "#punctuation_semicolon"
-		},
-		{
-			"include": "#punctuation_paren_begin"
-		},
-		{
-			"include": "#punctuation_paren_end"
-		}
-	],
-	"repository": {
-		"punctuation_paren_begin": {
-			"name": "punctuation.parenthesis.begin.tal",
-			"match": "\\("
-		},
-		"punctuation_paren_end": {
-			"name": "punctuation.parenthesis.end.tal",
-			"match": "\\)"
-		},
-		"punctuation_comma": {
-			"name": "punctuation.separator.comma.tal",
-			"match": ","
-		},
-		"punctuation_semicolon": {
-			"name": "punctuation.terminator.statement.tal",
-			"match": ";"
-		},
-		"punctuation_accessor": {
-			"name": "meta.punctuation.accessor.tal",
-			"match": "[\\w\\^](\\.)[\\w\\^]",
-			"captures": {
-				"1": { "name": "punctuation.accessor.tal" }
-			}
-		},
-		"compiler_directive": {
-			"comment": "TAL directive",
-			"begin": "^(\\?)",
-			"beginCaptures": {
-				"1": {
-					"name": "keyword.preprocessor.tal"
-				}
-			},
-			"end": "$",
-			"name": "meta.preprocessor.tal",
-			"patterns": [
-				{
-					"include": "#punctuation_comma"
-				},
-				{
-					"include": "#strings"
-				},
-				{
-					"include": "#comments"
-				},
-				{
-					"include": "#compiler_directive_keyword"
-				}
-			]
-		},
-		"compiler_directive_keyword": {
-			"patterns": [
-				{
-					"comment": "?page directive that is followed by a string",
-					"match": "(?i)\\b(?<!\\^)(page)(?!\\^)\\b\\s*(\"[^\"]*\")?",
-					"captures": {
-						"1": {
-							"name": "keyword.preprocessor.tal"
-						},
-						"2": {
-							"name": "string.quoted.double.tal"
-						}
-					}
-				},
-				{
-					"comment": "Multiline TAL directive. Match multiline directive and highlight procs inside.",
-					"begin": "\\(",
-					"end": "\\)",
-					"name": "meta.preprocessor.multiline-directive.tal",
-					"patterns": [
-						{
-							"include": "#comments"
-						},
-						{
-							"match": "(?i)^(\\?)\\s*\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
-							"name": "meta.function-import.tal",
-							"captures": {
-								"1": { "name": "keyword.preprocessor.tal" },
-								"2": { "name": "entity.name.function.tal" }
-							}
-						},
-						{
-							"match": "(?i)^[^\\?]?\\s*\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
-							"name": "invalid.illegal.tal"
-						},
-						{
-							"match": "(?i)\\s*\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
-							"name": "meta.function-import.tal",
-							"captures": {
-								"1": { "name": "entity.name.function.tal" }
-							}
-						},
-						{
-							"match": "^(\\?)",
-							"name": "keyword.preprocessor.tal"
-						},
-						{
-							"include": "#punctuation_comma"
-						}
-					]
-				},
-				{
-					"name": "keyword.preprocessor.tal",
-					"match": "(?i)\\b(?<!\\^)(assertion|begincompilation|cpu|decs|datapages|(define|set|reset)tog|dumpcons|env|errors|errorfile|(no)?(fixup|saveabend|code|crossref|inhibitxx|warn|suppress|symbols|compact)|(end)?if|ifnot|(no|push|pop)?(check|list|int32index|innerlist|map)|extendstack|rp|section|source|inspect|syntax|(no)?(l|g|f)map|high(requesters|pin)|runnamed|search)(?!\\^)\\b",
-					"comment": "Compiler directive keywords. Look behind to avoid matching ^keyword."
-				}
-			]
-		},
-		"comments": {
-			"patterns": [
-				{
-					"comment": "Match text between double dash and end of line",
-					"name": "comment.line.tal",
-					"match": "-{2}.*$"
-				},
-				{
-					"comment": "Match text between explanation marks or explanation mark and end of line",
-					"name": "comment.line.tal",
-					"begin": "!",
-					"end": "(!|$)"
-				}
-			]
-		},
-		"keywords": {
-			"patterns": [
-				{
-					"name": "keyword.control.tal",
-					"match": "(?i)\\b(?<!\\^)(call|case|do|else|for|goto|if|label|of|otherwise|return|then|until|while|to|downto|by|proc|subproc)(?!\\^)\\b",
-					"comment": "Control flow keywords. Look behind to avoid matching ^keyword."
-				},
-				{
-					"name": "keyword.other.tal",
-					"match": "(?i)\\b(?<!\\^)(begin|end)(?!\\^)\\b",
-					"comment": "Look behind to avoid matching ^keyword."
-				},
-				{
-					"name": "keyword.tal",
-					"match": "(?i)\\b(?<!\\^)(callable|code|drop|entry|external|forward|interrupt|main|priv|resident|use|variable|extensible|words|bytes|scan|rscan|store|stack|name|block|target)(?!\\^)\\b",
-					"comment": "Language keywords. Look behind to avoid matching ^keyword."
-				}
-			]
-		},
-		"numbers": {
-			"patterns": [
-				{
-					"match": "(?<!\\^)((%(h|H)[0-9a-fA-F]([0-9a-fA-F']*[0-9a-fA-F])?)|(%(b|B)[01]([01']*[01])?)|(\\b([0-9]([0-9']*[0-9])?\\.?[0-9]*([0-9']*[0-9])?)|(\\.[0-9]([0-9']*[0-9])?))((e|E|l|L)(\\+|-)?[0-9]([0-9']*[0-9])?)?)(D|d|%D|%d|F|f|%F|%f)?\\b",
-					"name": "constant.numeric.tal"
-				}
-			]
-		},
-		"strings": {
-			"name": "string.quoted.double.tal",
-			"begin": "\"",
-			"beginCaptures": {
-				"0": {
-					"name": "punctuation.definition.string.begin.tal"
-				}
-			},
-			"end": "\"",
-			"endCaptures": {
-				"0": {
-					"name": "punctuation.definition.string.end.tal"
-				}
-			}
-		},
-		"operators": {
-			"patterns": [
-				{
-					"match": "-|\\'-\\'",
-					"name": "keyword.operator.decrement.tal"
-				},
-				{
-					"match": "\\+|\\'\\+\\'",
-					"name": "keyword.operator.increment.tal"
-				},
-				{
-					"match": "<<|\\'<<\\'|>>|\\'>>\\'",
-					"name": "keyword.operator.bitwise.shift.tal"
-				},
-				{
-					"match": "<>|\\'<>\\'|<=|\\'<=\\'|>=|\\'>=\\'|=|\\'=\\'|<|\\'<\\'|>|\\'>\\'",
-					"name": "keyword.operator.comparison.tal"
-				},
-				{
-					"match": "(?i)\\b(?<!\\^)(not|and|or|lor|land|xor)(?!\\^)\\b",
-					"name": "keyword.operator.logical.tal"
-				},
-				{
-					"match": "\\'\\\\'",
-					"name": "keyword.operator.tal"
-				},
-				{
-					"match": ":=|\\':=\\'|=:|\\'=:\\'",
-					"name": "keyword.operator.assignment.tal"
-				},
-				{
-					"match": "\\*|\\'\\*\\'|/|\\'/\\'|&|@|->",
-					"name": "keyword.operator.tal"
-				}
-			]
-		},
-		"storage_types": {
-			"patterns": [
-				{
-					"match": "(?i)\\b(?<!\\^)(literal|define|string|struct)(?!\\^)\\b",
-					"name": "storage.type.tal"
-				},
-				{
-					"comment": "These storage types may include additional parameters. int can be int, int(16), int(32), int(64) or int(literal)",
-					"match": "(?i)\\b(?<!\\^)int(?!\\^)((\\s*\\(\\s*(16|32|64|([a-zA-Z\\^_][a-zA-Z0-9\\^_]*))\\s*\\))|\\b)",
-					"name": "storage.type.tal"
-				},
-				{
-					"comment": "These storage types may include additional parameters. real can be real, real(32), real(64) or real(literal)",
-					"match": "(?i)\\b(?<!\\^)real(?!\\^)((\\s*\\(\\s*(32|64|([a-zA-Z\\^_][a-zA-Z0-9\\^_]*))\\s*\\))|\\b)",
-					"name": "storage.type.tal"
-				},
-				{
-					"comment": "These storage types may include additional parameters. fixed can be fixed, fixed(*), fixed(-19) or fixed(19)",
-					"match": "(?i)\\b(?<!\\^)fixed(?!\\^)((\\s*\\(\\s*(\\*|-?[0-9]{1,2})\\s*\\))|\\b)",
-					"name": "storage.type.tal"
-				},
-				{
-					"temp": "([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
-					"comment": "These storage types may include additional parameters, unsigned can be unsigned(1), unsigned(31) or unsigned(literal)",
-					"match": "(?i)\\b(?<!\\^)unsigned(?!\\^)((\\s*\\(\\s*([0-9]{1,2}|([a-zA-Z\\^_][a-zA-Z0-9\\^_]*))\\s*\\))|\\b)",
-					"name": "storage.type.tal"
-				}
-			]
-		},
-		"illegal_tal": {
-			"patterns":[
-				{
-					"comment": "TAL does not allow identifiers that begin with numbers",
-					"match": "\\b(?<!\\^)(\\d[\\w\\^]+)\\b",
-					"name": "invalid.illegal.tal"
-				},
-				{
-					"comment": "Identifiers longer than 31 are not allowed",
-					"match": "\\s*[\\w\\^]{32,}",
-					"name": "invalid.illegal.tal"
-				},
-				{
-					"comment": "% are not allowed in the middle of an identifier",
-					"match": "\\s*[\\w\\^]+\\%[\\w\\^]+",
-					"name": "invalid.illegal.tal"
-				}
-			]
-		},
-		"functions_tal": {
-			"patterns": [
-				{
-					"begin": "(?i)((?<=^subproc)|(?<=\\ssubproc)|(?<=^proc)|(?<=\\sproc))(?!\\^)\\b\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
-					"beginCaptures": {
-						"2": { "name": "entity.name.function.tal" }
-					},
-					"end": "(\\)|;)",
-					"name": "meta.function-declaration.tal",
-					"patterns": [
-						{
-							"include": "#comments"
-						},
-						{
-							"include": "#punctuation_comma"
-						},
-						{
-							"include": "#attributes"
-						}
-					],
-					"comment": "Match proc or subproc declaration. Look behind for proc that either starts at the start of the line or has a whitespace. Reason being \b matches carrot that is a valid character in TAL"
-				},
-				{
-					"begin": "(?i)(?<![\\^_%$#])(\\$dbl|\\$dbll|\\$dblr|\\$dfix|\\$eflt|\\$efltr|\\$fix|\\$fixd|\\$fixi|\\$fixl|\\$fixr|\\$flt|\\$fltr|\\$high|\\$ifix|\\$int|\\$intr|\\$lfix|\\$udbl|\\$ladr|\\$xadr|\\$alpha|\\$numeric|\\$special|\\$lmax|\\$lmin|\\$max|\\$min|\\$point|\\$scale|\\$bitlength|\\$bitoffset|\\$len|\\$occurs|\\$offset|\\$type|\\$abs|\\$comp|\\$optional|\\$param|\\$usercode|\\$axadr|\\$bounds)(?!\\^)\\s*[\\(]",
-					"beginCaptures": {
-						"1": { "name": "entity.name.function.tal.standard_param" }
-					},
-					"end": "\\)",
-					"patterns": [
-						{
-							"include": "#comments"
-						},
-						{
-							"include": "#compiler_directive"
-						},
-						{
-							"include": "#punctuation_comma"
-						},
-						{
-							"include": "#functions_tal"
-						},
-						{
-							"include": "#lib_tal"
-						},
-						{
-							"include": "#keywords"
-						},
-						{
-							"include": "#attributes"
-						},
-						{
-							"include": "#numbers"
-						},
-						{
-							"include": "#strings"
-						},
-						{
-							"include": "#operators"
-						}
-					],
-					"name": "meta.function.tal.standard",
-					"comment": "Standard TAL functions start with a $. These functions require parameters."
-				},
-				{
-					"begin": "(?i)\\b(?<![\\.\\$\\^])([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
-					"beginCaptures": {
-						"1": { "name": "entity.name.function.tal" }
-					},
-					"end": "\\)",
-					"patterns": [
-						{
-							"include": "#comments"
-						},
-						{
-							"include": "#compiler_directive"
-						},
-						{
-							"include": "#punctuation_comma"
-						},
-						{
-							"include": "#functions_tal"
-						},
-						{
-							"include": "#lib_tal"
-						},
-						{
-							"include": "#keywords"
-						},
-						{
-							"include": "#attributes"
-						},
-						{
-							"include": "#numbers"
-						},
-						{
-							"include": "#strings"
-						},
-						{
-							"include": "#operators"
-						}
-					],
-					"name": "meta.function.tal",
-					"comment": "Match callable: proc, subproc, define. It will also match structure definition."
-				},
-				{
-					"comment": "Plain function preceded by call keyword",
-					"match": "(?i)((?<=^call)|(?<=\\scall))(?!\\^)\\b\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
-					"name": "entity.name.function.tal"
-				}
-			]
-		},
-		"lib_tal": {
-			"comment": "Standard TAL functions start with a $. These functions do not require parameters.",
-			"name": "entity.name.function.tal.standard_no_param",
-			"match": "(?i)(?<![\\^_%$#])(\\$carry|\\$overflow|\\$readclock|\\$rp|\\$switches)(?!\\^)\\b"
-		},
-		"attributes": {
-			"match": "([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
-			"name": "entity.variable.tal"
-		}
-	},
-	"scopeName": "source.tal"
+    "name": "TAL",
+    "patterns": [
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#compiler_directive"
+        },
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#storage_types"
+        },
+        {
+            "patterns": [
+                {
+                    "comment": "Match standalone '.ext' and '.sg'. Match '.' that is followed by a word and preceded by whitespace. Ignore variable that follows because we don't want to highlight them yet.",
+                    "match": "(?i)(?<=\\s|^)(\\.sg(?=\\s)|\\.ext(?=\\s)|\\.(?=\\w))\\s*([\\w\\^]+)",
+                    "name": "meta.storage.modifier.tal",
+                    "captures": {
+                        "1": { "name": "storage.modifier.tal" },
+                        "2": { "name": "meta.ignore.tal" }
+                    }
+                },
+                {
+                    "match": "(?i)\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]\\s*\\*+",
+                    "name":"meta.ignore.tal",
+                    "captures": {
+                        "1": { "name": "meta.ignore.tal" }
+                    },
+                    "comment": "This is a structure template declaration. Do not flag as a function"
+                },
+                {
+                    "match": "(?i)((?<=\\.ext)|(?<=\\.sg)|(?<=struct))\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
+                    "name":"meta.ignore.tal",
+                    "captures": {
+                        "2": { "name": "meta.ignore.tal" }
+                    },
+                    "comment": "This is a structure declaration. Do not flag as a function"
+                }
+            ]
+        },
+        {
+            "comment": "Not a language constant, but it's usually defined",
+            "match": "(?i)\\b(?<!\\^)(true|false)(?!\\^)\\b",
+            "name": "constant.language.tal"
+        },
+        {
+            "include": "#operators"
+        },
+        {
+            "include": "#numbers"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#illegal_tal"
+        },
+        {
+            "include": "#lib_tal"
+        },
+        {
+            "include": "#functions_tal"
+        },
+        {
+            "include": "#punctuation_accessor"
+        },
+        {
+            "include": "#punctuation_semicolon"
+        },
+        {
+            "include": "#punctuation_paren_begin"
+        },
+        {
+            "include": "#punctuation_paren_end"
+        }
+    ],
+    "repository": {
+        "punctuation_paren_begin": {
+            "name": "punctuation.parenthesis.begin.tal",
+            "match": "\\("
+        },
+        "punctuation_paren_end": {
+            "name": "punctuation.parenthesis.end.tal",
+            "match": "\\)"
+        },
+        "punctuation_comma": {
+            "name": "punctuation.separator.comma.tal",
+            "match": ","
+        },
+        "punctuation_semicolon": {
+            "name": "punctuation.terminator.statement.tal",
+            "match": ";"
+        },
+        "punctuation_accessor": {
+            "name": "meta.punctuation.accessor.tal",
+            "match": "[\\w\\^](\\.)[\\w\\^]",
+            "captures": {
+                "1": { "name": "punctuation.accessor.tal" }
+            }
+        },
+        "compiler_directive": {
+            "comment": "TAL directive",
+            "begin": "^(\\?)",
+            "beginCaptures": {
+                "1": {
+                    "name": "keyword.preprocessor.tal"
+                }
+            },
+            "end": "$",
+            "name": "meta.preprocessor.tal",
+            "patterns": [
+                {
+                    "include": "#punctuation_comma"
+                },
+                {
+                    "include": "#strings"
+                },
+                {
+                    "include": "#comments"
+                },
+                {
+                    "include": "#compiler_directive_keyword"
+                }
+            ]
+        },
+        "compiler_directive_keyword": {
+            "patterns": [
+                {
+                    "comment": "?page directive that is followed by a string",
+                    "match": "(?i)\\b(?<!\\^)(page)(?!\\^)\\b\\s*(\"[^\"]*\")?",
+                    "captures": {
+                        "1": {
+                            "name": "keyword.preprocessor.tal"
+                        },
+                        "2": {
+                            "name": "string.quoted.double.tal"
+                        }
+                    }
+                },
+                {
+                    "comment": "Multiline TAL directive. Match multiline directive and highlight procs inside.",
+                    "begin": "\\(",
+                    "end": "\\)",
+                    "name": "meta.preprocessor.multiline-directive.tal",
+                    "patterns": [
+                        {
+                            "include": "#comments"
+                        },
+                        {
+                            "match": "(?i)^(\\?)\\s*\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+                            "name": "meta.function-import.tal",
+                            "captures": {
+                                "1": { "name": "keyword.preprocessor.tal" },
+                                "2": { "name": "entity.name.function.tal" }
+                            }
+                        },
+                        {
+                            "match": "(?i)^[^\\?]?\\s*\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+                            "name": "invalid.illegal.tal"
+                        },
+                        {
+                            "match": "(?i)\\s*\\b([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+                            "name": "meta.function-import.tal",
+                            "captures": {
+                                "1": { "name": "entity.name.function.tal" }
+                            }
+                        },
+                        {
+                            "match": "^(\\?)",
+                            "name": "keyword.preprocessor.tal"
+                        },
+                        {
+                            "include": "#punctuation_comma"
+                        }
+                    ]
+                },
+                {
+                    "name": "keyword.preprocessor.tal",
+                    "match": "(?i)\\b(?<!\\^)(assertion|begincompilation|cpu|decs|datapages|(define|set|reset)tog|dumpcons|env|errors|errorfile|(no)?(fixup|saveabend|code|crossref|inhibitxx|warn|suppress|symbols|compact)|(end)?if|ifnot|(no|push|pop)?(check|list|int32index|innerlist|map)|extendstack|rp|section|source|inspect|syntax|(no)?(l|g|f)map|high(requesters|pin)|runnamed|search)(?!\\^)\\b",
+                    "comment": "Compiler directive keywords. Look behind to avoid matching ^keyword."
+                }
+            ]
+        },
+        "comments": {
+            "patterns": [
+                {
+                    "comment": "Match text between double dash and end of line",
+                    "name": "comment.line.tal",
+                    "match": "-{2}.*$"
+                },
+                {
+                    "comment": "Match text between explanation marks or explanation mark and end of line",
+                    "name": "comment.line.tal",
+                    "begin": "!",
+                    "end": "(!|$)"
+                }
+            ]
+        },
+        "keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.control.tal",
+                    "match": "(?i)\\b(?<!\\^)(call|case|do|else|for|goto|if|label|of|otherwise|return|then|until|while|to|downto|by|proc|subproc)(?!\\^)\\b",
+                    "comment": "Control flow keywords. Look behind to avoid matching ^keyword."
+                },
+                {
+                    "name": "keyword.other.tal",
+                    "match": "(?i)\\b(?<!\\^)(begin|end)(?!\\^)\\b",
+                    "comment": "Look behind to avoid matching ^keyword."
+                },
+                {
+                    "name": "keyword.tal",
+                    "match": "(?i)\\b(?<!\\^)(callable|code|drop|entry|external|forward|interrupt|main|priv|resident|use|variable|extensible|words|bytes|scan|rscan|store|stack|name|block|target)(?!\\^)\\b",
+                    "comment": "Language keywords. Look behind to avoid matching ^keyword."
+                }
+            ]
+        },
+        "numbers": {
+            "patterns": [
+                {
+                    "match": "(?<!\\^)((%(h|H)[0-9a-fA-F]([0-9a-fA-F']*[0-9a-fA-F])?)|(%(b|B)[01]([01']*[01])?)|(\\b([0-9]([0-9']*[0-9])?\\.?[0-9]*([0-9']*[0-9])?)|(\\.[0-9]([0-9']*[0-9])?))((e|E|l|L)(\\+|-)?[0-9]([0-9']*[0-9])?)?)(D|d|%D|%d|F|f|%F|%f)?\\b",
+                    "name": "constant.numeric.tal"
+                }
+            ]
+        },
+        "strings": {
+            "name": "string.quoted.double.tal",
+            "begin": "\"",
+            "beginCaptures": {
+                "0": {
+                    "name": "punctuation.definition.string.begin.tal"
+                }
+            },
+            "end": "\"",
+            "endCaptures": {
+                "0": {
+                    "name": "punctuation.definition.string.end.tal"
+                }
+            }
+        },
+        "operators": {
+            "patterns": [
+                {
+                    "match": "-|\\'-\\'",
+                    "name": "keyword.operator.decrement.tal"
+                },
+                {
+                    "match": "\\+|\\'\\+\\'",
+                    "name": "keyword.operator.increment.tal"
+                },
+                {
+                    "match": "<<|\\'<<\\'|>>|\\'>>\\'",
+                    "name": "keyword.operator.bitwise.shift.tal"
+                },
+                {
+                    "match": "<>|\\'<>\\'|<=|\\'<=\\'|>=|\\'>=\\'|=|\\'=\\'|<|\\'<\\'|>|\\'>\\'",
+                    "name": "keyword.operator.comparison.tal"
+                },
+                {
+                    "match": "(?i)\\b(?<!\\^)(not|and|or|lor|land|xor)(?!\\^)\\b",
+                    "name": "keyword.operator.logical.tal"
+                },
+                {
+                    "match": "\\'\\\\'",
+                    "name": "keyword.operator.tal"
+                },
+                {
+                    "match": ":=|\\':=\\'|=:|\\'=:\\'",
+                    "name": "keyword.operator.assignment.tal"
+                },
+                {
+                    "match": "\\*|\\'\\*\\'|/|\\'/\\'|&|@|->",
+                    "name": "keyword.operator.tal"
+                }
+            ]
+        },
+        "storage_types": {
+            "patterns": [
+                {
+                    "match": "(?i)\\b(?<!\\^)(literal|define|string|struct)(?!\\^)\\b",
+                    "name": "storage.type.tal"
+                },
+                {
+                    "comment": "These storage types may include additional parameters. int can be int, int(16), int(32), int(64) or int(literal)",
+                    "match": "(?i)\\b(?<!\\^)int(?!\\^)((\\s*\\(\\s*(16|32|64|([a-zA-Z\\^_][a-zA-Z0-9\\^_]*))\\s*\\))|\\b)",
+                    "name": "storage.type.tal"
+                },
+                {
+                    "comment": "These storage types may include additional parameters. real can be real, real(32), real(64) or real(literal)",
+                    "match": "(?i)\\b(?<!\\^)real(?!\\^)((\\s*\\(\\s*(32|64|([a-zA-Z\\^_][a-zA-Z0-9\\^_]*))\\s*\\))|\\b)",
+                    "name": "storage.type.tal"
+                },
+                {
+                    "comment": "These storage types may include additional parameters. fixed can be fixed, fixed(*), fixed(-19) or fixed(19)",
+                    "match": "(?i)\\b(?<!\\^)fixed(?!\\^)((\\s*\\(\\s*(\\*|-?[0-9]{1,2})\\s*\\))|\\b)",
+                    "name": "storage.type.tal"
+                },
+                {
+                    "temp": "([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+                    "comment": "These storage types may include additional parameters, unsigned can be unsigned(1), unsigned(31) or unsigned(literal)",
+                    "match": "(?i)\\b(?<!\\^)unsigned(?!\\^)((\\s*\\(\\s*([0-9]{1,2}|([a-zA-Z\\^_][a-zA-Z0-9\\^_]*))\\s*\\))|\\b)",
+                    "name": "storage.type.tal"
+                }
+            ]
+        },
+        "illegal_tal": {
+            "patterns":[
+                {
+                    "comment": "TAL does not allow identifiers that begin with numbers",
+                    "match": "\\b(?<!\\^)(\\d[\\w\\^]+)\\b",
+                    "name": "invalid.illegal.tal"
+                },
+                {
+                    "comment": "Identifiers longer than 31 are not allowed",
+                    "match": "\\s*[\\w\\^]{32,}",
+                    "name": "invalid.illegal.tal"
+                },
+                {
+                    "comment": "% are not allowed in the middle of an identifier",
+                    "match": "\\s*[\\w\\^]+\\%[\\w\\^]+",
+                    "name": "invalid.illegal.tal"
+                }
+            ]
+        },
+        "functions_tal": {
+            "patterns": [
+                {
+                    "begin": "(?i)((?<=^subproc)|(?<=\\ssubproc)|(?<=^proc)|(?<=\\sproc))(?!\\^)\\b\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+                    "beginCaptures": {
+                        "2": { "name": "entity.name.function.tal" }
+                    },
+                    "end": "(\\)|;)",
+                    "name": "meta.function-declaration.tal",
+                    "patterns": [
+                        {
+                            "include": "#comments"
+                        },
+                        {
+                            "include": "#punctuation_comma"
+                        },
+                        {
+                            "include": "#attributes"
+                        }
+                    ],
+                    "comment": "Match proc or subproc declaration. Look behind for proc that either starts at the start of the line or has a whitespace. Reason being \b matches carrot that is a valid character in TAL"
+                },
+                {
+                    "begin": "(?i)(?<![\\^_%$#])(\\$dbl|\\$dbll|\\$dblr|\\$dfix|\\$eflt|\\$efltr|\\$fix|\\$fixd|\\$fixi|\\$fixl|\\$fixr|\\$flt|\\$fltr|\\$high|\\$ifix|\\$int|\\$intr|\\$lfix|\\$udbl|\\$ladr|\\$xadr|\\$alpha|\\$numeric|\\$special|\\$lmax|\\$lmin|\\$max|\\$min|\\$point|\\$scale|\\$bitlength|\\$bitoffset|\\$len|\\$occurs|\\$offset|\\$type|\\$abs|\\$comp|\\$optional|\\$param|\\$usercode|\\$axadr|\\$bounds)(?!\\^)\\s*[\\(]",
+                    "beginCaptures": {
+                        "1": { "name": "entity.name.function.tal.standard_param" }
+                    },
+                    "end": "\\)",
+                    "patterns": [
+                        {
+                            "include": "#comments"
+                        },
+                        {
+                            "include": "#compiler_directive"
+                        },
+                        {
+                            "include": "#punctuation_comma"
+                        },
+                        {
+                            "include": "#functions_tal"
+                        },
+                        {
+                            "include": "#lib_tal"
+                        },
+                        {
+                            "include": "#keywords"
+                        },
+                        {
+                            "include": "#attributes"
+                        },
+                        {
+                            "include": "#numbers"
+                        },
+                        {
+                            "include": "#strings"
+                        },
+                        {
+                            "include": "#operators"
+                        }
+                    ],
+                    "name": "meta.function.tal.standard",
+                    "comment": "Standard TAL functions start with a $. These functions require parameters."
+                },
+                {
+                    "begin": "(?i)\\b(?<![\\.\\$\\^])([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*[\\(]",
+                    "beginCaptures": {
+                        "1": { "name": "entity.name.function.tal" }
+                    },
+                    "end": "\\)",
+                    "patterns": [
+                        {
+                            "include": "#comments"
+                        },
+                        {
+                            "include": "#compiler_directive"
+                        },
+                        {
+                            "include": "#punctuation_comma"
+                        },
+                        {
+                            "include": "#functions_tal"
+                        },
+                        {
+                            "include": "#lib_tal"
+                        },
+                        {
+                            "include": "#keywords"
+                        },
+                        {
+                            "include": "#attributes"
+                        },
+                        {
+                            "include": "#numbers"
+                        },
+                        {
+                            "include": "#strings"
+                        },
+                        {
+                            "include": "#operators"
+                        }
+                    ],
+                    "name": "meta.function.tal",
+                    "comment": "Match callable: proc, subproc, define. It will also match structure definition."
+                },
+                {
+                    "comment": "Plain function preceded by call keyword",
+                    "match": "(?i)((?<=^call)|(?<=\\scall))(?!\\^)\\b\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+                    "name": "entity.name.function.tal"
+                }
+            ]
+        },
+        "lib_tal": {
+            "comment": "Standard TAL functions start with a $. These functions do not require parameters.",
+            "name": "entity.name.function.tal.standard_no_param",
+            "match": "(?i)(?<![\\^_%$#])(\\$carry|\\$overflow|\\$readclock|\\$rp|\\$switches)(?!\\^)\\b"
+        },
+        "attributes": {
+            "match": "([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)",
+            "name": "entity.variable.tal"
+        }
+    },
+    "scopeName": "source.tal"
 }
