@@ -29,6 +29,9 @@
             "include": "#operators"
         },
         {
+            "include": "#filenames"
+        },
+        {
             "include": "#process"
         },
         {
@@ -308,6 +311,11 @@
                 }
             ]
         },
+        "filenames":{
+            "comment": "File names, [\\system.]$volume.subvol.file",
+            "name": "constant.other.tacl",
+            "match": "(?:)(\\\\[a-zA-Z][a-zA-Z0-9]{0,7}\\.)?\\$[a-zA-Z][a-zA-Z0-9]{0,6}\\.[a-zA-Z][a-zA-Z0-9]{0,7}\\.[a-zA-Z][a-zA-Z0-9]{0,7}"          
+        },
         "process": {
             "patterns": [
                 {
@@ -335,7 +343,7 @@
         "numbers": {
             "patterns": [
                 {
-                    "match": "(?<!\\^)[+-]?[0-9]+\\b",
+                    "match": "(?<!\\^)(\\s)[+-]?[0-9]+\\b",
                     "name": "constant.numeric.tacl"
                 }
             ]
