@@ -1,4 +1,12 @@
 # Change Log
+## [0.4.4] - 2020-08-26
+- TACL:
+  - Added file names
+  - Fixed define names
+  - Added define template
+  - Fixed numbers: do not highlight numeric part of identifier as number
+- TAL: recognize octal numbers
+
 ## [0.4.3] - 2020-08-20
 - Thanks [cnxguy](https://github.com/cnxguy). Enhanced TACL process parsing. Added defines support. See [PR #10](https://github.com/manoutoftime/vscode_tal/pull/10).
   - System names working
