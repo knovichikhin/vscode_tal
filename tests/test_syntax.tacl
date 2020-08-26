@@ -1,0 +1,58 @@
+== Processes
+== constant.other.process.tacl
+\node.$0
+\node.$0.file == illegal
+$0
+$0.file == illegal
+\node.$1 == illegal
+$1 == illegal
+$receive
+\node.$xyz12
+$xyz12
+\node$xyz12 == illegal
+
+== Files
+== constant.other.file.tacl
+\node
+\node.$volume1
+\node.$volume12 == illegal
+\node.$volume1.subvol12
+\node.$volume1.subvol123 == illegal
+\node.$volume1.subvol12.file1234
+\node.$volume1.subvol12.file12345 == illegal
+\node.volume == illegal
+$volume1
+$volume12 == illegal
+$volume1.subvol12
+$volume1.subvol123 == illegal
+$volume1.subvol12.file1234
+$volume1.subvol12.file12345 == illegal
+subvol12.file1234
+subvol12.file12345 == illegal
+subvol12.file123^ == illegal
+subvol123.file1234 == illegal
+subvol12.file12345 == illegal
+
+== Numbers
+== constant.numeric.tacl
+0123456789
+f^1
+f^1^f
+123^f
+
+== Defines
+== entity.name.type.tacl
+=CUSTOMER^RECORDS
+=Accounts_File
+=TEST_RESULTS_FOR_JANUAR
+=TAPE-FILE
+=disk_file_records
+=Customer^Records
+=Y
+=N^^^---^^^
+== Define template
+=cust*names
+=cust_name?
+=cust*
+=*
+=?

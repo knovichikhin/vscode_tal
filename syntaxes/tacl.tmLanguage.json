@@ -29,7 +29,7 @@
             "include": "#operators"
         },
         {
-            "include": "#process"
+            "include": "#filenames"
         },
         {
             "include": "#structure_declaration"
@@ -282,7 +282,7 @@
                     "name": "variable.tacl"
                 },
                 "3": {
-                    "name": "entity.name.type"
+                    "name": "entity.name.type.tacl"
                 },
                 "4": {
                     "name": "keyword.control.tacl"
@@ -308,34 +308,48 @@
                 }
             ]
         },
-        "process": {
+        "filenames": {
             "patterns": [
                 {
-                    "comment": "Special process, [\\system.]$0",
-                    "name": "constant.other.tacl",
-                    "match": "(?:)(\\\\[a-zA-Z][a-zA-Z0-9]{0,7}\\.)?\\$0"
+                    "comment": "Special process: node.$0, $0",
+                    "match": "(?i)(\\\\[a-z][a-z0-9]{,7}\\.)?\\$0(?![\\^\\.])\\b",
+                    "name": "constant.other.tacl.collector-process"
                 },
                 {
-                    "comment": "Special case $recieve",
-                    "name": "constant.other.tacl",
-                    "match": "(?:)\\$receive"
+                    "comment": "File name - moving from node to file: node.$vol.svol.file, $vol.svol.file, svol.file",
+                    "match": "(?i)((\\\\[a-z][a-z0-9]{,7}\\.)?\\$[a-z][a-z0-9]{,6}\\.)?(?<![\\$\\\\])\\b[a-z][a-z0-9]{,7}\\.\\b[a-z][a-z0-9]{,7}(?!\\^)\\b",
+                    "name": "constant.other.tacl.filename-to-file"
                 },
                 {
-                    "comment": "Process names, [\\system.]$prcs",
-                    "name": "constant.other.tacl",
-                    "match": "(?:)(\\\\[a-zA-Z][a-zA-Z0-9]{0,7}\\.)?\\$[a-zA-Z][a-zA-Z0-9]{0,4}"
+                    "comment": "File name - moving from file to node: node.$vol.svol.file, node.$vol.svol, node.$vol, node",
+                    "match": "(?i)\\\\[a-z][a-z0-9]{,7}(\\.\\$[a-z][a-z0-9]{,6}(\\.\\b[a-z][a-z0-9]{,7}(\\.\\b[a-z][a-z0-9]{,7})?)?)?(?![\\^\\$])\\b",
+                    "name": "constant.other.tacl.filename-to-node"
+                },
+                {
+                    "comment": "File name - middle: $vol.svol, $vol. This will also cover process names.",
+                    "match": "(?i)\\$[a-z][a-z0-9]{,6}(\\.\\b[a-z][a-z0-9]{,7})?(?!\\^)\\b",
+                    "name": "constant.other.tacl.filename-vol-svol-process"
                 }
             ]
         },
         "defines": {
-            "comment": "Defines",
-            "name": "entity.name.type",
-            "match": "(?:)\\=[a-zA-Z][a-zA-Z0-9\\-\\_\\^]{1,23}"
+            "patterns": [
+                {
+                    "comment": "Illegal defines",
+                    "name": "invalid.illegal.tacl.define",
+                    "match": "(?i)\\=[a-z*?][a-z0-9\\-\\_\\^*?]{23,}"
+                },
+                {
+                    "comment": "Defines: =myfile. Define template: =m*file?",
+                    "name": "entity.name.type.tacl.define",
+                    "match": "(?i)\\=[a-z*?][a-z0-9\\-\\_\\^*?]{,22}"
+                }
+            ]
         },
         "numbers": {
             "patterns": [
                 {
-                    "match": "(?<!\\^)[+-]?[0-9]+\\b",
+                    "match": "\\b(?<!\\^)[0-9]+(?!\\^)\\b",
                     "name": "constant.numeric.tacl"
                 }
             ]
