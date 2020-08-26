@@ -1,35 +1,47 @@
 ! Compilter directives
 ! meta.preprocessor
+! meta.preprocessor.multiline-directive.tal
 ! keyword.preprocessor.tal
 ?cpu TNS/II
 ?assertion
 ?begincompilation
 ?decs
-?definetog
+?definetog, settog, resettog
 ?dumpcons
 ?endif
 ?if
 ?ifnot
 ?page
 ?extendstack
-?compact
+?compact, nocompact
 ?rp
 ?section
 ?source
-?nolist
-?list
-?nocode
-?code
-?inspect
-?symbols
-?nolmap
-?nomap
-?map
-?gmap
-?nocrossref
-?crossref
-?innerlist
+?source =foo(proc1)
+?source =foo(proc2,
+  invalid
+? procs3
+?)
+?list, nolist, pushlist, poplist
+?code, nocode
+?inspect, highrequesters, highpin, runnamed, errors, syntax, errorfile
+?symbols, nosymbols
+?lmap, nolmap
+?gmap, nogmap
+?fmap, nofmap
+?map , nomap, pushmap, popmap
+?crossref, nocrossref
+?innerlist, noinnerlist
 ?search
+?fixup, nofixup
+?datapages
+?int32index, noint32index, pushint32index, popint32index
+?warn, nowarn
+?saveabend, nosaveabend
+?inhibitxx, noinhibitxx
+?check, nocheck, pushcheck, popcheck
+?suppress, nosuppress
+? noinnerlist, pushinnerlist, popinnerlist
 
 ! Storage Types
 ! storage.type.tal
@@ -78,6 +90,7 @@ unsigned(0_not_ok) ! invalid
 unsigned(1-2) foo; ! invalid
 
 ! Function
+! entity.name.function.tal
 call foo;
 call foo();
 foo();
@@ -91,3 +104,44 @@ foo($switches bar(for)for)
 ! subproc/proc followed by ^ is incorrectly considered a procedure.
 if proc^foo = 0 then
 if subproc^foo = 0 then
+
+! Numbers
+! constant.numeric.tal
+
+! int constants
+0123456789 ! decimal
+%01234567 ! octal
+%01234569 ! octal, invalid
+%b01 ! binary
+%b23 ! binary, invalid
+%h0123456789abcdef ! hex
+%h0123456789abcdel ! hex, invalid
+
+! int(32) constants
+0123456789d ! decimal
+%01234567d ! octal
+%01234569d ! octal, invalid
+%b01d ! binary
+%b23d ! binary, invalid
+%h0123456789abcdef%d ! hex
+%h0123456789abcdel%d ! hex, invalid
+
+! fixed constants
+0123456789f ! decimal
+01234.6789f ! decimal, fraction
+%01234567f ! octal
+%01234569f ! octal, invalid
+%b01f ! binary
+%b23f ! binary, invalid
+%h0123456789abcdef%f ! hex
+%h0123456789abcdel%f ! hex, invalid
+
+! real constants
+01234.6789e0  ! decimal
+01234.6789l0  ! decimal
+01234.6789e   ! decimal, invalid
+01234.6789l   ! decimal, invalid
+01234.6789e-1 ! decimal
+01234.6789l-1 ! decimal
+01234.6789e+1 ! decimal
+01234.6789l+1 ! decimal
