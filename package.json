@@ -22,10 +22,10 @@
     "license": "./LICENSE",
     "repository": {
         "type": "git",
-        "url": "https://github.com/manoutoftime/vscode_tal.git"
+        "url": "https://github.com/knovichikhin/vscode_tal.git"
     },
     "bugs": {
-        "url": "https://github.com/manoutoftime/vscode_tal/issues",
+        "url": "https://github.com/knovichikhin/vscode_tal/issues",
         "email": "konstantin.novichikhin@gmail.com"
     },
     "contributes": {
