@@ -41,13 +41,13 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
      * Match begin/end keywords.
      * These are reserved keywords. They can't be declared as variables.
      * So, simply searching for them is sufficient to determine
-     * where things beging and end.
+     * where things begin and end.
      */
     private beginRe = RegExp(''
-        + /\b(?<!\^)(begin)(?!\^)\b/.source,
+        + /\b(?<!\^)(begin)(?=([^"]*"[^"]*")*[^"]*$)(?!\^)\b/.source,
         'ig');
     private endRe = RegExp(''
-        + /\b(?<!\^)(end)(?!\^)\b/.source,
+        + /\b(?<!\^)(end)(?=([^"]*"[^"]*")*[^"]*$)(?!\^)\b/.source,
         'ig');
 
     /**
