@@ -1,4 +1,7 @@
 # Change Log
+## [0.4.5] - 2020-08-29
+- Thanks [cnxguy](https://github.com/cnxguy). Change code to not match begin and end inside double quotes. See [PR #12](https://github.com/knovichikhin/vscode_tal/pull/12).
+
 ## [0.4.4] - 2020-08-26
 - TACL:
   - Added file names
