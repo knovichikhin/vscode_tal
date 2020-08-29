@@ -1,0 +1,24 @@
+proc test_1(_end, ^end, ending, begin_, begin^, beginning);
+int _end;
+int ^end;
+int ending;
+int begin_;
+int begin^;
+int beginning;
+    begin
+    end;
+proc test_2;
+    begin
+    subproc sub_test_2(_end, ^end, ending, begin_, begin^, beginning);
+    int _end;
+    int ^end;
+    int ending;
+    int begin_;
+    int begin^;
+    int beginning;
+        begin
+        end;
+    end;
+proc test_3;
+    begin
+    end;

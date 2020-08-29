@@ -1,0 +1,21 @@
+proc test_contains_procs_inside_1;
+    begin
+    proc ignore;
+    end;
+proc test_contains_procs_inside_2;
+    proc lost;
+    begin
+    end;
+proc test_ends_too_early;
+    end;
+--proc commented_out_1;
+!proc commented_out_2;
+proc test_external_with_body;
+    begin
+    end;
+external; ! externals do not have a body
+proc test_forward_with_body;
+    begin
+    end;
+forward; ! forwards do not have a body
+proc test_end_of_file; ! EOF, no proc body

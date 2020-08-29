@@ -1,4 +1,5 @@
 .vscode/**
+.vscode-test/**
 **/*.ts
 **/*.map
 node_modules/**
@@ -10,3 +11,4 @@ tsconfig.json
 vsc-extension-quickstart.md
 images/**
 tests/**
+out/test/**

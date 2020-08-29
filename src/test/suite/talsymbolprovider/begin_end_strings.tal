@@ -1,0 +1,40 @@
+proc test_1;
+    begin
+    string .s[0:99] := "_end";
+    string .s[0:99] := "^end";
+    string .s[0:99] := "ending";
+    string .s[0:99] := "end";
+    string .s[0:99] := """end";
+    string .s[0:99] := "end""";
+    string .s[0:99] := """end""";
+    string .s[0:99] := "begin_";
+    string .s[0:99] := "begin^";
+    string .s[0:99] := "beginning";
+    string .s[0:99] := "begin";
+    string .s[0:99] := """begin";
+    string .s[0:99] := "begin""";
+    string .s[0:99] := """begin""";
+    end;
+proc test_2;
+    begin
+    subproc sub_test_2;
+        begin
+        string .s[0:99] := "_end";
+        string .s[0:99] := "^end";
+        string .s[0:99] := "ending";
+        string .s[0:99] := "end";
+        string .s[0:99] := """end";
+        string .s[0:99] := "end""";
+        string .s[0:99] := """end""";
+        string .s[0:99] := "begin_";
+        string .s[0:99] := "begin^";
+        string .s[0:99] := "beginning";
+        string .s[0:99] := "begin";
+        string .s[0:99] := """begin";
+        string .s[0:99] := "begin""";
+        string .s[0:99] := """begin""";
+        end;
+    end;
+proc test_3;
+    begin
+    end;

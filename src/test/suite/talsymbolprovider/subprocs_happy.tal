@@ -1,0 +1,18 @@
+proc test_1;
+    begin
+    subproc sub_test_1; ! simple
+        begin
+        end;
+
+    subproc sub_test_2(p1, p2); ! parameters
+    int p1;
+    int p2;
+        begin
+        end;
+
+    subproc sub_test_3; ! a gap
+
+        begin
+        end;
+    ! test_1 starts here
+    end;
