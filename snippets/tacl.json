@@ -6,15 +6,6 @@
             "$0",
             "#unframe"
         ],
-        "description": "Frame/unframe pair"
-    },
-    "Begin/end": {
-        "prefix": "begin",
-        "body": [
-            "begin",
-            "$0",
-            "end${1}"
-        ],
-        "description": "Begin/end pair"
+        "description": "Code snippet for a frame/unframe pair"
     }
 }
