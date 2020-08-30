@@ -1,4 +1,13 @@
 # Change Log
+## [0.4.6] - 2020-08-30
+- Updated TACL snippets:
+  - Shorten `for` snippet. Removed to/downto option.
+  - Change `begin/end` snippet to simply insert text without any tab stops.
+  - Shorten `case` snippet. Removed label tab stop.
+  - Shorten `use` snippet. Removed option to delete assignment.
+  - Remove `scan` and `rscan` snippets. Too many variations.
+- Removed TACL `begin/end` snippet.
+
 ## [0.4.5] - 2020-08-29
 - Thanks [cnxguy](https://github.com/cnxguy). Change code to not match begin and end inside double quotes. See [PR #12](https://github.com/knovichikhin/vscode_tal/pull/12).
 
