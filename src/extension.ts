@@ -1,5 +1,8 @@
+'use strict';
+
 import * as vscode from 'vscode';
 import { TALCompletionItemProvider } from './keywordprovider';
+import { getTALLanguageConfiguration } from './languageconfiguration';
 import { TALDocumentSymbolProvider } from './symbolprovider';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -14,4 +17,6 @@ export function activate(context: vscode.ExtensionContext) {
         const talSymbolProvider = vscode.languages.registerDocumentSymbolProvider('tal', new TALDocumentSymbolProvider());
         context.subscriptions.push(talSymbolProvider);
     }
+
+    vscode.languages.setLanguageConfiguration('tal', getTALLanguageConfiguration());
 }
