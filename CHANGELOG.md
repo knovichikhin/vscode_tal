@@ -1,4 +1,27 @@
 # Change Log
+## [0.5.0] - 2020-09-02
+- Added TAL indentation rules:
+  - Indent on:
+    - `for ... do`
+    - `while ... do`
+    - `do` (until loop)
+    - `else`
+    - `if ... then`
+    - `case ... of`
+  - Outdent on:
+    - `end`
+    - `end;`
+- TAL language indentation rules can be disabled by setting `editor.autoIndent` to something other than `full` or `advanced`. For example:
+  ```json
+  {
+    "settings": {
+      "[tal]": {
+        "editor.autoIndent": "brackets"
+      }
+    }
+  }
+  ```
+
 ## [0.4.6] - 2020-08-30
 - Updated TACL snippets:
   - Shorten `for` snippet. Removed to/downto option.
