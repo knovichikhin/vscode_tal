@@ -92,10 +92,10 @@
         },
         "configurationDefaults": {
             "[tal]": {
-                "editor.wordSeparators": "`~!@#$%&*()-=+[{]}\\|;:'\",.<>/?"
+                "editor.wordSeparators": "`~!@#%&*()-=+[{]}\\|;:'\",.<>/?"
             },
             "[tacl]": {
-                "editor.wordSeparators": "`~!@$%&*()-=+[{]}\\|;:'\",.<>/?"
+                "editor.wordSeparators": "`~!@%&*()-=+[{]}\\|;:'\",.<>/?"
             }
         }
     },
