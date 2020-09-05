@@ -1,13 +1,16 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { TALCompletionItemProvider } from './keywordprovider';
+import { TACLCompletionItemProvider, TALCompletionItemProvider } from './keywordprovider';
 import { getTALLanguageConfiguration } from './languageconfiguration';
 import { TALDocumentSymbolProvider } from './symbolprovider';
 
 export function activate(context: vscode.ExtensionContext) {
     const talCompletionItemProvider = vscode.languages.registerCompletionItemProvider('tal', new TALCompletionItemProvider());
     context.subscriptions.push(talCompletionItemProvider);
+
+    const taclCompletionItemProvider = vscode.languages.registerCompletionItemProvider('tacl', new TACLCompletionItemProvider());
+    context.subscriptions.push(taclCompletionItemProvider);
 
     // Register document breadcrumbs provider if tal.enableDocumentSymbol is turned on
     if (vscode.workspace.getConfiguration('tal').get('enableDocumentSymbol') === true) {

@@ -100,7 +100,8 @@
         }
     },
     "activationEvents": [
-        "onLanguage:tal"
+        "onLanguage:tal",
+        "onLanguage:tacl"
     ],
     "main": "./out/extension.js",
     "scripts": {
