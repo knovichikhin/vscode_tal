@@ -1,4 +1,10 @@
 # Change Log
+## [0.6.0] - 2020-09-05
+- Added completions for:
+  - TAL keywords
+  - TACL built-in functions and variables
+- Removed $ from TAL and TACL word separators.
+
 ## [0.5.0] - 2020-09-02
 - Added TAL indentation rules:
   - Indent on:
