@@ -1,5 +1,6 @@
 == TACL Programming Guide:
 == Starting and Sending Requests to a TACL Server
+
 ?SECTION runsrv MACRO
 #FRAME
 #PUSH err_var write_var temp_var rslt
@@ -31,3 +32,4 @@
 ]
 SINK [#REQUESTER CLOSE write_var]
 #UNFRAME
+==note:after writing tacl code you have to load in respective environment then write filename followed by enter or else you can use ?TACL routine in firs t line and create one more file with run command followed by path and give this path in batchcom to schedule the job!!
