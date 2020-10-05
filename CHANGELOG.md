@@ -1,4 +1,9 @@
 # Change Log
+## [0.6.1] - 2020-10-05
+- Outline update:
+  - Page symbol now has a range instead of being a single line.
+  - Page following a page no longer appears as a child of the previous page.
+
 ## [0.6.0] - 2020-09-05
 - Added completions for:
   - TAL keywords
