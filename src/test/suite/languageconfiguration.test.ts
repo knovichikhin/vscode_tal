@@ -42,7 +42,7 @@ suite('TAL Language Configuration', () => {
             ].forEach(commentString => {
                 test(`Check that indent-on-enter applies to "${testString + commentString}"`, () => {
                     const result = INDENT_ONENTER_REGEX.test(testString + commentString);
-                    assert.equal(result, true);
+                    assert.strictEqual(result, true);
                 });
             });
         });
@@ -93,7 +93,7 @@ suite('TAL Language Configuration', () => {
             ].forEach(commentString => {
                 test(`Check that indent-on-enter does not apply to "${testString + commentString}"`, () => {
                     const result = INDENT_ONENTER_REGEX.test(testString + commentString);
-                    assert.equal(result, false);
+                    assert.strictEqual(result, false);
                 });
             });
         });
@@ -129,7 +129,7 @@ suite('TAL Language Configuration', () => {
             ].forEach(commentString => {
                 test(`Check that outdent-on-enter applies to "${testString + commentString}"`, () => {
                     const result = OUTDENT_ONENTER_REGEX.test(testString + commentString);
-                    assert.equal(result, true);
+                    assert.strictEqual(result, true);
                 });
             });
         });
@@ -172,7 +172,7 @@ suite('TAL Language Configuration', () => {
             ].forEach(commentString => {
                 test(`Check that outdent-on-enter does not apply to "${testString + commentString}"`, () => {
                     const result = OUTDENT_ONENTER_REGEX.test(testString + commentString);
-                    assert.equal(result, false);
+                    assert.strictEqual(result, false);
                 });
             });
         });
