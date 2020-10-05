@@ -1,0 +1,10 @@
+?page "1"
+!1
+?page "2"
+!1
+!2
+?page ! empty page is not displayed
+!1
+!2
+!3
+?page "no_new_line"

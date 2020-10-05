@@ -62,19 +62,26 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
         + /([a-zA-Z\^_][a-zA-Z0-9\^_]*)/.source,
         'i');
 
+    // sectionSymbolKind must be different from pageSymbolKind
+    private readonly sectionSymbolKind = vscode.SymbolKind.Package;
+
     /**
-     * Match "?page "optional heading"".
+     * Match '?page "heading"'.
      * "?page" directive can appear alongside other directives
      * on the same source line. Although, this is not generally
-     * the case for the sake of code clarity.
-     * Page does not have a range. It's a single line directive.
+     * the case for the sake of code clarity. For this reason
+     * (and for simplicity) match ?page only at the beginning
+     * of a line.
      */
     private pageRe = new RegExp(''
         // ?page identifier
-        + /^\?\s*(page)\s*/.source
+        + /^\?\s*page\s*/.source
         // Optional heading
         + /(?:\"([^\"]*)\")/.source,
         'i');
+
+    // pageSymbolKind must be different from sectionSymbolKind
+    private readonly pageSymbolKind = vscode.SymbolKind.String;
 
     public async provideDocumentSymbols(document: vscode.TextDocument, canceltoken: vscode.CancellationToken): Promise<vscode.DocumentSymbol[]> {
         const procSymbols: vscode.DocumentSymbol[] = []; // Procs and subproc symbols
@@ -86,7 +93,8 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
 
             // Look for procs/subprocs while skipping lines.
             if (this._mapProc(document, lineNum, line, procSymbols)) {
-                lineNum = procSymbols[procSymbols.length - 1].range.end.line; // get the last line where mapping stopped
+                // get the last line where mapping stopped to continue parsing from this line
+                lineNum = procSymbols[procSymbols.length - 1].range.end.line;
             } else {
                 // Look for a section. Otherwise, look for a page.
                 if (!this._mapSection(document, lineNum, line, sectionSymbols)) {
@@ -101,12 +109,20 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
             return procSymbols;
         }
 
-        // If a section is already started then by encountering EOF
+        // If a section or top level page is already started then by encountering EOF
         // it must must end
         if (sectionSymbols.length > 0) {
             sectionSymbols[sectionSymbols.length - 1].range = new vscode.Range(
                 sectionSymbols[sectionSymbols.length - 1].range.start,
                 new vscode.Position(lineNum - 1, document.lineAt(lineNum - 1).text.length));
+
+            // Also, close off last child page if present in the last section.
+            if (sectionSymbols[sectionSymbols.length - 1].kind === this.sectionSymbolKind &&
+                sectionSymbols[sectionSymbols.length - 1].children.length > 0) {
+                sectionSymbols[sectionSymbols.length - 1].children[sectionSymbols[sectionSymbols.length - 1].children.length - 1].range = new vscode.Range(
+                    sectionSymbols[sectionSymbols.length - 1].children[sectionSymbols[sectionSymbols.length - 1].children.length - 1].range.start,
+                    new vscode.Position(lineNum - 1, document.lineAt(lineNum - 1).text.length));
+            }
         }
 
         return sectionSymbols;
@@ -324,19 +340,30 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
          */
         const result = line.match(this.sectionRe) || ['', ''];
         if (result[1] !== '') {
-            // If one section already started then by encountering new section
-            // the previous section must end. Update previous item range.
+            /**
+             * If one section or top level page already started then by encountering
+             * new section the previous section or top level page must end.
+             * Update previous item range.
+             */
             if (sectionSymbols.length > 0) {
                 sectionSymbols[sectionSymbols.length - 1].range = new vscode.Range(
                     sectionSymbols[sectionSymbols.length - 1].range.start,
                     new vscode.Position(lineNum - 1, document.lineAt(lineNum - 1).text.length));
+
+                // Also, close off last child page if present in the previous section.
+                if (sectionSymbols[sectionSymbols.length - 1].kind === this.sectionSymbolKind &&
+                    sectionSymbols[sectionSymbols.length - 1].children.length > 0) {
+                    sectionSymbols[sectionSymbols.length - 1].children[sectionSymbols[sectionSymbols.length - 1].children.length - 1].range = new vscode.Range(
+                        sectionSymbols[sectionSymbols.length - 1].children[sectionSymbols[sectionSymbols.length - 1].children.length - 1].range.start,
+                        new vscode.Position(lineNum - 1, document.lineAt(lineNum - 1).text.length));
+                }
             }
 
             // Add new section
             const sectionSymbol = new vscode.DocumentSymbol(
                 result[1],
                 '',
-                vscode.SymbolKind.Package,
+                this.sectionSymbolKind,
                 document.lineAt(lineNum).range,
                 document.lineAt(lineNum).range
             );
@@ -359,22 +386,46 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
     private _mapPage(document: vscode.TextDocument, lineNum: number, line: string, sectionSymbols: vscode.DocumentSymbol[]): boolean {
         /**
          * Match page line
-         * result[1] = page keyword
-         * result[2] = optional page heading
+         * result[1] = page heading
          */
-        const result = line.match(this.pageRe) || ['', '', ''];
-        if (result[2] !== '') {
+        const result = line.match(this.pageRe) || ['', ''];
+        if (result[1] !== '') {
+            /**
+             * If previous item is a page then by encountering a new page
+             * the previous page must end. Update previous item range.
+             */
+            if (sectionSymbols.length > 0 &&
+                sectionSymbols[sectionSymbols.length - 1].kind === this.pageSymbolKind) {
+                sectionSymbols[sectionSymbols.length - 1].range = new vscode.Range(
+                    sectionSymbols[sectionSymbols.length - 1].range.start,
+                    new vscode.Position(lineNum - 1, document.lineAt(lineNum - 1).text.length));
+            }
+            /**
+             * If previous item is a section then this page is a child of that section.
+             * If parent section already has at least 1 page child then by encountering
+             * a new page the previous page must end. Update previous item range.
+             */
+            else
+            if (sectionSymbols.length > 0 &&
+                sectionSymbols[sectionSymbols.length - 1].kind === this.sectionSymbolKind &&
+                sectionSymbols[sectionSymbols.length - 1].children.length > 0) {
+                sectionSymbols[sectionSymbols.length - 1].children[sectionSymbols[sectionSymbols.length - 1].children.length - 1].range = new vscode.Range(
+                    sectionSymbols[sectionSymbols.length - 1].children[sectionSymbols[sectionSymbols.length - 1].children.length - 1].range.start,
+                    new vscode.Position(lineNum - 1, document.lineAt(lineNum - 1).text.length));
+            }
+
             // A new page
             const page = new vscode.DocumentSymbol(
-                result[2],
+                result[1],
                 '',
-                vscode.SymbolKind.String,
+                this.pageSymbolKind,
                 document.lineAt(lineNum).range,
                 document.lineAt(lineNum).range
             );
 
             // If in the middle of a section then this page is belongs to the last section
-            if (sectionSymbols.length > 0) {
+            if (sectionSymbols.length > 0 &&
+                sectionSymbols[sectionSymbols.length - 1].kind === this.sectionSymbolKind) {
                 sectionSymbols[sectionSymbols.length - 1].children.push(page);
             // Otherwise, this page appears by itself
             } else {
