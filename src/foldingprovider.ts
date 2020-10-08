@@ -19,7 +19,7 @@ import * as vscode from 'vscode';
 interface CachedDocument {
     readonly version: number;
     readonly foldables: vscode.FoldingRange[];
-};
+}
 class FoldablesCache {
     private cachedDocuments = new Map<string, CachedDocument>();
 
@@ -51,14 +51,21 @@ class FoldablesCache {
 }
 
 /**
- * ToggleFoldables contains results of ?if/ifnot/endif foldables.
- * Toggle is the ?if toggle. Only matching toggles are considered foldable.
+ * ToggleFoldables contains results of ?if/?ifnot/?endif foldables.
+ * Only matching toggles are considered foldable.
  * E.g. '?if foo' is not folder by '?endif bar'.
+ * But it is folder by '?endif foo'.
  */
+enum ToggleType {
+    if = 0,
+    ifnot = 1
+}
 interface FoldableToggle {
     foldable: vscode.FoldingRange;
-    toggle: string;
-};
+    toggle_type: ToggleType;
+    toggle_id: string;
+    folded: boolean;
+}
 
 export class TALFoldingProvider implements vscode.FoldingRangeProvider {
     /**
@@ -67,17 +74,16 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
      */
     private toggleRe = new RegExp(''
         // ?if/ifnot/endof compiler directive
-        + /^\?(if(not)?|endif)\s+/.source
-        // Toggle ID
-        + /([a-zA-Z0-9\^_]*)/.source,
+        + /^\?(if(?:not)?|endif)\s+/.source
+        // Toggle ID (mandatory)
+        + /([a-zA-Z0-9^_]+)/.source,
         'i');
 
     private _cache = new FoldablesCache();
 
     public async provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext, token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
-        const foldables: vscode.FoldingRange[] = [];
         const foldableToggles: Array<FoldableToggle> = [];
-        let lineNum: number = 0;
+        let lineNum = 0;
 
         const cached = this._cache.get(document);
         if (cached) {
@@ -86,48 +92,98 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
 
         for (lineNum = 0; lineNum < document.lineCount; lineNum++) {
             const line = document.lineAt(lineNum).text;
-            if (line.startsWith("?if")) {
-                foldables.push(new vscode.FoldingRange(lineNum, lineNum, vscode.FoldingRangeKind.Region));
-            }
-            else
-            if (line.startsWith("?endif")) {
-                if (foldables.length > 0) {
-                    foldables[foldables.length-1].end = lineNum;
-                }
-            }
+            this.parseToggles(line, lineNum, foldableToggles);
         }
 
-        const combined_result = ([] as vscode.FoldingRange[]).concat(foldables, Array.from(foldableToggles, i => i.foldable));
-        this._cache.set(document, combined_result);
-        return combined_result;
+        const result = ([] as vscode.FoldingRange[]).concat(
+                        Array.from(foldableToggles.filter(e => e.folded), e => e.foldable));
+        this._cache.set(document, result);
+        return result;
     }
 
+    /**
+     * Locate ?if, ?ifnot and ?endif toggles and their ranges.
+     *
+     * @param line Document's current line instance
+     * @param lineNum Document's current line number
+     * @param foldables Array of toggle foldables so far.
+     */
     private parseToggles(line: string, lineNum: number, foldables: FoldableToggle[]): void {
+        let index = -1;
         /**
-         * result[1] = ?if, ?ifnot, ?endif
+         * result[1] = if, ifnot, endif
          * result[2] = toggle-number, toggle-name,
          */
         const result = line.match(this.toggleRe) || ['', '', ''];
-        if (result[2].length > 0) {
-            switch (result[1]) {
-                // ?if starts a new folding range
-                case "?if":                
-                    foldables.push(<FoldableToggle>{
-                                    foldable: new vscode.FoldingRange(lineNum, lineNum, vscode.FoldingRangeKind.Region),
-                                    toggle: result[2]});
-                    break;
+        switch (result[1]) {
+            // ?if starts a new folding range
+            case "if":
+                foldables.push(<FoldableToggle>{
+                    foldable: new vscode.FoldingRange(lineNum, lineNum, vscode.FoldingRangeKind.Region),
+                    toggle_type: ToggleType.if,
+                    toggle_id: result[2],
+                    folded: false});
+                break;
 
-                // ?ifnot ends previous ?if folding range if present
-                // ?ifnot starts a new folding range, as well.
-                case "?ifnot":
-                    break;
-                
-                case "?endif":
-                    break;
-            
-                default:
-                    break;
-            }
+            // ?ifnot ends previous ?if folding range if present
+            // ?ifnot starts a new folding range, as well.
+            case "ifnot":
+                // Close off previous ?if
+                index = this.lastToggleIndex(foldables, result[2], [ToggleType.if]);
+                if (index > -1) {
+                    // If there is more than 1 line to fold then close off previous ?if
+                    // Otherwise, delete previous opened ?if foldable.
+                    if (lineNum - foldables[index].foldable.start > 1) {
+                        foldables[index].foldable.end = lineNum - 1;
+                        foldables[index].folded = true;
+                    }
+                    else
+                        foldables.splice(index, 1);
+                }
+
+                // Add new folding range
+                foldables.push(<FoldableToggle>{
+                    foldable: new vscode.FoldingRange(lineNum, lineNum, vscode.FoldingRangeKind.Region),
+                    toggle_type: ToggleType.ifnot,
+                    toggle_id: result[2],
+                    folded: false});
+                break;
+
+            // ?endif ends previous ?if or ?ifnot folding range if present
+            case "endif":
+                // Close off previous ?if
+                index = this.lastToggleIndex(foldables, result[2], [ToggleType.if, ToggleType.ifnot]);
+                if (index > -1) {
+                    // If there is more than 1 line to fold then close off previous ?if/?ifnot
+                    // Otherwise, delete previous opened ?if foldable.
+                    if (lineNum - foldables[index].foldable.start > 1) {
+                        foldables[index].foldable.end = lineNum - 1;
+                        foldables[index].folded = true;
+                    }
+                    else
+                        foldables.splice(index, 1);
+                }
+                break;
+
+            default:
+                break;
         }
+    }
+
+    /**
+     * Find last matching ?if or ?endif toggle and return it's index.
+     * @param foldables Array of toggle foldables to be searched.
+     * @param toggle_id Toggle ID to match
+     * @param toggle_types Array of toggle types to match
+     * @return index of the matching entry in foldables array or -1 if not found
+     */
+    private lastToggleIndex(foldables: FoldableToggle[], toggle_id: string, toggle_types: ToggleType[]): number {
+        for(let i = foldables.length - 1; i >= 0; i--) {
+            if (!foldables[i].folded &&
+                foldables[i].toggle_id === toggle_id &&
+                toggle_types.includes(foldables[i].toggle_type))
+                return i;
+        }
+        return -1;
     }
 }
