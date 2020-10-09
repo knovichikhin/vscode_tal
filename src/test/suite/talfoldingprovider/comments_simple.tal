@@ -1,0 +1,25 @@
+--single line is not a foldable block
+
+-- 0: foldable block
+-- ...
+
+! 1: also a foldable block
+! ...
+
+-- 2: mixed is OK
+! ...
+
+! 3: mixed is OK 2
+-- ...
+
+    ! 4: indented is fine
+    ! ...
+
+! 5: This kind of ! ! stuff ! ! is ok too !
+! ...
+
+! But this is not a comment block
+! super awesome proc ! proc foo; forward;
+
+! 6: EOF is handled
+! ...

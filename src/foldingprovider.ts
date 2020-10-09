@@ -78,11 +78,21 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
         + /([a-zA-Z0-9^_]+)/.source,
         'i');
 
+    // Match "-- comment" or "! comment".
+    private commentRe = new RegExp(''
+        // Do not match more than 70 characters of whitespace
+        // to avoid ACI line count comments.
+        + /^\s{0,70}/.source
+        + /(--|!)/.source,
+        'i');
+
     private _cache = new FoldablesCache();
 
     public async provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext, token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
         const result: vscode.FoldingRange[] = [];
+        let foldable: vscode.FoldingRange | undefined;
         const foldableToggles: Array<FoldableToggle> = [];
+        const foldableCommentBlock: vscode.FoldingRange = new vscode.FoldingRange(-2, -2, vscode.FoldingRangeKind.Comment);
         let lineNum = 0;
 
         const cached = this._cache.get(document);
@@ -92,10 +102,20 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
 
         for (lineNum = 0; lineNum < document.lineCount; lineNum++) {
             const line = document.lineAt(lineNum).text;
-            const foldable = this.parseToggles(line, lineNum, foldableToggles);
-            if (foldable) {
+            if ((foldable = this.parseToggles(line, lineNum, foldableToggles)) !== undefined) {
+                result.push(foldable);
+            } else if ((foldable = this.parseCommentBlock(line, lineNum, foldableCommentBlock)) !== undefined) {
                 result.push(foldable);
             }
+        }
+
+        // Tie up last comment block if present
+        if (foldableCommentBlock.end > foldableCommentBlock.start) {
+            result.push(new vscode.FoldingRange(
+                foldableCommentBlock.start,
+                foldableCommentBlock.end,
+                foldableCommentBlock.kind
+            ));
         }
 
         this._cache.set(document, result);
@@ -190,4 +210,71 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
         }
         return -1;
     }
+
+
+    /**
+     * Locate consequetive comment lines.
+     *
+     * @param line Document's current line instance
+     * @param lineNum Document's current line number
+     * @param foldableCommentBlock a FoldingRange that holds potential comment block.
+     * @return Either a FoldingRange if found or undefined otherwise.
+     */
+    private parseCommentBlock(line: string, lineNum: number, foldableCommentBlock: vscode.FoldingRange): vscode.FoldingRange | undefined {
+        let result: vscode.FoldingRange | undefined = undefined;
+
+        // comment[1] = -- or ! style comment
+        const comment = line.match(this.commentRe) || ['', ''];
+        switch (comment[1]) {
+            // -- is a line comment
+            case "--":
+                // Continue comment block.
+                // Otherwise, start a new one
+                if (foldableCommentBlock.end + 1 === lineNum) {
+                    foldableCommentBlock.end = lineNum;
+                } else {
+                    foldableCommentBlock.start = lineNum;
+                    foldableCommentBlock.end = lineNum;
+                }
+                break;
+
+            // ! is a begin/end comment. Sanitize to make sure there are
+            // no characters outside of comments on this line.
+            case "!":
+                line = line.replace(/\s*--.*/gi, '');
+                line = line.replace(/\s*![^!]*(!\s*|$)/gi, '');
+
+                if (line.length === 0) {
+                    // Continue comment block.
+                    // Otherwise, start a new one
+                    if (foldableCommentBlock.end + 1 === lineNum) {
+                        foldableCommentBlock.end = lineNum;
+                    } else {
+                        foldableCommentBlock.start = lineNum;
+                        foldableCommentBlock.end = lineNum;
+                    }
+                }
+                break;
+
+            default:
+                // Restart comment block on a non-comment line.
+                // Provide comment block results if applicable.
+                if (foldableCommentBlock.start > -2) {
+                    if (foldableCommentBlock.end > foldableCommentBlock.start) {
+                        result = new vscode.FoldingRange(
+                            foldableCommentBlock.start,
+                            foldableCommentBlock.end,
+                            foldableCommentBlock.kind
+                        );
+                    }
+
+                    foldableCommentBlock.start = -2;
+                    foldableCommentBlock.end = -2;
+                }
+                break;
+        }
+
+        return result;
+    }
+
 }
