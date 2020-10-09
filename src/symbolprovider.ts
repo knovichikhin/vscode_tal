@@ -1,3 +1,5 @@
+'use strict';
+
 import * as vscode from 'vscode';
 
 
@@ -7,11 +9,11 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
      */
     private procRe = new RegExp(''
         // Optional data type, e.g. int, int(16), fixed(*), int(foo)
-        + /^\s*((?:string|int|unsigned|fixed|real)(?:\s*\(\s*(?:[0-9]{1,2}|\*|[a-zA-Z\^_][a-zA-Z0-9\^_]*)\s*\))?)?/.source
+        + /^\s*((?:string|int|unsigned|fixed|real)(?:\s*\(\s*(?:[0-9]{1,2}|\*|[a-zA-Z^_][a-zA-Z0-9^_]*)\s*\))?)?/.source
         // proc keyword
         + /\s*(proc)\s+/.source
         // proc name identifier
-        + /([a-zA-Z\^_][a-zA-Z0-9\^_]*)/.source,
+        + /([a-zA-Z^_][a-zA-Z0-9^_]*)/.source,
         'i');
 
     /**
@@ -19,11 +21,11 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
      */
     private subprocRe = new RegExp(''
         // Optional data type, e.g. int, int(16), fixed(*), int(foo)
-        + /^\s*((?:string|int|unsigned|fixed|real)(?:\s*\(\s*(?:[0-9]{1,2}|\*|[a-zA-Z\^_][a-zA-Z0-9\^_]*)\s*\))?)?/.source
+        + /^\s*((?:string|int|unsigned|fixed|real)(?:\s*\(\s*(?:[0-9]{1,2}|\*|[a-zA-Z^_][a-zA-Z0-9^_]*)\s*\))?)?/.source
         // subproc keyword
         + /\s*(subproc)\s+/.source
         // subproc name identifier
-        + /([a-zA-Z\^_][a-zA-Z0-9\^_]*)/.source,
+        + /([a-zA-Z^_][a-zA-Z0-9^_]*)/.source,
         'i');
 
     /**
@@ -59,7 +61,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
         // ?section identifier
         + /^\?\s*section\s+/.source
         // Section name
-        + /([a-zA-Z\^_][a-zA-Z0-9\^_]*)/.source,
+        + /([a-zA-Z^_][a-zA-Z0-9^_]*)/.source,
         'i');
 
     // sectionSymbolKind must be different from pageSymbolKind
@@ -77,7 +79,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
         // ?page identifier
         + /^\?\s*page\s*/.source
         // Optional heading
-        + /(?:\"([^\"]*)\")/.source,
+        + /(?:"([^"]*)")/.source,
         'i');
 
     // pageSymbolKind must be different from sectionSymbolKind
@@ -86,7 +88,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
     public async provideDocumentSymbols(document: vscode.TextDocument, canceltoken: vscode.CancellationToken): Promise<vscode.DocumentSymbol[]> {
         const procSymbols: vscode.DocumentSymbol[] = []; // Procs and subproc symbols
         const sectionSymbols: vscode.DocumentSymbol[] = []; // Sections and pages symbols
-        let lineNum: number = 0;
+        let lineNum = 0;
 
         for (lineNum = 0; lineNum < document.lineCount; lineNum++) {
             const line = document.lineAt(lineNum).text;
@@ -139,8 +141,8 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
      * @return Returns true if proc symbol is found. Return false, otherwise.
      */
     private _mapProc(document: vscode.TextDocument, lineNum: number, line: string, procSymbols: vscode.DocumentSymbol[]): boolean {
-        let stack: number = 0; // begin increases stack. end decreases stack. 0=end of proc
-        let endNum: number = 0;
+        let stack = 0; // begin increases stack. end decreases stack. 0=end of proc
+        let endNum = 0;
         let result: string[] = [];
 
         /**
@@ -154,7 +156,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
             return false;
         }
 
-        let procSymbol: vscode.DocumentSymbol = new vscode.DocumentSymbol(
+        const procSymbol = new vscode.DocumentSymbol(
             result[3],
             '',
             vscode.SymbolKind.Class,
@@ -210,7 +212,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
             // This is to avoid exiting procs where begin/end are not immediately found.
             endNum = (line.match(this.endRe) || []).length;
             if (endNum > 0) {
-                stack -= endNum
+                stack -= endNum;
 
                 // If the stack is 0 or negative then the subproc is complete
                 if (stack <= 0) {
@@ -263,8 +265,8 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
      * @return Returns true if subproc symbol is found. Return false, otherwise.
      */
     private _mapSubproc(document: vscode.TextDocument, lineNum: number, line: string, procSymbol: vscode.DocumentSymbol): boolean {
-        let stack: number = 0; // begin increases stack. end decreases stack. 0=end of proc
-        let endNum: number = 0;
+        let stack = 0; // begin increases stack. end decreases stack. 0=end of proc
+        let endNum = 0;
         let result: string[] = [];
 
         /**
@@ -277,7 +279,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
             return false;
         }
 
-        let subprocSymbol: vscode.DocumentSymbol = new vscode.DocumentSymbol(
+        const subprocSymbol = new vscode.DocumentSymbol(
             result[3],
             '',
             vscode.SymbolKind.Method,
@@ -304,7 +306,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
             // without exiting out of the subproc parsing.
             endNum = (line.match(this.endRe) || []).length;
             if (endNum > 0) {
-                stack -= endNum
+                stack -= endNum;
 
                 // If the stack is 0 or negative then the subproc is complete
                 if (stack <= 0) {

@@ -8,10 +8,10 @@ suite('TAL Symbol Provider Test', () => {
     const talSymbolProvider = new TALDocumentSymbolProvider();
     const tokenSource = new vscode.CancellationTokenSource();
     const token = tokenSource.token;
-    const testFilesPath = __dirname + '/../../../src/test/suite/talsymbolprovider'
+    const testFilesPath = __dirname + '/../../../src/test/suite/talsymbolprovider';
 
     test('Test empty file - no symbols, empty.tal', async () => {
-        const uri = vscode.Uri.file(testFilesPath + '/empty.tal')
+        const uri = vscode.Uri.file(testFilesPath + '/empty.tal');
         return vscode.workspace.openTextDocument(uri).then(async (doc: vscode.TextDocument) => {
             assert.ok(doc);
 
@@ -23,7 +23,7 @@ suite('TAL Symbol Provider Test', () => {
     });
 
     test('Test happy procs scenarios, procs_happy.tal', async () => {
-        const uri = vscode.Uri.file(testFilesPath + '/procs_happy.tal')
+        const uri = vscode.Uri.file(testFilesPath + '/procs_happy.tal');
         return vscode.workspace.openTextDocument(uri).then(async (doc: vscode.TextDocument) => {
             assert.ok(doc);
 
@@ -88,7 +88,7 @@ suite('TAL Symbol Provider Test', () => {
         });
     });
     test('Test tricky procs scenarios, procs_tricky.tal', async () => {
-        const uri = vscode.Uri.file(testFilesPath + '/procs_tricky.tal')
+        const uri = vscode.Uri.file(testFilesPath + '/procs_tricky.tal');
         return vscode.workspace.openTextDocument(uri).then(async (doc: vscode.TextDocument) => {
             assert.ok(doc);
 
@@ -153,7 +153,7 @@ suite('TAL Symbol Provider Test', () => {
         });
     });
     test('Test happy subprocs scenarios, subprocs_happy.tal', async () => {
-        const uri = vscode.Uri.file(testFilesPath + '/subprocs_happy.tal')
+        const uri = vscode.Uri.file(testFilesPath + '/subprocs_happy.tal');
         return vscode.workspace.openTextDocument(uri).then(async (doc: vscode.TextDocument) => {
             assert.ok(doc);
 
@@ -209,7 +209,7 @@ suite('TAL Symbol Provider Test', () => {
         });
     });
     test('Test tricky subprocs scenarios, subprocs_tricky.tal', async () => {
-        const uri = vscode.Uri.file(testFilesPath + '/subprocs_tricky.tal')
+        const uri = vscode.Uri.file(testFilesPath + '/subprocs_tricky.tal');
         return vscode.workspace.openTextDocument(uri).then(async (doc: vscode.TextDocument) => {
             assert.ok(doc);
 
@@ -283,7 +283,7 @@ suite('TAL Symbol Provider Test', () => {
         });
     });
     test('Test begin/end keywords, begin_end_keywords.tal', async () => {
-        const uri = vscode.Uri.file(testFilesPath + '/begin_end_keywords.tal')
+        const uri = vscode.Uri.file(testFilesPath + '/begin_end_keywords.tal');
         return vscode.workspace.openTextDocument(uri).then(async (doc: vscode.TextDocument) => {
             assert.ok(doc);
 
@@ -339,7 +339,7 @@ suite('TAL Symbol Provider Test', () => {
         });
     });
     test('Test begin/end enclosed in strings, begin_end_strings.tal', async () => {
-        const uri = vscode.Uri.file(testFilesPath + '/begin_end_strings.tal')
+        const uri = vscode.Uri.file(testFilesPath + '/begin_end_strings.tal');
         return vscode.workspace.openTextDocument(uri).then(async (doc: vscode.TextDocument) => {
             assert.ok(doc);
 
@@ -398,7 +398,7 @@ suite('TAL Symbol Provider Test', () => {
      * In this case sections are ignored and only procs are returned.
      */
     test('Test procs and sections mixed, procs_sections.tal', async () => {
-        const uri = vscode.Uri.file(testFilesPath + '/procs_sections.tal')
+        const uri = vscode.Uri.file(testFilesPath + '/procs_sections.tal');
         return vscode.workspace.openTextDocument(uri).then(async (doc: vscode.TextDocument) => {
             assert.ok(doc);
 
@@ -463,7 +463,7 @@ suite('TAL Symbol Provider Test', () => {
         });
     });
     test('Test sections and pages, sections_pages.tal', async () => {
-        const uri = vscode.Uri.file(testFilesPath + '/sections_pages.tal')
+        const uri = vscode.Uri.file(testFilesPath + '/sections_pages.tal');
         return vscode.workspace.openTextDocument(uri).then(async (doc: vscode.TextDocument) => {
             assert.ok(doc);
 
@@ -555,7 +555,7 @@ suite('TAL Symbol Provider Test', () => {
         });
     });
     test('Test pages, pages.tal', async () => {
-        const uri = vscode.Uri.file(testFilesPath + '/pages.tal')
+        const uri = vscode.Uri.file(testFilesPath + '/pages.tal');
         return vscode.workspace.openTextDocument(uri).then(async (doc: vscode.TextDocument) => {
             assert.ok(doc);
 
@@ -593,7 +593,7 @@ suite('TAL Symbol Provider Test', () => {
         });
     });
     test('Test page with data before EOF, page_eof_with_data.tal', async () => {
-        const uri = vscode.Uri.file(testFilesPath + '/page_eof_with_data.tal')
+        const uri = vscode.Uri.file(testFilesPath + '/page_eof_with_data.tal');
         return vscode.workspace.openTextDocument(uri).then(async (doc: vscode.TextDocument) => {
             assert.ok(doc);
 
@@ -613,7 +613,7 @@ suite('TAL Symbol Provider Test', () => {
         });
     });
     test('Test section with data before EOF, section_eof_with_data.tal', async () => {
-        const uri = vscode.Uri.file(testFilesPath + '/section_eof_with_data.tal')
+        const uri = vscode.Uri.file(testFilesPath + '/section_eof_with_data.tal');
         return vscode.workspace.openTextDocument(uri).then(async (doc: vscode.TextDocument) => {
             assert.ok(doc);
 
@@ -633,7 +633,7 @@ suite('TAL Symbol Provider Test', () => {
         });
     });
     test('Test section/page with data before EOF, section_page_eof_with_data.tal', async () => {
-        const uri = vscode.Uri.file(testFilesPath + '/section_page_eof_with_data.tal')
+        const uri = vscode.Uri.file(testFilesPath + '/section_page_eof_with_data.tal');
         return vscode.workspace.openTextDocument(uri).then(async (doc: vscode.TextDocument) => {
             assert.ok(doc);
 
