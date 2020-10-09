@@ -44,21 +44,21 @@ suite('TAL Toggle Folding Provider Test', () => {
                 assert.ok(ranges);
                 assert.strictEqual(ranges.length, 4);
 
-                ranges[0].start = 0;
-                ranges[0].end = 1;
-                ranges[0].kind = vscode.FoldingRangeKind.Region;
+                assert.strictEqual(ranges[0].start, 0);
+                assert.strictEqual(ranges[0].end, 1);
+                assert.strictEqual(ranges[0].kind, vscode.FoldingRangeKind.Region);
 
-                ranges[1].start = 4;
-                ranges[1].end = 5;
-                ranges[1].kind = vscode.FoldingRangeKind.Region;
+                assert.strictEqual(ranges[1].start, 4);
+                assert.strictEqual(ranges[1].end, 5);
+                assert.strictEqual(ranges[1].kind, vscode.FoldingRangeKind.Region);
 
-                ranges[3].start = 8;
-                ranges[3].end = 9;
-                ranges[3].kind = vscode.FoldingRangeKind.Region;
+                assert.strictEqual(ranges[2].start, 8);
+                assert.strictEqual(ranges[2].end, 9);
+                assert.strictEqual(ranges[2].kind, vscode.FoldingRangeKind.Region);
 
-                ranges[3].start = 10;
-                ranges[3].end = 11;
-                ranges[3].kind = vscode.FoldingRangeKind.Region;
+                assert.strictEqual(ranges[3].start, 10);
+                assert.strictEqual(ranges[3].end, 11);
+                assert.strictEqual(ranges[3].kind, vscode.FoldingRangeKind.Region);
             });
         });
     });
@@ -72,13 +72,13 @@ suite('TAL Toggle Folding Provider Test', () => {
                 assert.ok(ranges);
                 assert.strictEqual(ranges.length, 2);
 
-                ranges[0].start = 0;
-                ranges[0].end = 3;
-                ranges[0].kind = vscode.FoldingRangeKind.Region;
+                assert.strictEqual(ranges[0].start, 0);
+                assert.strictEqual(ranges[0].end, 3);
+                assert.strictEqual(ranges[0].kind, vscode.FoldingRangeKind.Region);
 
-                ranges[1].start = 2;
-                ranges[1].end = 4;
-                ranges[1].kind = vscode.FoldingRangeKind.Region;
+                assert.strictEqual(ranges[1].start, 2);
+                assert.strictEqual(ranges[1].end, 4);
+                assert.strictEqual(ranges[1].kind, vscode.FoldingRangeKind.Region);
             });
         });
     });
