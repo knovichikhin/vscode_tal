@@ -1,0 +1,17 @@
+.vscode/**
+.vscode-test/**
+**/*.map
+node_modules/**
+.eslintrc.js
+.prettierrc.json
+tsconfig.json
+.vscode-test/**
+.gitignore
+vsc-extension-quickstart.md
+images/**
+tests/**
+out/**
+package.json
+package-lock.json
+CHANGELOG.md
+README.md

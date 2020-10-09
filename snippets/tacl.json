@@ -1,11 +1,7 @@
 {
-    "Frame/unframe": {
-        "prefix": "#frame",
-        "body": [
-            "#frame",
-            "$0",
-            "#unframe"
-        ],
-        "description": "Code snippet for a frame/unframe pair"
-    }
+  "Frame/unframe": {
+    "prefix": "#frame",
+    "body": ["#frame", "$0", "#unframe"],
+    "description": "Code snippet for a frame/unframe pair"
+  }
 }
