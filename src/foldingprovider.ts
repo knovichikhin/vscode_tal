@@ -86,6 +86,16 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
         + /(--|!)/.source,
         'i');
 
+    /**
+     * Match begin/end keywords.
+     * These are reserved keywords. They can't be declared as variables.
+     * So, simply searching for them is sufficient to determine
+     * where things begin and end.
+     */
+    private beginEndRe = RegExp(''
+        + /\b(?<!\^)(begin|end)(?=([^"]*"[^"]*")*[^"]*$)(?!\^)\b/.source,
+        'ig');
+
     private _cache = new FoldablesCache();
 
     public async provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext, token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
@@ -93,6 +103,7 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
         let foldable: vscode.FoldingRange | undefined;
         const foldableToggles: Array<FoldableToggle> = [];
         const foldableCommentBlock: vscode.FoldingRange = new vscode.FoldingRange(-2, -2, vscode.FoldingRangeKind.Comment);
+        const foldableStacks: vscode.FoldingRange[] = [];
         let lineNum = 0;
 
         const cached = this._cache.get(document);
@@ -102,9 +113,19 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
 
         for (lineNum = 0; lineNum < document.lineCount; lineNum++) {
             const line = document.lineAt(lineNum).text;
-            if ((foldable = this.parseToggles(line, lineNum, foldableToggles)) !== undefined) {
+
+            foldable = this.parseToggles(line, lineNum, foldableToggles);
+            if (foldable) {
                 result.push(foldable);
-            } else if ((foldable = this.parseCommentBlock(line, lineNum, foldableCommentBlock)) !== undefined) {
+            }
+
+            foldable = this.parseCommentBlock(line, lineNum, foldableCommentBlock);
+            if (foldable) {
+                result.push(foldable);
+            }
+
+            foldable = this.parseBeginEnd(line, lineNum, foldableStacks);
+            if (foldable) {
                 result.push(foldable);
             }
         }
@@ -211,7 +232,6 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
         return -1;
     }
 
-
     /**
      * Locate consequetive comment lines.
      *
@@ -277,4 +297,38 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
         return result;
     }
 
+    /**
+     * Locate multiline begin/end blocks.
+     *
+     * @param line Document's current line instance
+     * @param lineNum Document's current line number
+     * @param foldableStacks a stack of FoldingRanges that holds begin/end blocks.
+     * @return Either a FoldingRange if found or undefined otherwise.
+     */
+    private parseBeginEnd(line: string, lineNum: number, foldableStacks: vscode.FoldingRange[]): vscode.FoldingRange | undefined {
+        let result: vscode.FoldingRange | undefined = undefined;
+
+        line = line.replace(/\s*--.*/gi, '');
+        line = line.replace(/\s*![^!]*(!\s*|$)/gi, '');
+
+        // brackets['begin', 'end', etc]
+        const brackets = line.match(this.beginEndRe) || [];
+        brackets.forEach(bracket => {
+            if (bracket === "begin") {
+                foldableStacks.push(new vscode.FoldingRange(
+                    lineNum,
+                    lineNum,
+                    vscode.FoldingRangeKind.Region
+                ));
+            } else {
+                const f = foldableStacks.pop();
+                if (f &&
+                    lineNum - f.start > 1) {
+                    result = f;
+                    result.end = lineNum - 1;
+                }
+            }
+        });
+        return result;
+    }
 }

@@ -1,0 +1,10 @@
+proc foo;
+begin
+if True then
+    begin
+    while True do
+        begin
+
+        end;
+    end;
+end;

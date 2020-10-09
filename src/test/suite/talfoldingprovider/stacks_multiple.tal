@@ -1,0 +1,28 @@
+if True then
+    begin
+    while True do
+        begin begin
+
+
+        end; end;
+    end;
+
+if True then
+    begin
+    while True do
+        begin ! acceptable? Takes outter because it's the last end on a line
+        begin
+
+
+        end; end;
+    end;
+
+if True then
+    begin
+    while True do
+        begin begin ! acceptable? Takes inner because it's the first end
+                    ! that establishes the fold line
+
+        end;
+        end;
+    end;
