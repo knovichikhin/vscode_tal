@@ -1,6 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import { TALFoldingProvider } from './foldingprovider';
 import { TACLCompletionItemProvider, TALCompletionItemProvider } from './keywordprovider';
 import { getTALLanguageConfiguration } from './languageconfiguration';
 import { TALDocumentSymbolProvider } from './symbolprovider';
@@ -17,6 +18,9 @@ export function activate(context: vscode.ExtensionContext) {
         const talSymbolProvider = vscode.languages.registerDocumentSymbolProvider('tal', new TALDocumentSymbolProvider());
         context.subscriptions.push(talSymbolProvider);
     }
+
+    const talFoldingProvider = vscode.languages.registerFoldingRangeProvider('tal', new TALFoldingProvider());
+    context.subscriptions.push(talFoldingProvider);
 
     vscode.languages.setLanguageConfiguration('tal', getTALLanguageConfiguration());
 }
