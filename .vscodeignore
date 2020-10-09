@@ -12,3 +12,5 @@ vsc-extension-quickstart.md
 images/**
 tests/**
 out/test/**
+.prettierignore
+.prettierrc.json
