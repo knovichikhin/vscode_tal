@@ -93,7 +93,7 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
         for (lineNum = 0; lineNum < document.lineCount; lineNum++) {
             const line = document.lineAt(lineNum).text;
             const foldable = this.parseToggles(line, lineNum, foldableToggles);
-            if (foldable !== undefined) {
+            if (foldable) {
                 result.push(foldable);
             }
         }
@@ -176,7 +176,7 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
     }
 
     /**
-     * Find last matching ?if or ?endif toggle and return it's index.
+     * Find last matching ?if or ?endif toggle and return its index.
      * @param foldables Array of toggle foldables to be searched.
      * @param toggle_id Toggle ID to match
      * @param toggle_types Array of toggle types to match
