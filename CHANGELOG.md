@@ -1,4 +1,7 @@
 # Change Log
+## [0.7.0] - 2020-10-09
+- TAL folding support for compiler toggles, comment blocks and begin/end blocks.
+
 ## [0.6.1] - 2020-10-05
 - Outline update:
   - Page symbol now has a range instead of being a single line.
