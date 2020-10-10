@@ -1,4 +1,7 @@
 # Change Log
+## [0.7.1] - 2020-10-10
+- Added caching for symbol results.
+
 ## [0.7.0] - 2020-10-09
 - TAL folding support for compiler toggles, comment blocks and begin/end blocks.
 
