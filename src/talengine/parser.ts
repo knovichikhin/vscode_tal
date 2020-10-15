@@ -47,6 +47,7 @@ export class TALParser {
     if (cached) {
       return cached;
     }
+
     do {
       token = lexer.getNextToken();
       //const line = document.lineAt(token.start.line).text;
