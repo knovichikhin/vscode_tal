@@ -1,6 +1,8 @@
 "use strict";
 
 import * as vscode from "vscode";
+import { TALParser } from "./talengine/parser";
+import { Token } from "./talengine/tokens";
 
 /**
  * VSCode requests folding results every time user
@@ -123,6 +125,7 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
       return cached;
     }
 
+    console.time(">old");
     for (lineNum = 0; lineNum < document.lineCount; lineNum++) {
       const line = document.lineAt(lineNum).text;
 
@@ -153,6 +156,7 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
       );
     }
 
+    console.timeEnd(">old");
     this._cache.set(document, result);
     return result;
   }
@@ -371,6 +375,46 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
         }
       }
     });
+    return result;
+  }
+}
+
+export class TestTALFoldingProvider implements vscode.FoldingRangeProvider {
+  private _cache = new FoldablesCache();
+  private parser: TALParser;
+
+  constructor(parser: TALParser) {
+    this.parser = parser;
+  }
+
+  public async provideFoldingRanges(
+    document: vscode.TextDocument,
+    context: vscode.FoldingContext,
+    token: vscode.CancellationToken
+  ): Promise<vscode.FoldingRange[]> {
+    let result: vscode.FoldingRange[] = [];
+
+    const cached = this._cache.get(document);
+    if (cached) {
+      return cached;
+    }
+
+    console.time(">new");
+    const tokens = await this.parser.parse(document);
+    result = result.concat(await this.commentBlocks(tokens));
+    console.timeEnd(">new");
+    this._cache.set(document, result);
+    return result;
+  }
+
+  /**
+   * Collect comment blocks
+   * @param tokens document tokens
+   * @returns comment blocks folding ranges
+   */
+  private async commentBlocks(tokens: Token[]): Promise<vscode.FoldingRange[]> {
+    const result: vscode.FoldingRange[] = [];
+
     return result;
   }
 }
