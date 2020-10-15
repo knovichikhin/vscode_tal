@@ -1,51 +1,7 @@
 "use strict";
 
 import * as vscode from "vscode";
-
-/**
- * VSCode requests folding results every time user
- * selects a document. E.g. active document is Foo.tal.
- * Folding results will be requested if user selects document
- * Bar.tal and then again Foo.tal. Meanwhile, Foo.tal is unchanged.
- * FoldableCache class implement a simple cache mechanism where it
- * provide already computed results for the same unchanged document
- * based on document URI.
- * There is no reason to track document per URI and version
- * because version is incremenet on any document change including
- * undo/redo.
- * Instead different document version will be used to invalidate
- * cache.
- */
-interface CachedDocument {
-  readonly version: number;
-  readonly foldables: vscode.FoldingRange[];
-}
-class FoldablesCache {
-  private cachedDocuments = new Map<string, CachedDocument>();
-
-  public get(document: vscode.TextDocument): vscode.FoldingRange[] | undefined {
-    const cachedDocument = this.cachedDocuments.get(document.uri.toString());
-
-    if (cachedDocument) {
-      // Invalidate cache on the same but edited document
-      if (cachedDocument.version !== document.version) {
-        this.cachedDocuments.delete(document.uri.toString());
-        return undefined;
-      }
-
-      return cachedDocument.foldables;
-    }
-
-    return undefined;
-  }
-
-  public set(document: vscode.TextDocument, foldables: vscode.FoldingRange[]): void {
-    this.cachedDocuments.set(document.uri.toString(), <CachedDocument>{
-      version: document.version,
-      foldables: foldables,
-    });
-  }
-}
+import { DocumentCache } from "./cache";
 
 /**
  * ToggleFoldables contains results of ?if/?ifnot/?endif foldables.
@@ -100,7 +56,7 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
         "ig"
     );
 
-  private _cache = new FoldablesCache();
+  private readonly _cache = new DocumentCache<vscode.FoldingRange>();
 
   public async provideFoldingRanges(
     document: vscode.TextDocument,
