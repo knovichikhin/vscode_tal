@@ -125,7 +125,7 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
       return cached;
     }
 
-    console.time(">old");
+    console.time(">old fr");
     for (lineNum = 0; lineNum < document.lineCount; lineNum++) {
       const line = document.lineAt(lineNum).text;
 
@@ -156,7 +156,7 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
       );
     }
 
-    console.timeEnd(">old");
+    console.timeEnd(">old fr");
     this._cache.set(document, result);
     return result;
   }
@@ -399,10 +399,10 @@ export class TestTALFoldingProvider implements vscode.FoldingRangeProvider {
       return cached;
     }
 
-    console.time(">new");
+    console.time(">new fr");
     const tokens = await this.parser.parse(document);
     result = result.concat(await this.commentBlocks(tokens));
-    console.timeEnd(">new");
+    console.timeEnd(">new fr");
     this._cache.set(document, result);
     return result;
   }
