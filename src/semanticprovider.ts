@@ -27,7 +27,7 @@ export class TALDocumentSemanticTokensProvider
     console.timeEnd(">new fr");
 
     //const allTokens = this._parseText(document.getText());
-    const builder = new vscode.SemanticTokensBuilder();
+    const builder = new vscode.SemanticTokensBuilder(TALSemanticTokensLegend);
     //allTokens.forEach((token) => {
     //    builder.push(token.line, token.startCharacter, token.length, this._encodeTokenType(token.tokenType), this._encodeTokenModifiers(token.tokenModifiers));
     //});
