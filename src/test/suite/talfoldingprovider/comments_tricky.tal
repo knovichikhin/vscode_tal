@@ -1,0 +1,2 @@
+! order of sanitizing comments matter
+! -- ! proc foo; external; ! this line should not form a comment block

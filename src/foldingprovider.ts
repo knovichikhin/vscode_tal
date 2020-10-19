@@ -50,7 +50,6 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
    * where things begin and end.
    */
   // prettier-ignore
-
   private beginEndRe = RegExp(
         /\b(?<!\^)(begin|end)(?=([^"]*"[^"]*")*[^"]*$)(?!\^)\b/.source,
         "ig"
@@ -99,14 +98,10 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
     }
 
     // Tie up last comment block if present
+    // Comment block is created on a non-comment source line.
+    // It should also be created on EOF.
     if (foldableCommentBlock.end > foldableCommentBlock.start) {
-      result.push(
-        new vscode.FoldingRange(
-          foldableCommentBlock.start,
-          foldableCommentBlock.end,
-          foldableCommentBlock.kind
-        )
-      );
+      result.push(foldableCommentBlock);
     }
 
     this._cache.set(document, result);
@@ -258,8 +253,8 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
       // ! is a begin/end comment. Sanitize to make sure there are
       // no characters outside of comments on this line.
       case "!":
-        line = line.replace(/\s*--.*/gi, "");
         line = line.replace(/\s*![^!]*(!\s*|$)/gi, "");
+        line = line.replace(/\s*--.*/gi, "");
 
         if (line.length === 0) {
           // Continue comment block.
@@ -309,8 +304,8 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
   ): vscode.FoldingRange | undefined {
     let result: vscode.FoldingRange | undefined = undefined;
 
-    line = line.replace(/\s*--.*/gi, "");
     line = line.replace(/\s*![^!]*(!\s*|$)/gi, "");
+    line = line.replace(/\s*--.*/gi, "");
 
     // brackets['begin', 'end', etc]
     const brackets = line.match(this.beginEndRe) || [];
