@@ -194,6 +194,22 @@ suite("TAL Comment Blocks Folding Provider Test", () => {
           });
       });
   });
+
+  test("Test tricky comments, comments_tricky.tal", async () => {
+    const uri = vscode.Uri.file(testFilesPath + "/comments_tricky.tal");
+    return vscode.workspace
+      .openTextDocument(uri)
+      .then(async (doc: vscode.TextDocument) => {
+        assert.ok(doc);
+
+        return talFoldingProvider
+          .provideFoldingRanges(doc, context, token)
+          .then((ranges: vscode.FoldingRange[]) => {
+            assert.ok(ranges);
+            assert.strictEqual(ranges.length, 0);
+          });
+      });
+  });
 });
 
 suite("TAL Begin/End Blocks Folding Provider Test", () => {
@@ -267,6 +283,26 @@ suite("TAL Begin/End Blocks Folding Provider Test", () => {
             assert.strictEqual(ranges[6].start, 20);
             assert.strictEqual(ranges[6].end, 26);
             assert.strictEqual(ranges[6].kind, vscode.FoldingRangeKind.Region);
+          });
+      });
+  });
+
+  test("Test tricky begin/end blocks, stacks_tricky.tal", async () => {
+    const uri = vscode.Uri.file(testFilesPath + "/stacks_tricky.tal");
+    return vscode.workspace
+      .openTextDocument(uri)
+      .then(async (doc: vscode.TextDocument) => {
+        assert.ok(doc);
+
+        return talFoldingProvider
+          .provideFoldingRanges(doc, context, token)
+          .then((ranges: vscode.FoldingRange[]) => {
+            assert.ok(ranges);
+            assert.strictEqual(ranges.length, 1);
+
+            assert.strictEqual(ranges[0].start, 2);
+            assert.strictEqual(ranges[0].end, 3);
+            assert.strictEqual(ranges[0].kind, vscode.FoldingRangeKind.Region);
           });
       });
   });
