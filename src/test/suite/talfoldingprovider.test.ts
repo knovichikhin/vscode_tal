@@ -306,4 +306,28 @@ suite("TAL Begin/End Blocks Folding Provider Test", () => {
           });
       });
   });
+
+  test("Test mixed case begin/end blocks, stacks_upper_case.tal", async () => {
+    const uri = vscode.Uri.file(testFilesPath + "/stacks_upper_case.tal");
+    return vscode.workspace
+      .openTextDocument(uri)
+      .then(async (doc: vscode.TextDocument) => {
+        assert.ok(doc);
+
+        return talFoldingProvider
+          .provideFoldingRanges(doc, context, token)
+          .then((ranges: vscode.FoldingRange[]) => {
+            assert.ok(ranges);
+            assert.strictEqual(ranges.length, 2);
+
+            assert.strictEqual(ranges[0].start, 1);
+            assert.strictEqual(ranges[0].end, 2);
+            assert.strictEqual(ranges[0].kind, vscode.FoldingRangeKind.Region);
+
+            assert.strictEqual(ranges[1].start, 6);
+            assert.strictEqual(ranges[1].end, 7);
+            assert.strictEqual(ranges[1].kind, vscode.FoldingRangeKind.Region);
+          });
+      });
+  });
 });

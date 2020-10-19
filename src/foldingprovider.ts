@@ -310,7 +310,7 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
     // brackets['begin', 'end', etc]
     const brackets = line.match(this.beginEndRe) || [];
     brackets.forEach((bracket) => {
-      if (bracket === "begin") {
+      if (bracket.toLowerCase() === "begin") {
         foldableStacks.push(
           new vscode.FoldingRange(lineNum, lineNum, vscode.FoldingRangeKind.Region)
         );
