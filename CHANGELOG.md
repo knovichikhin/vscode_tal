@@ -1,4 +1,20 @@
 # Change Log
+## [0.7.2] - 2020-10-18
+- Revisit TAL textmate syntax:
+  - Fix indirection symbol to recognize identifier that starts with ^
+  - Highlight `?`, `:`, `,`, `()`, `[]`, `#` in various situations.
+  - Flag `.` accessor when accessing bit operator
+  - Flag base address symbols as storage modifiers
+  - Flag block name
+  - Flag name as a keyword only when it declares a name of a compilation unit
+  - Flag source directive filename
+  - Flag identifiers as possible variables
+  - Flag conditional directive identifiers
+  - Flag function declaration public name specification
+  - Separate function declaration from function calls
+  - Flag variables inside function declaration/call as parameters
+  - Flag section name
+
 ## [0.7.1] - 2020-10-10
 - Added caching for symbol results.
 
