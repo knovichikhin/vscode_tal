@@ -724,4 +724,38 @@ suite("TAL Symbol Provider Test", () => {
           });
       });
   });
+
+  test("Test begin/end inside comments, begin_end_between_comments.tal", async () => {
+    const uri = vscode.Uri.file(testFilesPath + "/begin_end_between_comments.tal");
+    return vscode.workspace
+      .openTextDocument(uri)
+      .then(async (doc: vscode.TextDocument) => {
+        assert.ok(doc);
+
+        return talSymbolProvider
+          .provideDocumentSymbols(doc, token)
+          .then((symbols: vscode.DocumentSymbol[]) => {
+            assert.ok(symbols);
+            assert.strictEqual(symbols.length, 2);
+
+            assert.strictEqual(symbols[0].children.length, 0);
+            assert.strictEqual(symbols[0].detail, "");
+            assert.strictEqual(symbols[0].kind, vscode.SymbolKind.Class);
+            assert.strictEqual(symbols[0].name, "foo");
+            assert.strictEqual(symbols[0].selectionRange.start.line, 1);
+            assert.strictEqual(symbols[0].selectionRange.end.line, 1);
+            assert.strictEqual(symbols[0].range.start.line, 1);
+            assert.strictEqual(symbols[0].range.end.line, 4);
+
+            assert.strictEqual(symbols[1].children.length, 0);
+            assert.strictEqual(symbols[1].detail, "external");
+            assert.strictEqual(symbols[1].kind, vscode.SymbolKind.Interface);
+            assert.strictEqual(symbols[1].name, "bar");
+            assert.strictEqual(symbols[1].selectionRange.start.line, 6);
+            assert.strictEqual(symbols[1].selectionRange.end.line, 6);
+            assert.strictEqual(symbols[1].range.start.line, 6);
+            assert.strictEqual(symbols[1].range.end.line, 6);
+          });
+      });
+  });
 });

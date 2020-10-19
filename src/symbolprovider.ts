@@ -526,8 +526,8 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
    * @return line with commented out source code removed
    */
   private _removeComments(line: string): string {
-    line = line.replace(/--.*/gi, ""); // line comment --
     line = line.replace(/![^!]*(!|$)/gi, ""); // start-end comment !comment!
+    line = line.replace(/--.*/gi, ""); // line comment --
     return line;
   }
 }
