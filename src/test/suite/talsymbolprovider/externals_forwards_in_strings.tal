@@ -1,0 +1,11 @@
+! Do not match externals and forwards within strings
+proc foo1;
+begin string .a[0:7] := "external"; end;
+proc foo2;
+begin string .a[0:7] := "forward"; end;
+proc foo3 = "external";
+begin
+end;
+proc foo4 = "forward";
+begin
+end;

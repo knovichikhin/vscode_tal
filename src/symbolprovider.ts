@@ -42,7 +42,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
   // prettier-ignore
 
   private forwardProcRe = RegExp(
-        /\b(?<!\^)(external|forward)(?!\^)\b/.source,
+        /\b(?<!\^)(external|forward)(?=([^"]*"[^"]*")*[^"]*$)(?!\^)\b/.source,
         "i"
     );
 
