@@ -1,9 +1,13 @@
 "use strict";
 
 import * as vscode from "vscode";
-import { TestTALFoldingProvider, TALFoldingProvider } from "./foldingprovider";
+import { TALFoldingProvider } from "./foldingprovider";
 import { TACLCompletionItemProvider, TALCompletionItemProvider } from "./keywordprovider";
 import { getTALLanguageConfiguration } from "./languageconfiguration";
+import {
+  TALDocumentSemanticTokensProvider,
+  TALSemanticTokensLegend,
+} from "./semanticprovider";
 import { TALDocumentSymbolProvider } from "./symbolprovider";
 import { TALParser } from "./talengine/parser";
 
@@ -37,11 +41,12 @@ export function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(talFoldingProvider);
 
-  const testTALFoldingProvider = vscode.languages.registerFoldingRangeProvider(
+  const talDocumentSemanticTokensProvider = vscode.languages.registerDocumentSemanticTokensProvider(
     "tal",
-    new TestTALFoldingProvider(talParser)
+    new TALDocumentSemanticTokensProvider(talParser),
+    TALSemanticTokensLegend
   );
-  context.subscriptions.push(testTALFoldingProvider);
+  context.subscriptions.push(talDocumentSemanticTokensProvider);
 
   vscode.languages.setLanguageConfiguration("tal", getTALLanguageConfiguration());
 }
