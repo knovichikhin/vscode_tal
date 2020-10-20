@@ -114,6 +114,38 @@ suite("TAL Toggle Folding Provider Test", () => {
           });
       });
   });
+
+  test("Test mixed case toggles, toggle_upper_case.tal", async () => {
+    const uri = vscode.Uri.file(testFilesPath + "/toggle_upper_case.tal");
+    return vscode.workspace
+      .openTextDocument(uri)
+      .then(async (doc: vscode.TextDocument) => {
+        assert.ok(doc);
+
+        return talFoldingProvider
+          .provideFoldingRanges(doc, context, token)
+          .then((ranges: vscode.FoldingRange[]) => {
+            assert.ok(ranges);
+            assert.strictEqual(ranges.length, 4);
+
+            assert.strictEqual(ranges[0].start, 0);
+            assert.strictEqual(ranges[0].end, 1);
+            assert.strictEqual(ranges[0].kind, vscode.FoldingRangeKind.Region);
+
+            assert.strictEqual(ranges[1].start, 4);
+            assert.strictEqual(ranges[1].end, 5);
+            assert.strictEqual(ranges[1].kind, vscode.FoldingRangeKind.Region);
+
+            assert.strictEqual(ranges[2].start, 8);
+            assert.strictEqual(ranges[2].end, 9);
+            assert.strictEqual(ranges[2].kind, vscode.FoldingRangeKind.Region);
+
+            assert.strictEqual(ranges[3].start, 10);
+            assert.strictEqual(ranges[3].end, 11);
+            assert.strictEqual(ranges[3].kind, vscode.FoldingRangeKind.Region);
+          });
+      });
+  });
 });
 
 suite("TAL Comment Blocks Folding Provider Test", () => {

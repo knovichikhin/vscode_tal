@@ -129,7 +129,7 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
      * toggle[2] = toggle-number, toggle-name,
      */
     const toggle = line.match(this.toggleRe) || ["", "", ""];
-    switch (toggle[1]) {
+    switch (toggle[1].toLowerCase()) {
       // ?if starts a new folding range
       case "if":
         foldableToggles.push(<FoldableToggle>{
