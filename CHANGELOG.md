@@ -1,4 +1,7 @@
 # Change Log
+## [0.7.4] - 2020-10-19
+- Handle mixed case `?if`, `?ifnot` and `?endif` folding ranges.
+
 ## [0.7.3] - 2020-10-19
 - Add backup scopes for call, proc, subproc, section and imports. This should make it work for themes that want to colour exotic scopes and themes that colour more generic scopes (e.g. default VSCode themes).
 - Bug fixes for folding ranges and symbols.
