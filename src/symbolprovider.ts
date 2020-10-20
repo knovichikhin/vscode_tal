@@ -119,13 +119,13 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
       const line = document.lineAt(lineNum).text;
 
       // Look for procs/subprocs while skipping lines.
-      if (this._mapProc(document, lineNum, line, procSymbols)) {
+      if (this.mapProc(document, lineNum, line, procSymbols)) {
         // get the last line where mapping stopped to continue parsing from this line
         lineNum = procSymbols[procSymbols.length - 1].range.end.line;
       } else {
         // Look for a section. Otherwise, look for a page.
-        if (!this._mapSection(document, lineNum, line, sectionSymbols)) {
-          this._mapPage(document, lineNum, line, sectionSymbols);
+        if (!this.mapSection(document, lineNum, line, sectionSymbols)) {
+          this.mapPage(document, lineNum, line, sectionSymbols);
         }
       }
     }
@@ -175,7 +175,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
    * @param procSymbols An array of proc symbols
    * @return Returns true if proc symbol is found. Return false, otherwise.
    */
-  private _mapProc(
+  private mapProc(
     document: vscode.TextDocument,
     lineNum: number,
     line: string,
@@ -225,7 +225,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
     // Start parsing proc at the line after the proc line
     for (lineNum += 1; lineNum < document.lineCount; lineNum++) {
       line = document.lineAt(lineNum).text;
-      line = this._removeComments(line);
+      line = this.removeComments(line);
 
       // External and forward procs do not have begin/end body.
       // Therefore, once at least 1 begin is found external and forward
@@ -262,7 +262,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
       }
 
       // Look for subprocs while skipping lines.
-      if (this._mapSubproc(document, lineNum, line, procSymbol)) {
+      if (this.mapSubproc(document, lineNum, line, procSymbol)) {
         // get the last line where mapping stopped
         lineNum = procSymbol.children[procSymbol.children.length - 1].range.end.line;
       }
@@ -310,7 +310,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
    * @param procSymbol A proc symbol to attach subprocs to
    * @return Returns true if subproc symbol is found. Return false, otherwise.
    */
-  private _mapSubproc(
+  private mapSubproc(
     document: vscode.TextDocument,
     lineNum: number,
     line: string,
@@ -347,7 +347,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
     // Start parsing subproc at the line after the subproc line
     for (lineNum += 1; lineNum < document.lineCount; lineNum++) {
       let line: string = document.lineAt(lineNum).text;
-      line = this._removeComments(line);
+      line = this.removeComments(line);
 
       // Get number of begins on the line
       stack += (line.match(this.beginRe) || []).length;
@@ -386,7 +386,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
    * @param sectionSymbols An array of section symbols
    * @return Returns true if section symbol is found. Return false, otherwise.
    */
-  private _mapSection(
+  private mapSection(
     document: vscode.TextDocument,
     lineNum: number,
     line: string,
@@ -449,7 +449,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
    * @param sectionSymbols An array of section symbols
    * @return Returns true if page symbol is found. Return false, otherwise.
    */
-  private _mapPage(
+  private mapPage(
     document: vscode.TextDocument,
     lineNum: number,
     line: string,
@@ -525,7 +525,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
    * @param line A line in a text document
    * @return line with commented out source code removed
    */
-  private _removeComments(line: string): string {
+  private removeComments(line: string): string {
     line = line.replace(/![^!]*(!|$)/gi, ""); // start-end comment !comment!
     line = line.replace(/--.*/gi, ""); // line comment --
     return line;
