@@ -1,0 +1,7 @@
+! order of sanitizing comments matter
+proc foo;
+! -- ! begin ! begin should not be lost
+    call something;
+! -- ! end; ! end should not be lost
+
+proc bar; external;

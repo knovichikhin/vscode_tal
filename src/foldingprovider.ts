@@ -1,53 +1,7 @@
 "use strict";
 
 import * as vscode from "vscode";
-import { TALParser } from "./talengine/parser";
-import { Token } from "./talengine/tokens";
-
-/**
- * VSCode requests folding results every time user
- * selects a document. E.g. active document is Foo.tal.
- * Folding results will be requested if user selects document
- * Bar.tal and then again Foo.tal. Meanwhile, Foo.tal is unchanged.
- * FoldableCache class implement a simple cache mechanism where it
- * provide already computed results for the same unchanged document
- * based on document URI.
- * There is no reason to track document per URI and version
- * because version is incremenet on any document change including
- * undo/redo.
- * Instead different document version will be used to invalidate
- * cache.
- */
-interface CachedDocument {
-  readonly version: number;
-  readonly foldables: vscode.FoldingRange[];
-}
-class FoldablesCache {
-  private cachedDocuments = new Map<string, CachedDocument>();
-
-  public get(document: vscode.TextDocument): vscode.FoldingRange[] | undefined {
-    const cachedDocument = this.cachedDocuments.get(document.uri.toString());
-
-    if (cachedDocument) {
-      // Invalidate cache on the same but edited document
-      if (cachedDocument.version !== document.version) {
-        this.cachedDocuments.delete(document.uri.toString());
-        return undefined;
-      }
-
-      return cachedDocument.foldables;
-    }
-
-    return undefined;
-  }
-
-  public set(document: vscode.TextDocument, foldables: vscode.FoldingRange[]): void {
-    this.cachedDocuments.set(document.uri.toString(), <CachedDocument>{
-      version: document.version,
-      foldables: foldables,
-    });
-  }
-}
+import { DocumentCache } from "./cache";
 
 /**
  * ToggleFoldables contains results of ?if/?ifnot/?endif foldables.
@@ -96,13 +50,12 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
    * where things begin and end.
    */
   // prettier-ignore
-
   private beginEndRe = RegExp(
         /\b(?<!\^)(begin|end)(?=([^"]*"[^"]*")*[^"]*$)(?!\^)\b/.source,
         "ig"
     );
 
-  private _cache = new FoldablesCache();
+  private readonly _cache = new DocumentCache<vscode.FoldingRange>();
 
   public async provideFoldingRanges(
     document: vscode.TextDocument,
@@ -146,14 +99,10 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
     }
 
     // Tie up last comment block if present
+    // Comment block is created on a non-comment source line.
+    // It should also be created on EOF.
     if (foldableCommentBlock.end > foldableCommentBlock.start) {
-      result.push(
-        new vscode.FoldingRange(
-          foldableCommentBlock.start,
-          foldableCommentBlock.end,
-          foldableCommentBlock.kind
-        )
-      );
+      result.push(foldableCommentBlock);
     }
 
     console.timeEnd(">old fr");
@@ -182,7 +131,7 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
      * toggle[2] = toggle-number, toggle-name,
      */
     const toggle = line.match(this.toggleRe) || ["", "", ""];
-    switch (toggle[1]) {
+    switch (toggle[1].toLowerCase()) {
       // ?if starts a new folding range
       case "if":
         foldableToggles.push(<FoldableToggle>{
@@ -306,8 +255,8 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
       // ! is a begin/end comment. Sanitize to make sure there are
       // no characters outside of comments on this line.
       case "!":
-        line = line.replace(/\s*--.*/gi, "");
         line = line.replace(/\s*![^!]*(!\s*|$)/gi, "");
+        line = line.replace(/\s*--.*/gi, "");
 
         if (line.length === 0) {
           // Continue comment block.
@@ -357,13 +306,13 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
   ): vscode.FoldingRange | undefined {
     let result: vscode.FoldingRange | undefined = undefined;
 
-    line = line.replace(/\s*--.*/gi, "");
     line = line.replace(/\s*![^!]*(!\s*|$)/gi, "");
+    line = line.replace(/\s*--.*/gi, "");
 
     // brackets['begin', 'end', etc]
     const brackets = line.match(this.beginEndRe) || [];
     brackets.forEach((bracket) => {
-      if (bracket === "begin") {
+      if (bracket.toLowerCase() === "begin") {
         foldableStacks.push(
           new vscode.FoldingRange(lineNum, lineNum, vscode.FoldingRangeKind.Region)
         );

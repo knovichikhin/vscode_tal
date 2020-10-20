@@ -1,0 +1,5 @@
+! order of sanitizing comments matter
+while true do
+! -- ! begin ! this line should start a foldable block
+    call something; ! this line should be foldable
+    end;

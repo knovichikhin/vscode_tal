@@ -1,51 +1,7 @@
 "use strict";
 
 import * as vscode from "vscode";
-
-/**
- * VSCode requests symbold results every time user
- * selects a document. E.g. active document is Foo.tal.
- * Symbol results will be requested if user selects document
- * Bar.tal and then again Foo.tal. Meanwhile, Foo.tal is unchanged.
- * SymbolsCache class implements a simple cache mechanism where it
- * provide already computed results for the same unchanged document
- * based on document URI.
- * There is no reason to track document per URI and version
- * because version is incremenet on any document change including
- * undo/redo.
- * Instead different document version will be used to invalidate
- * cache.
- */
-interface CachedDocument {
-  readonly version: number;
-  readonly symbols: vscode.DocumentSymbol[];
-}
-class SymbolsCache {
-  private cachedDocuments = new Map<string, CachedDocument>();
-
-  public get(document: vscode.TextDocument): vscode.DocumentSymbol[] | undefined {
-    const cachedDocument = this.cachedDocuments.get(document.uri.toString());
-
-    if (cachedDocument) {
-      // Invalidate cache on the same but edited document
-      if (cachedDocument.version !== document.version) {
-        this.cachedDocuments.delete(document.uri.toString());
-        return undefined;
-      }
-
-      return cachedDocument.symbols;
-    }
-
-    return undefined;
-  }
-
-  public set(document: vscode.TextDocument, symbols: vscode.DocumentSymbol[]): void {
-    this.cachedDocuments.set(document.uri.toString(), <CachedDocument>{
-      version: document.version,
-      symbols: symbols,
-    });
-  }
-}
+import { DocumentCache } from "./cache";
 
 export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
   /**
@@ -144,7 +100,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
   // pageSymbolKind must be different from sectionSymbolKind
   private readonly pageSymbolKind = vscode.SymbolKind.String;
 
-  private _cache = new SymbolsCache();
+  private readonly _cache = new DocumentCache<vscode.DocumentSymbol>();
 
   public async provideDocumentSymbols(
     document: vscode.TextDocument,
@@ -573,8 +529,8 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
    * @return line with commented out source code removed
    */
   private _removeComments(line: string): string {
-    line = line.replace(/--.*/gi, ""); // line comment --
     line = line.replace(/![^!]*(!|$)/gi, ""); // start-end comment !comment!
+    line = line.replace(/--.*/gi, ""); // line comment --
     return line;
   }
 }

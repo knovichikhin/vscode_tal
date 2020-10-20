@@ -114,6 +114,38 @@ suite("TAL Toggle Folding Provider Test", () => {
           });
       });
   });
+
+  test("Test mixed case toggles, toggle_upper_case.tal", async () => {
+    const uri = vscode.Uri.file(testFilesPath + "/toggle_upper_case.tal");
+    return vscode.workspace
+      .openTextDocument(uri)
+      .then(async (doc: vscode.TextDocument) => {
+        assert.ok(doc);
+
+        return talFoldingProvider
+          .provideFoldingRanges(doc, context, token)
+          .then((ranges: vscode.FoldingRange[]) => {
+            assert.ok(ranges);
+            assert.strictEqual(ranges.length, 4);
+
+            assert.strictEqual(ranges[0].start, 0);
+            assert.strictEqual(ranges[0].end, 1);
+            assert.strictEqual(ranges[0].kind, vscode.FoldingRangeKind.Region);
+
+            assert.strictEqual(ranges[1].start, 4);
+            assert.strictEqual(ranges[1].end, 5);
+            assert.strictEqual(ranges[1].kind, vscode.FoldingRangeKind.Region);
+
+            assert.strictEqual(ranges[2].start, 8);
+            assert.strictEqual(ranges[2].end, 9);
+            assert.strictEqual(ranges[2].kind, vscode.FoldingRangeKind.Region);
+
+            assert.strictEqual(ranges[3].start, 10);
+            assert.strictEqual(ranges[3].end, 11);
+            assert.strictEqual(ranges[3].kind, vscode.FoldingRangeKind.Region);
+          });
+      });
+  });
 });
 
 suite("TAL Comment Blocks Folding Provider Test", () => {
@@ -194,6 +226,22 @@ suite("TAL Comment Blocks Folding Provider Test", () => {
           });
       });
   });
+
+  test("Test tricky comments, comments_tricky.tal", async () => {
+    const uri = vscode.Uri.file(testFilesPath + "/comments_tricky.tal");
+    return vscode.workspace
+      .openTextDocument(uri)
+      .then(async (doc: vscode.TextDocument) => {
+        assert.ok(doc);
+
+        return talFoldingProvider
+          .provideFoldingRanges(doc, context, token)
+          .then((ranges: vscode.FoldingRange[]) => {
+            assert.ok(ranges);
+            assert.strictEqual(ranges.length, 0);
+          });
+      });
+  });
 });
 
 suite("TAL Begin/End Blocks Folding Provider Test", () => {
@@ -267,6 +315,50 @@ suite("TAL Begin/End Blocks Folding Provider Test", () => {
             assert.strictEqual(ranges[6].start, 20);
             assert.strictEqual(ranges[6].end, 26);
             assert.strictEqual(ranges[6].kind, vscode.FoldingRangeKind.Region);
+          });
+      });
+  });
+
+  test("Test tricky begin/end blocks, stacks_tricky.tal", async () => {
+    const uri = vscode.Uri.file(testFilesPath + "/stacks_tricky.tal");
+    return vscode.workspace
+      .openTextDocument(uri)
+      .then(async (doc: vscode.TextDocument) => {
+        assert.ok(doc);
+
+        return talFoldingProvider
+          .provideFoldingRanges(doc, context, token)
+          .then((ranges: vscode.FoldingRange[]) => {
+            assert.ok(ranges);
+            assert.strictEqual(ranges.length, 1);
+
+            assert.strictEqual(ranges[0].start, 2);
+            assert.strictEqual(ranges[0].end, 3);
+            assert.strictEqual(ranges[0].kind, vscode.FoldingRangeKind.Region);
+          });
+      });
+  });
+
+  test("Test mixed case begin/end blocks, stacks_upper_case.tal", async () => {
+    const uri = vscode.Uri.file(testFilesPath + "/stacks_upper_case.tal");
+    return vscode.workspace
+      .openTextDocument(uri)
+      .then(async (doc: vscode.TextDocument) => {
+        assert.ok(doc);
+
+        return talFoldingProvider
+          .provideFoldingRanges(doc, context, token)
+          .then((ranges: vscode.FoldingRange[]) => {
+            assert.ok(ranges);
+            assert.strictEqual(ranges.length, 2);
+
+            assert.strictEqual(ranges[0].start, 1);
+            assert.strictEqual(ranges[0].end, 2);
+            assert.strictEqual(ranges[0].kind, vscode.FoldingRangeKind.Region);
+
+            assert.strictEqual(ranges[1].start, 6);
+            assert.strictEqual(ranges[1].end, 7);
+            assert.strictEqual(ranges[1].kind, vscode.FoldingRangeKind.Region);
           });
       });
   });

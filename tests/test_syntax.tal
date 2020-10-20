@@ -71,6 +71,8 @@ define foo_d(x) = bar((x) + 1)#;
 string char;
 string .ext char;
 string .char;
+string ._char;
+string .^char;
 struct .foo(bar);
 struct foo(bar);
 struct .foo(bar);
