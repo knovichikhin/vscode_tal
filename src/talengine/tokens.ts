@@ -4,15 +4,17 @@ import * as vscode from "vscode";
 
 export enum TokenType {
   unknown,
+  eofmarker,
+  number,
+  invalidNumber,
+
   assign,
   begin,
   closingparenthesis,
   colon,
   comma,
-  comment,
   dot,
   end,
-  eof,
   id,
   integerconst,
   integerdivision,

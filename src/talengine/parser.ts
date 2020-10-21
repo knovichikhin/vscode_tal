@@ -50,10 +50,16 @@ export class TALParser {
 
     do {
       token = lexer.getNextToken();
-      //const line = document.lineAt(token.start.line).text;
-      //console.error(line.substring(token.start.character, token.end.character + 1));
+      if (token.type !== TokenType.eofmarker) {
+        const line = document.lineAt(token.start.line).text;
+        console.log(
+          line.substring(token.start.character, token.end.character + 1) +
+            ", " +
+            TokenType[token.type]
+        );
+      }
       tokens.push(token);
-    } while (token.type !== TokenType.eof);
+    } while (token.type !== TokenType.eofmarker);
 
     this._cache.set(document, tokens);
     return tokens;

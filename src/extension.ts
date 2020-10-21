@@ -5,14 +5,12 @@ import { TALFoldingProvider } from "./foldingprovider";
 import { TACLCompletionItemProvider, TALCompletionItemProvider } from "./keywordprovider";
 import { getTALLanguageConfiguration } from "./languageconfiguration";
 import {
-  TALDocumentSemanticTokensProvider,
+  ANTLRTALDocumentSemanticTokensProvider,
   TALSemanticTokensLegend,
 } from "./semanticprovider";
 import { TALDocumentSymbolProvider } from "./symbolprovider";
-import { TALParser } from "./talengine/parser";
 
 export function activate(context: vscode.ExtensionContext) {
-  const talParser = new TALParser();
 
   const talCompletionItemProvider = vscode.languages.registerCompletionItemProvider(
     "tal",
@@ -43,7 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   const talDocumentSemanticTokensProvider = vscode.languages.registerDocumentSemanticTokensProvider(
     "tal",
-    new TALDocumentSemanticTokensProvider(talParser),
+    new ANTLRTALDocumentSemanticTokensProvider(),
     TALSemanticTokensLegend
   );
   context.subscriptions.push(talDocumentSemanticTokensProvider);

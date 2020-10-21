@@ -2,8 +2,10 @@
 
 import * as vscode from "vscode";
 import { DocumentCache } from "./cache";
-import { TALParser } from "./talengine/parser";
-
+import { CharStreams, CommonTokenStream } from 'antlr4ts';
+import { TALLexer } from "./talengine/antlr/TALLexer";
+import { TALParser } from "./talengine/antlr/TALParser";
+/*
 export class TALDocumentSemanticTokensProvider
   implements vscode.DocumentSemanticTokensProvider {
   private _cache = new DocumentCache<vscode.SemanticTokens>();
@@ -23,7 +25,7 @@ export class TALDocumentSemanticTokensProvider
     }
 
     console.time(">new fr");
-    const tokens = await this.parser.parse(document);
+    //const tokens = await this.parser.parse(document);
     console.timeEnd(">new fr");
 
     //const allTokens = this._parseText(document.getText());
@@ -34,6 +36,44 @@ export class TALDocumentSemanticTokensProvider
     const result = builder.build();
 
     this._cache.set(document, new Array(result));
+    return result;
+  }
+}
+*/
+export class ANTLRTALDocumentSemanticTokensProvider
+  implements vscode.DocumentSemanticTokensProvider {
+  private _cache = new DocumentCache<vscode.SemanticTokens>();
+
+  async provideDocumentSemanticTokens(
+    document: vscode.TextDocument,
+    token: vscode.CancellationToken
+  ): Promise<vscode.SemanticTokens> {
+
+    //const cached = this._cache.get(document);
+    //if (cached) {
+    //  return cached[0];
+    //}
+
+    console.time(">ant");
+    const stream = CharStreams.fromString(document.getText());
+    const lexer = new TALLexer(stream);
+    const tokenStream = new CommonTokenStream(lexer);
+    tokenStream.fill();
+    const t = tokenStream.getTokens();
+    const v = lexer.vocabulary;
+    t.forEach((i) => {
+      console.log(v.getSymbolicName(i.type) + " >> `" + i.text + "`");
+    });
+    
+    //const parser = new TALParser(tokenStream);
+    //const pResult = parser.primaryexpression();
+    //const t1 = pResult.getTokens();
+    console.timeEnd(">ant");
+
+    const builder = new vscode.SemanticTokensBuilder(TALSemanticTokensLegend);
+    const result = builder.build();
+
+    //this._cache.set(document, new Array(result));
     return result;
   }
 }
