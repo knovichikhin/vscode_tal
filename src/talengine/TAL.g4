@@ -4,14 +4,21 @@ primaryexpression
     : ANY+
     ;
 
-STRING
-    : S T R I N G
+// Data types
+UNSIGNED : U N S I G N E D LEFTPAREN DIGIT_SEQUENCE RIGHTPAREN;
+STRING : S T R I N G;
+FIXED
+    : F I X E D ( LEFTPAREN ( '*' | SIGN? DIGIT_SEQUENCE )? RIGHTPAREN)?
+    | I N T LEFTPAREN '64' RIGHTPAREN
     ;
+INT32 : I N T LEFTPAREN '32' RIGHTPAREN;
+INT : I N T ( LEFTPAREN '16' RIGHTPAREN )?;
+REAL64 : R E A L LEFTPAREN '64' RIGHTPAREN;
+REAL : R E A L ( LEFTPAREN '32' RIGHTPAREN )?;
+LITERAL : L I T E R A L;
+STRUCT : S T R U C T;
 
-INT
-    : I N T
-    ;
-
+// Reserved keywords
 CASE : C A S E;
 CALL : C A L L;
 BEGIN : B E G I N;
@@ -39,10 +46,12 @@ RIGHTPAREN : ')';
 LEFTBRACKET : '[';
 RIGHTBRACKET : ']';
 
+// Operators
 LESS : '<' | '\'<\'';
 LESSEQUAL : '<=' | '\'<=\'';
 GREATER : '>' | '\'>\'';
 GREATEREQUAL : '>=' | '\'>=\'';
+
 LEFTSHIFT : '<<' | '\'<<\'';
 RIGHTSHIFT : '>>' | '\'>>\'';
 
@@ -51,17 +60,14 @@ MINUS : '-' | '\'-\'';
 DIV : '/' | '\'/\'';
 MOD : '\'\\\'';
 
-AT : '@';
-
-BIT_EXTRACT
-    : '.<' DIGIT_SEQUENCE ( COLON DIGIT_SEQUENCE )? '>';
-
 AND : A N D;
 OR : O R;
 LAND : L A N D;
 LOR : L O R;
 NOT : N O T;
 
+AT : '@';
+BIT_EXTRACT : '.<' DIGIT_SEQUENCE ( COLON DIGIT_SEQUENCE )? '>';
 COLON : ':';
 SEMI : ';';
 COMMA : ',';
