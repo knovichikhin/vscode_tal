@@ -758,4 +758,56 @@ suite("TAL Symbol Provider Test", () => {
           });
       });
   });
+
+  test("Test externals/forwards within strings, externals_forwards_in_strings.tal", async () => {
+    const uri = vscode.Uri.file(testFilesPath + "/externals_forwards_in_strings.tal");
+    return vscode.workspace
+      .openTextDocument(uri)
+      .then(async (doc: vscode.TextDocument) => {
+        assert.ok(doc);
+
+        return talSymbolProvider
+          .provideDocumentSymbols(doc, token)
+          .then((symbols: vscode.DocumentSymbol[]) => {
+            assert.ok(symbols);
+            assert.strictEqual(symbols.length, 4);
+
+            assert.strictEqual(symbols[0].children.length, 0);
+            assert.strictEqual(symbols[0].detail, "");
+            assert.strictEqual(symbols[0].kind, vscode.SymbolKind.Class);
+            assert.strictEqual(symbols[0].name, "foo1");
+            assert.strictEqual(symbols[0].selectionRange.start.line, 1);
+            assert.strictEqual(symbols[0].selectionRange.end.line, 1);
+            assert.strictEqual(symbols[0].range.start.line, 1);
+            assert.strictEqual(symbols[0].range.end.line, 2);
+
+            assert.strictEqual(symbols[1].children.length, 0);
+            assert.strictEqual(symbols[1].detail, "");
+            assert.strictEqual(symbols[1].kind, vscode.SymbolKind.Class);
+            assert.strictEqual(symbols[1].name, "foo2");
+            assert.strictEqual(symbols[1].selectionRange.start.line, 3);
+            assert.strictEqual(symbols[1].selectionRange.end.line, 3);
+            assert.strictEqual(symbols[1].range.start.line, 3);
+            assert.strictEqual(symbols[1].range.end.line, 4);
+
+            assert.strictEqual(symbols[2].children.length, 0);
+            assert.strictEqual(symbols[2].detail, "");
+            assert.strictEqual(symbols[2].kind, vscode.SymbolKind.Class);
+            assert.strictEqual(symbols[2].name, "foo3");
+            assert.strictEqual(symbols[2].selectionRange.start.line, 5);
+            assert.strictEqual(symbols[2].selectionRange.end.line, 5);
+            assert.strictEqual(symbols[2].range.start.line, 5);
+            assert.strictEqual(symbols[2].range.end.line, 7);
+
+            assert.strictEqual(symbols[3].children.length, 0);
+            assert.strictEqual(symbols[3].detail, "");
+            assert.strictEqual(symbols[3].kind, vscode.SymbolKind.Class);
+            assert.strictEqual(symbols[3].name, "foo4");
+            assert.strictEqual(symbols[3].selectionRange.start.line, 8);
+            assert.strictEqual(symbols[3].selectionRange.end.line, 8);
+            assert.strictEqual(symbols[3].range.start.line, 8);
+            assert.strictEqual(symbols[3].range.end.line, 10);
+          });
+      });
+  });
 });
