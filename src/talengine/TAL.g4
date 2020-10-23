@@ -1,28 +1,341 @@
 grammar TAL;
 
-primaryexpression
+unknown
     : ANY+
     ;
 
+// Functions
+functionInvocation
+    : 'functionInvocation'
+    ;
+
+paramList
+    : '(' param ( ',' param )* ')'
+    ;
+
+param
+    : IDENTIFIER ':' arithmeticExpression
+    | IDENTIFIER
+    ;
+
+// Statements
+statement
+    : compoundStatement
+    | assertStatement
+    | assignmentStatement
+    | callStatement
+    | labeledCaseStatement
+    | unlabledCaseStatement
+    | doStatement
+    | dropStatement
+    | forStatement
+    | ifStatement
+    | moveStatement
+    ;
+
+compoundStatement
+    : BEGIN ( statement ( ';' statement )* )? ';'?  END
+    ;
+
+assertStatement
+    : ASSERT INT_CONSTANT ':' condition
+    ;
+
+assignmentStatement
+    : ( variable ':=' )+ ( arithmeticExpression | conditionalExpression )
+    ;
+
+callStatement
+    : CALL IDENTIFIER paramList?
+    ;
+
+labeledCaseStatement
+    : CASE arithmeticExpression OF BEGIN caseAlternative+ ( OTHERWISE ARROW statement )? ';' END
+    ;
+
+caseAlternative
+    : caseLabel ( ',' caseLabel )* ARROW statement ';'
+    ;
+
+caseLabel
+    : ( INT_CONSTANT | IDENTIFIER ) ( '..' ( INT_CONSTANT | IDENTIFIER ) )?
+    ;
+
+unlabledCaseStatement
+    : CASE arithmeticExpression OF BEGIN ( statement ';' )+ ( OTHERWISE statement )? ';' END
+    ;
+
+doStatement
+    : DO statement UNTIL condition
+    ;
+
+dropStatement
+    : DROP IDENTIFIER ( ',' IDENTIFIER )*
+    ;
+
+forStatement
+    : FOR variable ':=' arithmeticExpression ( TO | DOWNTO ) arithmeticExpression ( BY arithmeticExpression )? DO statement
+    ;
+
+ifStatement
+    : IF ( arithmeticExpression | conditionalExpression ) THEN statement? ( ELSE statement? )?
+    ;
+
+moveStatement
+    : variable ( '\':=\'' | '\'=:\'' )
+    ;
+
+// Name and blocks
+name
+    : N A M E IDENTIFIER ';';
+
+// Declarations
+simpleDeclaration
+    : DATA_TYPE simpleDeclarationItem ( ',' simpleDeclarationItem )* ';'
+    ;
+
+simpleDeclarationItem
+    : simpleDeclarationItemVariable
+    | simpleDeclarationItemPointer
+    | simpleDecalrationItemStructPointer
+    | simpleDeclarationItemArray
+    ;
+
+simpleDeclarationItemVariable
+    : IDENTIFIER ( ':=' CONSTANT | arithmeticExpression )?
+    ;
+
+simpleDeclarationItemPointer
+    : ( DOT | EXT ) IDENTIFIER ( ':=' CONSTANT | arithmeticExpression )?
+    ;
+
+simpleDecalrationItemStructPointer
+    : ( EXT | DOT ) IDENTIFIER '(' IDENTIFIER ')'  ( ':=' CONSTANT | arithmeticExpression )?
+    ;
+
+simpleDeclarationItemArray
+    : ( EXT | DOT )? IDENTIFIER '[' arithmeticExpression ':' arithmeticExpression ']' ( ':=' constantList )?
+    ;
+
+readOnlyArrayDeclaration
+    : DATA_TYPE readOnlyArrayDeclarationItem ( ',' readOnlyArrayDeclarationItem )* ';'
+    ;
+
+readOnlyArrayDeclarationItem
+    : IDENTIFIER ( '[' arithmeticExpression ':' arithmeticExpression ']' )? '=' P_REGISTER ':=' constantList
+    ;
+
+structDeclaration
+    : STRUCT ( EXT | DOT )? IDENTIFIER ( '[' arithmeticExpression ':' arithmeticExpression ']' )? ';' structDeclarationLayout
+    ;
+
+structTemplateDeclaration
+    : STRUCT IDENTIFIER '(' '*' ')' ';' structDeclarationLayout
+    ;
+
+structReferralDeclaration
+    : STRUCT ( EXT | DOT )? IDENTIFIER '(' IDENTIFIER ')' ( '[' arithmeticExpression ':' arithmeticExpression ']' )? ';'
+    ;
+
+subStructDeclaration // with optional redefinition
+    : STRUCT IDENTIFIER ( '[' arithmeticExpression ':' arithmeticExpression ']' )? ( '=' IDENTIFIER )? ';' structDeclarationLayout
+    ;
+
+subStructReferralDeclaration // with optional redefinition
+    : STRUCT IDENTIFIER '(' IDENTIFIER ')' ( '[' arithmeticExpression ':' arithmeticExpression ']' )? ( '=' IDENTIFIER )? ';'
+    ;
+
+structDeclarationLayout
+    : BEGIN structDeclarationLayoutItem+ END ';'
+    ;
+
+structDeclarationLayoutItem
+    : DATA_TYPE IDENTIFIER ( ',' IDENTIFIER )* ';' // simple variable
+    | DATA_TYPE IDENTIFIER '[' arithmeticExpression ':' arithmeticExpression ']' ( ',' IDENTIFIER '[' arithmeticExpression ':' arithmeticExpression ']' )* ';' // array variable
+    | subStructDeclaration
+    | subStructReferralDeclaration
+    | DATA_TYPE ( EXT | DOT ) IDENTIFIER ( ',' ( EXT | DOT ) IDENTIFIER )* ';' // simple pointers
+    | DATA_TYPE ( EXT | DOT ) IDENTIFIER  '=' IDENTIFIER ';' // simple pointers with optional redefinition
+    | ( STRUCT | INT ) ( EXT | DOT ) IDENTIFIER '(' IDENTIFIER ')' ( ',' ( EXT | DOT ) IDENTIFIER '(' IDENTIFIER ')' )* ';' // struct pointers
+    | ( STRUCT | INT ) ( EXT | DOT ) IDENTIFIER '(' IDENTIFIER ')' '=' IDENTIFIER ';' // struct pointers with optional redefinition
+    | ( FILLER | BIT_FILLER ) INT_CONSTANT ';'
+    | DATA_TYPE IDENTIFIER ( '[' arithmeticExpression ':' arithmeticExpression ']' )? '=' IDENTIFIER ';' // redefinition
+    ;
+
+literalDeclaration
+    : LITERAL literalDeclarationItem ( ',' literalDeclarationItem )* ';'
+    ;
+
+literalDeclarationItem
+    : IDENTIFIER ( '=' CONSTANT )?
+    ;
+
+defineDeclaration
+    : DEFINE defineDeclarationItem ( ',' defineDeclarationItem )* ';'
+    ;
+
+defineDeclarationItem
+    : IDENTIFIER defineParamList? '=' ( STRING_LITERAL | ANY )* '#'
+    ;
+
+defineParamList
+    : '(' IDENTIFIER ( ',' IDENTIFIER )* ')'
+    ;
+
+// Expressions
+expression
+    : relationalExpression
+    | groupComparisonExpression
+    | arithmeticExpression
+    | conditionalExpression
+    ;
+
+groupComparisonExpression
+    : variable relationalOperator groupComparisonOperand ( ARROW variable )?
+    ;
+
+groupComparisonOperand
+    : variable FOR arithmeticExpression ( BYTES | WORDS | ELEMENTS )?
+    | CONSTANT | IDENTIFIER
+    | '[' CONSTANT | IDENTIFIER ']'
+    | constantList
+    ;
+
+ifExpression
+    : IF ifExpressionElement THEN ifExpressionElement ( ELSE ifExpressionElement )?
+    ;
+
+ifExpressionElement
+    : ( arithmeticExpression | conditionalExpression )
+    ;
+
+caseExpression
+    : CASE arithmeticExpression OF BEGIN caseExpressionElement+ ( OTHERWISE caseExpressionElement )? END
+    ;
+
+caseExpressionElement
+    : ( arithmeticExpression | conditionalExpression ) ';'
+    ;
+
+assignmentExpression
+    : ( variable ':=' )+ ( arithmeticExpression | conditionalExpression )
+    ;
+
+conditionalExpression
+    : NOT? condition ( ( AND | OR )? NOT? condition )*
+    ;
+
+condition
+    : relationalExpression
+    | groupComparisonExpression
+    | arithmeticExpression
+    | relationalOperator
+    ;
+
+relationalExpression
+    : operand relationalOperator operand
+    ;
+
+relationalOperator
+    : LESS | LESSEQUAL | GREATER | GREATEREQUAL | EQUAL | NOTEQUAL
+    ;
+
+arithmeticExpression
+    : unaryOperator? operand ( arithmeticOperator operand )*
+    | '(' arithmeticExpression ')' BIT_EXTRACT?
+    ;
+
+arithmeticOperator
+    : PLUS
+    | MINUS
+    | DIV
+    | MOD
+    | MULT
+    | LOR
+    | LAND
+    | XOR
+    | LEFTSHIFT
+    | RIGHTSHIFT
+    ;
+
+unaryOperator
+    : PLUS
+    | MINUS
+    ;
+
+operand
+    : variable | CONSTANT | expression | functionInvocation
+    | '(' operand ')'
+    ;
+
+variable
+    : pointerVariable
+    | arrayVariable BIT_EXTRACT?
+    | IDENTIFIER BIT_EXTRACT?
+    ;
+
+arrayVariable
+    : IDENTIFIER '[' ( arithmeticExpression | assignmentExpression ) ']'
+    ;
+
+pointerVariable
+    : '@' arrayVariable
+    | '@' IDENTIFIER
+    ;
+
+// A constant list is a list of one or more constants
+// E.g. `[ "A", "BCD" , "...", "Z" ]` or `10 * [0]`
+constantList
+    : repetitionConstantList
+    | '[' repetitionConstantList ']'
+    | '[' constantListSequence ']'
+    ;
+
+repetitionConstantList
+    : INT_CONSTANT '*' '[' constantListSequence ']'
+    ;
+
+constantListSequence
+    : NUMERIC_CONSTANT ( ',' constantListSequence )*
+    | STRING_LITERAL ( ',' constantListSequence )*
+    | repetitionConstantList ( ',' constantListSequence )*
+    ;
+
+// LEXER
+
 // Data types
-UNSIGNED : U N S I G N E D LEFTPAREN DIGIT_SEQUENCE RIGHTPAREN;
+DATA_TYPE
+    : UNSIGNED
+    | STRING
+    | FIXED
+    | INT32
+    | INT
+    | REAL64
+    | REAL
+    ;
+
+UNSIGNED : U N S I G N E D '(' DIGIT_SEQUENCE ')';
 STRING : S T R I N G;
 FIXED
-    : F I X E D ( LEFTPAREN ( '*' | SIGN? DIGIT_SEQUENCE )? RIGHTPAREN)?
-    | I N T LEFTPAREN '64' RIGHTPAREN
+    : F I X E D ( '(' ( '*' | SIGN? DIGIT_SEQUENCE )? ')')?
+    | I N T '(' '64' ')'
     ;
-INT32 : I N T LEFTPAREN '32' RIGHTPAREN;
-INT : I N T ( LEFTPAREN '16' RIGHTPAREN )?;
-REAL64 : R E A L LEFTPAREN '64' RIGHTPAREN;
-REAL : R E A L ( LEFTPAREN '32' RIGHTPAREN )?;
+INT32 : I N T '(' '32' ')';
+INT : I N T ( '(' '16' ')' )?;
+REAL64 : R E A L '(' '64' ')';
+REAL : R E A L ( '(' '32' ')' )?;
+
+// Special Data Types
 LITERAL : L I T E R A L;
 STRUCT : S T R U C T;
+DEFINE : D E F I N E;
 
 // Reserved keywords
 CASE : C A S E;
 CALL : C A L L;
 BEGIN : B E G I N;
 DO : D O;
+DROP : D R O P;
 ELSE : E L S E;
 END : E N D;
 FOR : F O R;
@@ -40,11 +353,14 @@ DOWNTO : D O W N T O;
 BY : B Y;
 PROC : P R O C;
 SUBPROC : S U B P R O C;
+ASSERT : A S S E R T;
 
-LEFTPAREN : '(';
-RIGHTPAREN : ')';
-LEFTBRACKET : '[';
-RIGHTBRACKET : ']';
+// Non-reserved keywords
+BYTES : B Y T E S;
+WORDS : W O R D S;
+ELEMENTS : E L E M E N T S;
+FILLER : F I L L E R; // inside struct only
+BIT_FILLER : B I T '_' F I L L E R; // inside struct only
 
 // Operators
 LESS : '<' | '\'<\'';
@@ -57,6 +373,7 @@ RIGHTSHIFT : '>>' | '\'>>\'';
 
 PLUS : '+' | '\'+\'';
 MINUS : '-' | '\'-\'';
+MULT : '*' | '\'*\'';
 DIV : '/' | '\'/\'';
 MOD : '\'\\\'';
 
@@ -65,12 +382,11 @@ OR : O R;
 LAND : L A N D;
 LOR : L O R;
 NOT : N O T;
+XOR : X O R;
 
-AT : '@';
-BIT_EXTRACT : '.<' DIGIT_SEQUENCE ( COLON DIGIT_SEQUENCE )? '>';
-COLON : ':';
-SEMI : ';';
-COMMA : ',';
+P_REGISTER : '\'' P '\'';
+EXT : '.' E X T;
+BIT_EXTRACT : '.<' DIGIT_SEQUENCE ( ':' DIGIT_SEQUENCE )? '>';
 
 ASSIGN
     : ':='
@@ -91,6 +407,11 @@ DIRECTIVE_START
 
 IDENTIFIER
     : [a-zA-Z^_] [a-zA-Z0-9^_]*
+    ;
+
+CONSTANT
+    : NUMERIC_CONSTANT
+    | STRING_LITERAL
     ;
 
 NUMERIC_CONSTANT
