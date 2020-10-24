@@ -1,5 +1,9 @@
 grammar TAL;
 
+program
+    : declaration*
+    ;
+
 unknown
     : ANY+
     ;
@@ -85,11 +89,17 @@ moveStatement
     : variable ( '\':=\'' | '\'=:\'' )
     ;
 
-// Name and blocks
-name
-    : N A M E IDENTIFIER ';';
-
 // Declarations
+declaration
+    : simpleDeclaration
+    | readOnlyArrayDeclaration
+    | structDeclaration
+    | structReferralDeclaration
+    | structTemplateDeclaration
+    | defineDeclaration
+    | literalDeclaration
+    ;
+
 simpleDeclaration
     : DATA_TYPE simpleDeclarationItem ( ',' simpleDeclarationItem )* ';'
     ;
@@ -403,6 +413,10 @@ DOT : '.';
 
 DIRECTIVE_START
     : '?' { this.charPositionInLine === 0; }
+    ;
+
+NAME
+    : N A M E IDENTIFIER ';' -> skip
     ;
 
 IDENTIFIER
