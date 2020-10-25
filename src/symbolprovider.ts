@@ -115,7 +115,6 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
       return cached;
     }
 
-    console.time(">old sp:");
     for (lineNum = 0; lineNum < document.lineCount; lineNum++) {
       const line = document.lineAt(lineNum).text;
 
@@ -134,7 +133,6 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
     // If a document has procs/subprocs then present those.
     // If, however, it's a document without procs then present sections/pages instead.
     if (procSymbols.length > 0) {
-      console.timeEnd(">old sp:");
       this._cache.set(document, procSymbols);
       return procSymbols;
     }
@@ -163,7 +161,6 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
       }
     }
 
-    console.timeEnd(">old sp:");
     this._cache.set(document, sectionSymbols);
     return sectionSymbols;
   }

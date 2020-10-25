@@ -78,7 +78,6 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
       return cached;
     }
 
-    console.time(">old fr");
     for (lineNum = 0; lineNum < document.lineCount; lineNum++) {
       const line = document.lineAt(lineNum).text;
 
@@ -105,7 +104,6 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
       result.push(foldableCommentBlock);
     }
 
-    console.timeEnd(">old fr");
     this._cache.set(document, result);
     return result;
   }
