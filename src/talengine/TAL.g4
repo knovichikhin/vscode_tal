@@ -7,29 +7,38 @@ program
 
 // Functions
 procInvocation
-    : identifier '(' expression? ( ',' expression? )* ')'
-    | '$' identifier ( '(' expression? ( ',' expression? )* ')' )? // built-in
+    : identifier procInvocationParamList
+    | '$' identifier procInvocationParamList? // built-in
+    ;
+
+procInvocationParamList
+    : '(' procInvocationParam? ( ',' procInvocationParam? )* ')'
+    ;
+
+procInvocationParam
+    : expression ':' expression
+    | expression
     ;
 
 procDeclaration
-    : dataType? PROC identifier ( '=' STRING_LITERAL )? paramList? procAttributes ';'
-      paramSpec* ( procBody | EXTERNAL | FORWARD ) ';'
+    : dataType? PROC identifier ( '=' STRING_LITERAL )? procDeclarationParamList? procDeclarationAttributes ';'
+      procDeclarationParamSpec* ( procDeclarationBody | EXTERNAL | FORWARD ) ';'
     ;
 
-paramList
-    : '(' param ( ',' param )* ')'
+procDeclarationParamList
+    : '(' procDeclarationParam ( ',' procDeclarationParam )* ')'
     ;
 
-param
-    : identifier ':' expression
+procDeclarationParam
+    : identifier ':' identifier
     | identifier
     ;
 
-procAttributes
-    : procAttribute? ( ',' procAttribute? )*
+procDeclarationAttributes
+    : procDeclarationAttribute? ( ',' procDeclarationAttribute? )*
     ;
 
-procAttribute
+procDeclarationAttribute
     : MAIN
     | INTERRUPT
     | RESIDENT
@@ -40,19 +49,19 @@ procAttribute
     | LANGUAGE ( CLANG | COBOL | FORTRAN | PASCAL | UNSPECIFIED )
     ;
 
-paramSpec
+procDeclarationParamSpec
     : dataType? PROC ( '(' '32' ')' )? identifier ( ',' identifier )* ';'
-    | dataType ( DOT EXT? )? identifier ( '(' identifier ')' )? ( ',' identifier ( '(' identifier ')' )? )* ';'
-    | STRUCT ( DOT EXT? ) identifier ( '(' identifier ')' )? ( ',' identifier ( '(' identifier ')' )? )* ';'
+    | dataType ( '.' EXT? )? identifier ( '(' identifier ')' )? ( ',' identifier ( '(' identifier ')' )? )* ';'
+    | STRUCT ( '.' EXT? ) identifier ( '(' identifier ')' )? ( ',' identifier ( '(' identifier ')' )? )* ';'
     ;
 
-procBody
+procDeclarationBody
     : BEGIN variableDeclaration* subprocDeclaration* statements? END
     ;
 
 subprocDeclaration
-    : dataType? SUBPROC identifier paramList? VARIABLE? ';'
-      ( paramSpec )* ( subprocBody | FORWARD ) ';'
+    : dataType? SUBPROC identifier procDeclarationParamList? VARIABLE? ';'
+      ( procDeclarationParamSpec )* ( subprocBody | FORWARD ) ';'
     ;
 
 subprocBody
@@ -82,6 +91,8 @@ statement
     | storeStatement
     | useStatement
     | whileStatement
+    | procInvocation
+    | identifier // identifier by itself is also procInvocation without params
     | ';' // Empty statement
     ;
 
@@ -102,11 +113,11 @@ callStatement
     ;
 
 labeledCaseStatement
-    : CASE arithmeticExpression OF BEGIN caseAlternative+ ( OTHERWISE ARROW statement )? ';' END
+    : CASE arithmeticExpression OF BEGIN caseAlternative+ ( OTHERWISE '->' statement )? ';' END
     ;
 
 caseAlternative
-    : caseLabel ( ',' caseLabel )* ARROW statement ';'
+    : caseLabel ( ',' caseLabel )* '->' statement ';'
     ;
 
 caseLabel
@@ -134,7 +145,7 @@ ifStatement
     ;
 
 moveStatement
-    : variable ( '\':=\'' | '\'=:\'' ) moveStatementSource ( '&' moveStatementSource )* ( ARROW variable )?
+    : variable MOVE moveStatementSource ( '&' moveStatementSource )* ( '->' variable )?
     ;
 
 moveStatementSource
@@ -149,7 +160,7 @@ returnStatement
     ;
 
 scanStatement
-    : ( SCAN | RSCAN ) variable ( WHILE | UNTIL ) arithmeticExpression ( ARROW variable )?
+    : ( SCAN | RSCAN ) variable ( WHILE | UNTIL ) arithmeticExpression ( '->' variable )?
     ;
 
 storeStatement
@@ -191,15 +202,15 @@ simpleDeclarationItemVariable
     ;
 
 simpleDeclarationItemPointer
-    : ( DOT EXT? ) identifier ( ':=' constant | arithmeticExpression )?
+    : ( '.' EXT? ) identifier ( ':=' constant | arithmeticExpression )?
     ;
 
 simpleDecalrationItemStructPointer
-    : ( DOT EXT? ) identifier '(' identifier ')'  ( ':=' constant | arithmeticExpression )?
+    : ( '.' EXT? ) identifier '(' identifier ')'  ( ':=' constant | arithmeticExpression )?
     ;
 
 simpleDeclarationItemArray
-    : ( DOT EXT? )? identifier '[' arithmeticExpression ':' arithmeticExpression ']' ( ':=' constantList )?
+    : ( '.' EXT? )? identifier '[' arithmeticExpression ':' arithmeticExpression ']' ( ':=' constantList )?
     ;
 
 readOnlyArrayDeclaration
@@ -211,7 +222,7 @@ readOnlyArrayDeclarationItem
     ;
 
 structDeclaration
-    : STRUCT ( DOT EXT? )? identifier ( '[' arithmeticExpression ':' arithmeticExpression ']' )? ';' structDeclarationLayout
+    : STRUCT ( '.' EXT? )? identifier ( '[' arithmeticExpression ':' arithmeticExpression ']' )? ';' structDeclarationLayout
     ;
 
 structTemplateDeclaration
@@ -219,7 +230,7 @@ structTemplateDeclaration
     ;
 
 structReferralDeclaration
-    : STRUCT ( DOT EXT? )? identifier '(' identifier ')' ( '[' arithmeticExpression ':' arithmeticExpression ']' )? ';'
+    : STRUCT ( '.' EXT? )? identifier '(' identifier ')' ( '[' arithmeticExpression ':' arithmeticExpression ']' )? ';'
     ;
 
 subStructDeclaration // with optional redefinition
@@ -238,15 +249,15 @@ structDeclarationLayoutDeclaration
     : dataType structDeclarationLayoutDeclarationItem ( ',' structDeclarationLayoutDeclarationItem )* ';'
     | subStructDeclaration
     | subStructReferralDeclaration
-    | dataType ( DOT EXT? ) structIdentifier  '=' structIdentifier ';' // simple pointers with optional redefinition
-    | ( STRUCT | INT ) ( DOT EXT? ) structIdentifier '(' structIdentifier ')' ( ',' ( DOT EXT? ) structIdentifier '(' structIdentifier ')' )* ';' // struct pointers
-    | ( STRUCT | INT ) ( DOT EXT? ) structIdentifier '(' structIdentifier ')' '=' structIdentifier ';' // struct pointers with optional redefinition
+    | dataType ( '.' EXT? ) structIdentifier  '=' structIdentifier ';' // simple pointers with optional redefinition
+    | ( STRUCT | INT ) ( '.' EXT? ) structIdentifier '(' structIdentifier ')' ( ',' ( '.' EXT? ) structIdentifier '(' structIdentifier ')' )* ';' // struct pointers
+    | ( STRUCT | INT ) ( '.' EXT? ) structIdentifier '(' structIdentifier ')' '=' structIdentifier ';' // struct pointers with optional redefinition
     | ( FILLER | BIT_FILLER ) INT_CONSTANT ';'
     | dataType structIdentifier ( '[' arithmeticExpression ':' arithmeticExpression ']' )? '=' structIdentifier ';' // redefinition
     ;
 
 structDeclarationLayoutDeclarationItem
-    : ( DOT EXT? )? structIdentifier // simple variable or pointer
+    : ( '.' EXT? )? structIdentifier // simple variable or pointer
     | structIdentifier '[' arithmeticExpression ':' arithmeticExpression ']' // array variable
     ;
 
@@ -255,7 +266,7 @@ literalDeclaration
     ;
 
 literalDeclarationItem
-    : literalDefineIdentifier ( '=' constant )?
+    : literalDefineIdentifier ( '=' ( '+' | '-' )? constant )?
     ;
 
 defineDeclaration
@@ -280,14 +291,14 @@ expression
     | ifExpression
     | caseExpression
     | assignmentExpression
+    | procInvocation
     | variable
     | constant
-    | procInvocation
     ;
 
 groupComparisonExpression
     : '(' groupComparisonExpression ')'
-    | variable relationalOperator groupComparisonOperand ( ARROW variable )?
+    | variable relationalOperator groupComparisonOperand ( '->' variable )?
     ;
 
 groupComparisonOperand
@@ -338,7 +349,7 @@ relationalExpression
     ;
 
 relationalOperator
-    : LESS | LESSEQUAL | GREATER | GREATEREQUAL | EQUAL | NOTEQUAL
+    : LESS | LESSEQUAL | GREATER | GREATEREQUAL | EQUAL | NOT_EQUAL
     ;
 
 arithmeticExpression
@@ -408,7 +419,7 @@ repetitionConstantList
     ;
 
 constantListSequence
-    : NUMERIC_CONSTANT ( ',' constantListSequence )*
+    : numericConstant ( ',' constantListSequence )*
     | STRING_LITERAL ( ',' constantListSequence )*
     | repetitionConstantList ( ',' constantListSequence )*
     ;
@@ -425,8 +436,16 @@ dataType
     ;
 
 constant
-    : NUMERIC_CONSTANT
+    : numericConstant
     | STRING_LITERAL
+    ;
+
+numericConstant
+    : REAL64_CONSTANT
+    | REAL_CONSTANT
+    | FIXED_CONSTANT
+    | INT32_CONSTANT
+    | INT_CONSTANT
     ;
 
 // Context-sensitive identifiers
@@ -552,7 +571,7 @@ BYTES : B Y T E S;          // reserved inside literal/define declaration
 WORDS : W O R D S;          // reserved inside literal/define declaration
 ELEMENTS : E L E M E N T S; // reserved inside literal/define declaration
 
-CLANG : C;                            // function declaration
+CLANG : C;                           // function declaration
 COBOL : C O B O L;                   // function declaration
 EXTENSIBLE : E X T E N S I B L E;    // function declaration
 FORTRAN : F O R T R A N;             // function declaration
@@ -584,18 +603,13 @@ XOR : X O R;
 P_REGISTER : '\'' P '\'';
 BIT_EXTRACT : '.<' DIGIT_SEQUENCE ( ':' DIGIT_SEQUENCE )? '>';
 
-ASSIGN
-    : ':='
-    | '=:'
-    | '\':=\''
+MOVE
+    : '\':=\''
     | '\'=:\''
     ;
 
 EQUAL : '=' | '\'=\'';
-NOTEQUAL : '<>' | '\'<>\'';
-
-ARROW : '->';
-DOT : '.';
+NOT_EQUAL : '<>' | '\'<>\'';
 
 // Skip directives
 DIRECTIVE
@@ -614,14 +628,6 @@ NAME
 
 IDENTIFIER
     : [a-zA-Z^_] [a-zA-Z0-9^_]*
-    ;
-
-NUMERIC_CONSTANT
-    : REAL64_CONSTANT
-    | REAL_CONSTANT
-    | FIXED_CONSTANT
-    | INT32_CONSTANT
-    | INT_CONSTANT
     ;
 
 INT_CONSTANT
@@ -653,93 +659,75 @@ REAL64_CONSTANT
     : DECIMAL_CONSTANT '.' DECIMAL_CONSTANT EXPONENT_PART_REAL64
     ;
 
-fragment
-EXPONENT_PART_REAL
+fragment EXPONENT_PART_REAL
     : [eE] SIGN? DIGIT DIGIT?
     ;
 
-fragment
-EXPONENT_PART_REAL64
+fragment EXPONENT_PART_REAL64
     : [lL] SIGN? DIGIT DIGIT?
     ;
 
-fragment
-SIGN
+fragment SIGN
     : '+' | '-'
     ;
 
-fragment
-DECIMAL_CONSTANT
+fragment DECIMAL_CONSTANT
     : DIGIT_SEQUENCE
     ;
 
-fragment
-DIGIT_SEQUENCE
+fragment DIGIT_SEQUENCE
     : DIGIT+
     ;
 
-fragment
-DIGIT
+fragment DIGIT
     : [0-9]
     ;
 
-fragment
-BINARY_CONSTANT
+fragment BINARY_CONSTANT
     : BINARY_BASE BINARY_DIGIT_SEQUENCE
     ;
 
-fragment
-BINARY_DIGIT_SEQUENCE
+fragment BINARY_DIGIT_SEQUENCE
     : BINARY_DIGIT+
     ;
 
-fragment
-BINARY_BASE
+fragment BINARY_BASE
     : '%' [bB]
     ;
 
-fragment
-BINARY_DIGIT
+fragment BINARY_DIGIT
     : [0-1]
     ;
 
-fragment
-OCTAL_CONSTANT
+fragment OCTAL_CONSTANT
     : OCTAL_BASE OCTAL_DIGIT_SEQUENCE
     ;
 
-fragment
-OCTAL_DIGIT_SEQUENCE
+fragment OCTAL_DIGIT_SEQUENCE
     : OCTAL_DIGIT+
     ;
 
-fragment
-OCTAL_BASE
+fragment OCTAL_BASE
     : '%'
     ;
 
-fragment
-OCTAL_DIGIT
+fragment OCTAL_DIGIT
     : [0-7]
     ;
 
-fragment
-HEXADECIMAL_CONSTANT
+fragment HEXADECIMAL_CONSTANT
     : HEXADECIMAL_BASE HEXADECIMAL_DIGIT_SEQUENCE
     ;
 
-fragment
-HEXADECIMAL_DIGIT_SEQUENCE
+fragment HEXADECIMAL_DIGIT_SEQUENCE
     : HEXADECIMAL_DIGIT+
     ;
 
-fragment
-HEXADECIMAL_BASE
+fragment HEXADECIMAL_BASE
     : '%' [hH]
     ;
 
-fragment
-HEXADECIMAL_DIGIT
+fragment HEXADECIMAL_DIGIT
     : [0-9a-fA-F]
     ;
 
