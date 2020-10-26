@@ -2,14 +2,17 @@
 
 import * as vscode from "vscode";
 import { DocumentCache } from "./cache";
-import { CharStreams, CommonTokenStream } from 'antlr4ts';
+import { CharStreams, CommonTokenStream } from "antlr4ts";
+import {
+  AbstractParseTreeVisitor,
+  TerminalNode,
+  ParseTree,
+  RuleNode,
+  ErrorNode,
+} from "antlr4ts/tree";
 import { TALLexer } from "./talengine/antlr/TALLexer";
-import { TALParser } from "./talengine/antlr/TALParser";
+import { ProcDeclarationContext, TALParser } from "./talengine/antlr/TALParser";
 import { TALVisitor } from "./talengine/antlr/TALVisitor";
-import { ParseTree } from "antlr4ts/tree/ParseTree";
-import { RuleNode } from "antlr4ts/tree/RuleNode";
-import { TerminalNode } from "antlr4ts/tree/TerminalNode";
-import { ErrorNode } from "antlr4ts/tree/ErrorNode";
 
 /*
 export class TALDocumentSemanticTokensProvider
@@ -45,21 +48,14 @@ export class TALDocumentSemanticTokensProvider
 }
 */
 
-class SemanticTALVisitor implements TALVisitor<void> {
-  public visit(tree: ParseTree): void {
-    return;
+class SemanticTALVisitor
+  extends AbstractParseTreeVisitor<void>
+  implements TALVisitor<void> {
+  public defaultResult(): void {
+    console.log("defaultResult");
   }
-
-  public visitChildren(node: RuleNode): void {
-    console.log("visitChildren");
-  }
-
-  public visitTerminal(node: TerminalNode): void {
-    console.log("visitTerminal");
-  }
-
-  public visitErrorNode(node: ErrorNode): void {
-    console.log("visitErrorNode");
+  public visitProcDeclaration(ctx: ProcDeclarationContext) {
+    console.log(ctx.text);
   }
 }
 
@@ -71,7 +67,6 @@ export class ANTLRTALDocumentSemanticTokensProvider
     document: vscode.TextDocument,
     token: vscode.CancellationToken
   ): Promise<vscode.SemanticTokens> {
-
     //const cached = this._cache.get(document);
     //if (cached) {
     //  return cached[0];
@@ -79,22 +74,21 @@ export class ANTLRTALDocumentSemanticTokensProvider
     const stream = CharStreams.fromString(document.getText());
     const lexer = new TALLexer(stream);
     const tokenStream = new CommonTokenStream(lexer);
+
     //tokenStream.fill();
     //const t = tokenStream.getTokens();
-    const v = lexer.vocabulary;
     //console.log("LEXER========================================");
     //t.forEach((i) => {
-    //  console.log(v.getSymbolicName(i.type) + " >> `" + i.text + "`");
+    //  console.log(lexer.vocabulary.getSymbolicName(i.type) + " >> `" + i.text + "`");
     //});
 
     const parser = new TALParser(tokenStream);
-    const programContext = parser.program();
+    const tree = parser.program();
     const visitor = new SemanticTALVisitor();
     console.log("PARSER========================================");
-    console.log(programContext.toInfoString(parser));
-    console.log(programContext.toStringTree());
-    console.log(programContext.toString(parser.ruleNames));
-    visitor.visit(programContext);
+    console.log(tree.toStringTree());
+    visitor.visit(tree);
+
     const builder = new vscode.SemanticTokensBuilder(TALSemanticTokensLegend);
     const result = builder.build();
 

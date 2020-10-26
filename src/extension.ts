@@ -11,7 +11,6 @@ import {
 import { TALDocumentSymbolProvider } from "./symbolprovider";
 
 export function activate(context: vscode.ExtensionContext) {
-
   const talCompletionItemProvider = vscode.languages.registerCompletionItemProvider(
     "tal",
     new TALCompletionItemProvider()

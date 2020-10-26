@@ -8,11 +8,12 @@ program
 // Functions
 procInvocation
     : identifier '(' expression? ( ',' expression? )* ')'
+    | '$' identifier ( '(' expression? ( ',' expression? )* ')' )? // built-in
     ;
 
 procDeclaration
-    : DATA_TYPE? PROC identifier ( '=' STRING_LITERAL )? paramList? procAttributes? ';'
-      ( paramSpec )* ( procBody | EXTERNAL | FORWARD ) ';'
+    : dataType? PROC identifier ( '=' STRING_LITERAL )? paramList? procAttributes ';'
+      paramSpec* ( procBody | EXTERNAL | FORWARD ) ';'
     ;
 
 paramList
@@ -40,17 +41,17 @@ procAttribute
     ;
 
 paramSpec
-    : DATA_TYPE? PROC ( '(' '32' ')' )? identifier ( ',' identifier )* ';'
-    | DATA_TYPE ( DOT EXT? )? identifier ( '(' identifier ')' )? ( ',' identifier ( '(' identifier ')' )? )* ';'
+    : dataType? PROC ( '(' '32' ')' )? identifier ( ',' identifier )* ';'
+    | dataType ( DOT EXT? )? identifier ( '(' identifier ')' )? ( ',' identifier ( '(' identifier ')' )? )* ';'
     | STRUCT ( DOT EXT? ) identifier ( '(' identifier ')' )? ( ',' identifier ( '(' identifier ')' )? )* ';'
     ;
 
 procBody
-    : BEGIN variableDeclaration* subprocDeclaration* statements? END ';'
+    : BEGIN variableDeclaration* subprocDeclaration* statements? END
     ;
 
 subprocDeclaration
-    : DATA_TYPE? SUBPROC identifier paramList? VARIABLE? ';'
+    : dataType? SUBPROC identifier paramList? VARIABLE? ';'
       ( paramSpec )* ( subprocBody | FORWARD ) ';'
     ;
 
@@ -97,7 +98,7 @@ assignmentStatement
     ;
 
 callStatement
-    : CALL procInvocation
+    : CALL ( procInvocation | identifier )
     ;
 
 labeledCaseStatement
@@ -133,13 +134,13 @@ ifStatement
     ;
 
 moveStatement
-    : variable ( '\':=\'' | '\'=:\'' ) moveStatementSource ( '&' moveStatementSource )* ( '->' variable )?
+    : variable ( '\':=\'' | '\'=:\'' ) moveStatementSource ( '&' moveStatementSource )* ( ARROW variable )?
     ;
 
 moveStatementSource
     : variable FOR arithmeticExpression ( BYTES | WORDS | ELEMENTS )?
-    | '[' CONSTANT ']'
-    | CONSTANT
+    | '[' constant ']'
+    | constant
     | constantList
     ;
 
@@ -148,7 +149,7 @@ returnStatement
     ;
 
 scanStatement
-    : ( SCAN | RSCAN ) variable ( WHILE | UNTIL ) arithmeticExpression ( '->' variable )?
+    : ( SCAN | RSCAN ) variable ( WHILE | UNTIL ) arithmeticExpression ( ARROW variable )?
     ;
 
 storeStatement
@@ -175,7 +176,7 @@ variableDeclaration
     ;
 
 simpleDeclaration
-    : DATA_TYPE simpleDeclarationItem ( ',' simpleDeclarationItem )* ';'
+    : dataType simpleDeclarationItem ( ',' simpleDeclarationItem )* ';'
     ;
 
 simpleDeclarationItem
@@ -186,15 +187,15 @@ simpleDeclarationItem
     ;
 
 simpleDeclarationItemVariable
-    : identifier ( ':=' CONSTANT | arithmeticExpression )?
+    : identifier ( ':=' constant | arithmeticExpression )?
     ;
 
 simpleDeclarationItemPointer
-    : ( DOT EXT? ) identifier ( ':=' CONSTANT | arithmeticExpression )?
+    : ( DOT EXT? ) identifier ( ':=' constant | arithmeticExpression )?
     ;
 
 simpleDecalrationItemStructPointer
-    : ( DOT EXT? ) identifier '(' identifier ')'  ( ':=' CONSTANT | arithmeticExpression )?
+    : ( DOT EXT? ) identifier '(' identifier ')'  ( ':=' constant | arithmeticExpression )?
     ;
 
 simpleDeclarationItemArray
@@ -202,7 +203,7 @@ simpleDeclarationItemArray
     ;
 
 readOnlyArrayDeclaration
-    : DATA_TYPE readOnlyArrayDeclarationItem ( ',' readOnlyArrayDeclarationItem )* ';'
+    : dataType readOnlyArrayDeclarationItem ( ',' readOnlyArrayDeclarationItem )* ';'
     ;
 
 readOnlyArrayDeclarationItem
@@ -234,14 +235,14 @@ structDeclarationLayout
     ;
 
 structDeclarationLayoutDeclaration
-    : DATA_TYPE structDeclarationLayoutDeclarationItem ( ',' structDeclarationLayoutDeclarationItem )* ';'
+    : dataType structDeclarationLayoutDeclarationItem ( ',' structDeclarationLayoutDeclarationItem )* ';'
     | subStructDeclaration
     | subStructReferralDeclaration
-    | DATA_TYPE ( DOT EXT? ) structIdentifier  '=' structIdentifier ';' // simple pointers with optional redefinition
+    | dataType ( DOT EXT? ) structIdentifier  '=' structIdentifier ';' // simple pointers with optional redefinition
     | ( STRUCT | INT ) ( DOT EXT? ) structIdentifier '(' structIdentifier ')' ( ',' ( DOT EXT? ) structIdentifier '(' structIdentifier ')' )* ';' // struct pointers
     | ( STRUCT | INT ) ( DOT EXT? ) structIdentifier '(' structIdentifier ')' '=' structIdentifier ';' // struct pointers with optional redefinition
     | ( FILLER | BIT_FILLER ) INT_CONSTANT ';'
-    | DATA_TYPE structIdentifier ( '[' arithmeticExpression ':' arithmeticExpression ']' )? '=' structIdentifier ';' // redefinition
+    | dataType structIdentifier ( '[' arithmeticExpression ':' arithmeticExpression ']' )? '=' structIdentifier ';' // redefinition
     ;
 
 structDeclarationLayoutDeclarationItem
@@ -254,7 +255,7 @@ literalDeclaration
     ;
 
 literalDeclarationItem
-    : literalDefineIdentifier ( '=' CONSTANT )?
+    : literalDefineIdentifier ( '=' constant )?
     ;
 
 defineDeclaration
@@ -280,7 +281,7 @@ expression
     | caseExpression
     | assignmentExpression
     | variable
-    | CONSTANT
+    | constant
     | procInvocation
     ;
 
@@ -291,8 +292,8 @@ groupComparisonExpression
 
 groupComparisonOperand
     : variable FOR arithmeticExpression ( BYTES | WORDS | ELEMENTS )?
-    | CONSTANT | identifier
-    | '[' CONSTANT | identifier ']'
+    | constant | identifier
+    | '[' constant | identifier ']'
     | constantList
     ;
 
@@ -366,7 +367,7 @@ unaryOperator
 
 operand
     : '(' operand ')'
-    | variable | CONSTANT | procInvocation
+    | variable | constant | procInvocation
     ;
 
 variable
@@ -410,6 +411,22 @@ constantListSequence
     : NUMERIC_CONSTANT ( ',' constantListSequence )*
     | STRING_LITERAL ( ',' constantListSequence )*
     | repetitionConstantList ( ',' constantListSequence )*
+    ;
+
+// Data types
+dataType
+    : UNSIGNED
+    | STRING
+    | FIXED
+    | INT32
+    | INT
+    | REAL64
+    | REAL
+    ;
+
+constant
+    : NUMERIC_CONSTANT
+    | STRING_LITERAL
     ;
 
 // Context-sensitive identifiers
@@ -461,27 +478,16 @@ literalDefineIdentifier
 
 // LEXER
 
-// Data types
-DATA_TYPE
-    : UNSIGNED
-    | STRING
-    | FIXED
-    | INT32
-    | INT
-    | REAL64
-    | REAL
-    ;
-
-UNSIGNED : U N S I G N E D '(' DIGIT_SEQUENCE ')';
+UNSIGNED : U N S I G N E D WS? '(' WS? DIGIT_SEQUENCE WS? ')';
 STRING : S T R I N G;
 FIXED
-    : F I X E D ( '(' ( '*' | SIGN? DIGIT_SEQUENCE )? ')')?
-    | I N T '(' '64' ')'
+    : F I X E D ( WS? '(' WS? ( '*' | SIGN? DIGIT_SEQUENCE )? WS? ')' )?
+    | I N T WS? '(' WS? '64' WS? ')'
     ;
-INT32 : I N T '(' '32' ')';
-INT : I N T ( '(' '16' ')' )?;
-REAL64 : R E A L '(' '64' ')';
-REAL : R E A L ( '(' '32' ')' )?;
+INT32 : I N T WS? '(' WS? '32' WS? ')';
+INT : I N T ( WS? '(' WS? '16' WS? ')' )?;
+REAL64 : R E A L WS? '(' WS? '64' WS? ')';
+REAL : R E A L ( WS? '(' WS? '32' WS? ')' )?;
 
 // Special Data Types
 LITERAL : L I T E R A L;
@@ -603,16 +609,11 @@ DIRECTIVE_START
 
 // Skip unit name
 NAME
-    : N A M E ( WHITESPACE | NEWLINE )+ IDENTIFIER ';' -> skip
+    : N A M E ( WS | NEWLINE )+ IDENTIFIER ';' -> skip
     ;
 
 IDENTIFIER
     : [a-zA-Z^_] [a-zA-Z0-9^_]*
-    ;
-
-CONSTANT
-    : NUMERIC_CONSTANT
-    | STRING_LITERAL
     ;
 
 NUMERIC_CONSTANT
@@ -754,7 +755,7 @@ LINECOMMENT
     : '--' ~[\r\n]* -> skip
     ;
 
-WHITESPACE
+WS
     : [ \f\t]+ -> skip
     ;
 
