@@ -8,7 +8,10 @@ program
 // Functions
 procInvocation
     : identifier procInvocationParamList
-    | '$' identifier procInvocationParamList? // built-in
+    ;
+
+stdlibInvocation
+    : '$' identifier procInvocationParamList? // built-in
     ;
 
 procInvocationParamList
@@ -56,22 +59,22 @@ procDeclarationParamSpec
     ;
 
 procDeclarationBody
-    : BEGIN variableDeclaration* subprocDeclaration* statements? END
+    : BEGIN variableDeclaration* subprocDeclaration* statements END
     ;
 
 subprocDeclaration
     : dataType? SUBPROC identifier procDeclarationParamList? VARIABLE? ';'
-      ( procDeclarationParamSpec )* ( subprocBody | FORWARD ) ';'
+      ( procDeclarationParamSpec )* ( subprocDeclarationBody | FORWARD ) ';'
     ;
 
-subprocBody
-    : BEGIN variableDeclaration* statements? END ';'
+subprocDeclarationBody
+    : BEGIN variableDeclaration* statements END ';'
     ;
 
 
 // Statements
 statements
-    : statement ( ';' statement? )*
+    : statement? ( ';' statement? )*
     ;
 
 statement
@@ -92,20 +95,20 @@ statement
     | useStatement
     | whileStatement
     | procInvocation
+    | stdlibInvocation
     | identifier // identifier by itself is also procInvocation without params
-    | ';' // Empty statement
     ;
 
 compoundStatement
-    : BEGIN ( statements )? END
+    : BEGIN statements END
     ;
 
 assertStatement
-    : ASSERT INT_CONSTANT ':' condition
+    : ASSERT INT_CONSTANT ':' expression
     ;
 
 assignmentStatement
-    : ( variable ':=' )+ ( arithmeticExpression | conditionalExpression )
+    : ( variable BIT_EXTRACT? ':=' )+ ( arithmeticExpression | conditionalExpression )
     ;
 
 callStatement
@@ -129,7 +132,7 @@ unlabledCaseStatement
     ;
 
 doStatement
-    : DO statement UNTIL condition
+    : DO statement UNTIL ( arithmeticExpression | conditionalExpression )
     ;
 
 dropStatement
@@ -150,6 +153,8 @@ moveStatement
 
 moveStatementSource
     : variable FOR arithmeticExpression ( BYTES | WORDS | ELEMENTS )?
+    | identifier // could be a define, such as `define move = var for 10 bytes#;`
+    | procInvocation // could be a define, such as `define move(X) = var for X bytes#;`
     | '[' constant ']'
     | constant
     | constantList
@@ -172,7 +177,7 @@ useStatement
     ;
 
 whileStatement
-    : WHILE condition DO statement 
+    : WHILE ( arithmeticExpression | conditionalExpression ) DO statement
     ;
 
 // Declarations
@@ -198,15 +203,15 @@ simpleDeclarationItem
     ;
 
 simpleDeclarationItemVariable
-    : identifier ( ':=' constant | arithmeticExpression )?
+    : identifier ( ':=' arithmeticExpression )?
     ;
 
 simpleDeclarationItemPointer
-    : ( '.' EXT? ) identifier ( ':=' constant | arithmeticExpression )?
+    : ( '.' EXT? ) identifier ( ':=' arithmeticExpression )?
     ;
 
 simpleDecalrationItemStructPointer
-    : ( '.' EXT? ) identifier '(' identifier ')'  ( ':=' constant | arithmeticExpression )?
+    : ( '.' EXT? ) identifier '(' identifier ')' ( ':=' arithmeticExpression )?
     ;
 
 simpleDeclarationItemArray
@@ -266,7 +271,7 @@ literalDeclaration
     ;
 
 literalDeclarationItem
-    : literalDefineIdentifier ( '=' ( '+' | '-' )? constant )?
+    : literalDefineIdentifier ( '=' constant )?
     ;
 
 defineDeclaration
@@ -284,68 +289,69 @@ defineParamList
 // Expressions
 expression
     : '(' expression ')'
-    | relationalExpression
-    | groupComparisonExpression
     | arithmeticExpression
     | conditionalExpression
-    | ifExpression
-    | caseExpression
-    | assignmentExpression
     | procInvocation
+    | stdlibInvocation
     | variable
     | constant
     ;
 
+// E.g. if d_array = s_array for 10 elements -> @pointer
 groupComparisonExpression
-    : '(' groupComparisonExpression ')'
-    | variable relationalOperator groupComparisonOperand ( '->' variable )?
+    : variable relationalOperator groupComparisonOperand
     ;
 
 groupComparisonOperand
-    : variable FOR arithmeticExpression ( BYTES | WORDS | ELEMENTS )?
-    | constant | identifier
+    : variable FOR arithmeticExpression ( BYTES | WORDS | ELEMENTS )? ( '->' variable )?
+    | constant | identifier // identifier is a stand-in for declared literal
     | '[' constant | identifier ']'
     | constantList
     ;
 
+// E.g. var := if length > 0 then 10 else 20;
 ifExpression
-    : '(' ifExpression ')'
-    | IF ifExpressionElement THEN ifExpressionElement ( ELSE ifExpressionElement )?
+    : IF ifExpressionElement THEN ifExpressionElement ( ELSE ifExpressionElement )?
     ;
 
 ifExpressionElement
     : ( arithmeticExpression | conditionalExpression )
     ;
 
+// E.g.
+// x := case a of
+//          begin
+//          b;
+//          c;
+//          otherwise -1;
+//          end;
 caseExpression
-    : '(' caseExpression ')'
-    | CASE arithmeticExpression OF BEGIN caseExpressionElement+ ( OTHERWISE caseExpressionElement )? END
+    : CASE arithmeticExpression OF BEGIN caseExpressionElement+ ( OTHERWISE caseExpressionElement )? END
     ;
 
 caseExpressionElement
     : ( arithmeticExpression | conditionalExpression ) ';'
     ;
 
+// E.g. if (a := a - 1) then...
 assignmentExpression
-    : '(' assignmentExpression ')'
-    | ( variable ':=' )+ ( arithmeticExpression | conditionalExpression )
+    : ( variable BIT_EXTRACT? ':=' )+ ( arithmeticExpression | conditionalExpression )
     ;
 
+// E.g. a and not b or c
 conditionalExpression
-    : '(' conditionalExpression ')'
-    | NOT? condition ( ( AND | OR )? NOT? condition )*
-    ;
-
-condition
-    : relationalExpression
+    : NOT conditionalExpression
+    | conditionalExpression AND conditionalExpression
+    | conditionalExpression OR conditionalExpression
+    | '(' conditionalExpression ')'
+    | relationalExpression
     | groupComparisonExpression
     | arithmeticExpression
-    | relationalOperator
+    | relationalOperator // e.g. if < then...
     ;
 
 relationalExpression
-    : '(' relationalExpression ')'
-    | operand relationalOperator operand
+    : arithmeticExpression relationalOperator arithmeticExpression
     ;
 
 relationalOperator
@@ -353,32 +359,25 @@ relationalOperator
     ;
 
 arithmeticExpression
-    : '(' arithmeticExpression ')' BIT_EXTRACT?
-    | '(' arithmeticExpression ')'
-    | unaryOperator? operand ( arithmeticOperator operand )*
-    ;
-
-arithmeticOperator
-    : PLUS
-    | MINUS
-    | DIV
-    | MOD
-    | MULT
-    | LOR
-    | LAND
-    | XOR
-    | LEFTSHIFT
-    | RIGHTSHIFT
+    : arithmeticExpression BIT_EXTRACT
+    | unaryOperator arithmeticExpression
+    | arithmeticExpression ( LEFTSHIFT | RIGHTSHIFT ) arithmeticExpression
+    | arithmeticExpression ( MULT | DIV | MOD ) arithmeticExpression
+    | arithmeticExpression ( PLUS | MINUS ) arithmeticExpression
+    | arithmeticExpression ( LOR | LAND | XOR ) arithmeticExpression
+    | ifExpression // special arithmetic expression
+    | caseExpression // special arithmetic expression
+    | assignmentExpression // special arithmetic expression
+    | '(' expression ')'
+    | procInvocation
+    | stdlibInvocation
+    | variable
+    | constant
     ;
 
 unaryOperator
-    : PLUS
-    | MINUS
-    ;
-
-operand
-    : '(' operand ')'
-    | variable | constant | procInvocation
+    : '-'
+    | '+'
     ;
 
 variable
@@ -389,7 +388,7 @@ variable
     ;
 
 arrayVariable
-    : identifier '[' ( arithmeticExpression | assignmentExpression ) ']'
+    : identifier '[' arithmeticExpression ']'
     ;
 
 pointerVariable
@@ -436,7 +435,7 @@ dataType
     ;
 
 constant
-    : numericConstant
+    : ( '+' | '-' )? numericConstant
     | STRING_LITERAL
     ;
 
