@@ -68,7 +68,7 @@ subprocDeclaration
     ;
 
 subprocDeclarationBody
-    : BEGIN variableDeclaration* statements END ';'
+    : BEGIN variableDeclaration* statements END
     ;
 
 
@@ -288,13 +288,9 @@ defineParamList
 
 // Expressions
 expression
-    : '(' expression ')'
-    | arithmeticExpression
+    : arithmeticExpression
     | conditionalExpression
-    | procInvocation
-    | stdlibInvocation
-    | variable
-    | constant
+    | '(' expression ')'
     ;
 
 // E.g. if d_array = s_array for 10 elements -> @pointer
@@ -344,27 +340,22 @@ conditionalExpression
     | conditionalExpression AND conditionalExpression
     | conditionalExpression OR conditionalExpression
     | '(' conditionalExpression ')'
-    | relationalExpression
     | groupComparisonExpression
     | arithmeticExpression
     | relationalOperator // e.g. if < then...
     ;
 
-relationalExpression
-    : arithmeticExpression relationalOperator arithmeticExpression
-    ;
-
-relationalOperator
-    : LESS | LESSEQUAL | GREATER | GREATEREQUAL | EQUAL | NOT_EQUAL
-    ;
-
 arithmeticExpression
     : arithmeticExpression BIT_EXTRACT
     | unaryOperator arithmeticExpression
-    | arithmeticExpression ( LEFTSHIFT | RIGHTSHIFT ) arithmeticExpression
-    | arithmeticExpression ( MULT | DIV | MOD ) arithmeticExpression
+    | arithmeticExpression ( LEFT_SHIFT | RIGHT_SHIFT ) arithmeticExpression
+    | arithmeticExpression ( ULEFT_SHIFT | URIGHT_SHIFT ) arithmeticExpression
+    | arithmeticExpression ( MULT | DIV  ) arithmeticExpression
+    | arithmeticExpression ( UMULT | UDIV | MOD ) arithmeticExpression
     | arithmeticExpression ( PLUS | MINUS ) arithmeticExpression
+    | arithmeticExpression ( UPLUS | UMINUS ) arithmeticExpression
     | arithmeticExpression ( LOR | LAND | XOR ) arithmeticExpression
+    | arithmeticExpression relationalOperator arithmeticExpression
     | ifExpression // special arithmetic expression
     | caseExpression // special arithmetic expression
     | assignmentExpression // special arithmetic expression
@@ -373,6 +364,21 @@ arithmeticExpression
     | stdlibInvocation
     | variable
     | constant
+    ;
+
+relationalOperator
+    : EQUAL
+    | LESS
+    | GREATER
+    | LESS_EQUAL
+    | GREATER_EQUAL
+    | NOT_EQUAL
+    | UEQUAL
+    | ULESS
+    | UGREATER
+    | ULESS_EQUAL
+    | UGREATER_EQUAL
+    | UNOT_EQUAL
     ;
 
 unaryOperator
@@ -579,18 +585,32 @@ UNSPECIFIED : U N S P E C I F I E D; // function declaration
 PASCAL : P A S C A L;                // function declaration
 
 // Operators
-LESS : '<' | '\'<\'';
-LESSEQUAL : '<=' | '\'<=\'';
-GREATER : '>' | '\'>\'';
-GREATEREQUAL : '>=' | '\'>=\'';
+LESS : '<';
+ULESS : '\'<\'';
+LESS_EQUAL : '<=';
+ULESS_EQUAL : '\'<=\'';
+GREATER : '>';
+UGREATER : '\'>\'';
+GREATER_EQUAL : '>=';
+UGREATER_EQUAL : '\'>=\'';
+EQUAL : '=';
+UEQUAL : '\'=\'';
+NOT_EQUAL : '<>';
+UNOT_EQUAL : '\'<>\'';
 
-LEFTSHIFT : '<<' | '\'<<\'';
-RIGHTSHIFT : '>>' | '\'>>\'';
+LEFT_SHIFT : '<<';
+ULEFT_SHIFT : '\'<<\'';
+RIGHT_SHIFT : '>>';
+URIGHT_SHIFT : '\'>>\'';
 
-PLUS : '+' | '\'+\'';
-MINUS : '-' | '\'-\'';
-MULT : '*' | '\'*\'';
-DIV : '/' | '\'/\'';
+PLUS : '+';
+UPLUS : '\'+\'';
+MINUS : '-';
+UMINUS : '\'-\'';
+MULT : '*';
+UMULT : '\'*\'';
+DIV : '/';
+UDIV : '\'/\'';
 MOD : '\'\\\'';
 
 OR : O R;
@@ -606,9 +626,6 @@ MOVE
     : '\':=\''
     | '\'=:\''
     ;
-
-EQUAL : '=' | '\'=\'';
-NOT_EQUAL : '<>' | '\'<>\'';
 
 // Skip directives
 DIRECTIVE
