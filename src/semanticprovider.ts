@@ -71,23 +71,27 @@ export class ANTLRTALDocumentSemanticTokensProvider
     //if (cached) {
     //  return cached[0];
     //}
+    console.log("sym==");
+    console.time("lex");
     const stream = CharStreams.fromString(document.getText());
     const lexer = new TALLexer(stream);
     const tokenStream = new CommonTokenStream(lexer);
+    console.timeEnd("lex");
 
     //tokenStream.fill();
     //const t = tokenStream.getTokens();
+    //const v = lexer.vocabulary;
     //console.log("LEXER========================================");
     //t.forEach((i) => {
-    //  console.log(lexer.vocabulary.getSymbolicName(i.type) + " >> `" + i.text + "`");
+    //  console.log(v.getSymbolicName(i.type) + " >> `" + i.text + "`");
     //});
 
+    console.time("par");
     const parser = new TALParser(tokenStream);
-    const tree = parser.program();
-    const visitor = new SemanticTALVisitor();
-    console.log("PARSER========================================");
-    console.log(tree.toStringTree());
-    visitor.visit(tree);
+    //const tree = parser.program();
+    //const visitor = new SemanticTALVisitor();
+    //visitor.visit(tree);
+    console.timeEnd("par");
 
     const builder = new vscode.SemanticTokensBuilder(TALSemanticTokensLegend);
     const result = builder.build();

@@ -6,16 +6,15 @@ program
     ;
 
 // Functions
-procInvocation
-    : identifier procInvocationParamList
-    ;
 
-stdlibInvocation
-    : '$' identifier procInvocationParamList? // built-in
+// This is a proc, define or stdlib invocation
+procInvocation
+    : stdlibIdentifier procInvocationParamList? // built-in
+    | identifier procInvocationParamList
     ;
 
 procInvocationParamList
-    : '(' procInvocationParam? ( ',' procInvocationParam? )* ')'
+    : '(' procInvocationParam? ( ( ',' | DEFINE_COMA ) procInvocationParam? )* ')'
     ;
 
 procInvocationParam
@@ -53,7 +52,7 @@ procDeclarationAttribute
     ;
 
 procDeclarationParamSpec
-    : dataType? PROC ( '(' '32' ')' )? identifier ( ',' identifier )* ';'
+    : dataType? PROC ( '(' INT_CONSTANT ')' )? identifier ( ',' identifier )* ';'
     | dataType ( '.' EXT? )? identifier ( '(' identifier ')' )? ( ',' identifier ( '(' identifier ')' )? )* ';'
     | STRUCT ( '.' EXT? ) identifier ( '(' identifier ')' )? ( ',' identifier ( '(' identifier ')' )? )* ';'
     ;
@@ -95,7 +94,6 @@ statement
     | useStatement
     | whileStatement
     | procInvocation
-    | stdlibInvocation
     | identifier // identifier by itself is also procInvocation without params
     ;
 
@@ -108,7 +106,7 @@ assertStatement
     ;
 
 assignmentStatement
-    : ( variable BIT_EXTRACT? ':=' )+ ( arithmeticExpression | conditionalExpression )
+    : ( variable BIT_EXTRACT? ':=' )+ expression
     ;
 
 callStatement
@@ -116,7 +114,7 @@ callStatement
     ;
 
 labeledCaseStatement
-    : CASE arithmeticExpression OF BEGIN caseAlternative+ ( OTHERWISE '->' statement )? ';' END
+    : CASE expression OF BEGIN caseAlternative+ ( OTHERWISE '->' statement? ';' )? END
     ;
 
 caseAlternative
@@ -125,14 +123,15 @@ caseAlternative
 
 caseLabel
     : ( INT_CONSTANT | identifier ) ( '..' ( INT_CONSTANT | identifier ) )?
+    | STRING_LITERAL
     ;
 
 unlabledCaseStatement
-    : CASE arithmeticExpression OF BEGIN ( statement ';' )+ ( OTHERWISE statement )? ';' END
+    : CASE expression OF BEGIN ( statement ';' )+ ( OTHERWISE statement? ';' )? END
     ;
 
 doStatement
-    : DO statement UNTIL ( arithmeticExpression | conditionalExpression )
+    : DO statement? UNTIL expression
     ;
 
 dropStatement
@@ -140,11 +139,11 @@ dropStatement
     ;
 
 forStatement
-    : FOR variable ':=' arithmeticExpression ( TO | DOWNTO ) arithmeticExpression ( BY arithmeticExpression )? DO statement
+    : FOR variable ':=' expression ( TO | DOWNTO ) expression ( BY expression )? DO statement
     ;
 
 ifStatement
-    : IF ( arithmeticExpression | conditionalExpression ) THEN statement? ( ELSE statement? )?
+    : IF expression THEN statement? ( ELSE statement? )?
     ;
 
 moveStatement
@@ -152,7 +151,8 @@ moveStatement
     ;
 
 moveStatementSource
-    : variable FOR arithmeticExpression ( BYTES | WORDS | ELEMENTS )?
+    // procInvocation is a stand in for a define, e.g. `def_foo(x) for 20 bytes`
+    : ( variable | procInvocation ) FOR expression ( BYTES | WORDS | ELEMENTS )?
     | identifier // could be a define, such as `define move = var for 10 bytes#;`
     | procInvocation // could be a define, such as `define move(X) = var for X bytes#;`
     | '[' constant ']'
@@ -161,11 +161,11 @@ moveStatementSource
     ;
 
 returnStatement
-    : RETURN ( arithmeticExpression | conditionalExpression )? ( ',' expression )?
+    : RETURN expression? ( ',' expression )?
     ;
 
 scanStatement
-    : ( SCAN | RSCAN ) variable ( WHILE | UNTIL ) arithmeticExpression ( '->' variable )?
+    : ( SCAN | RSCAN ) variable ( WHILE | UNTIL ) expression ( '->' variable )?
     ;
 
 storeStatement
@@ -177,7 +177,7 @@ useStatement
     ;
 
 whileStatement
-    : WHILE ( arithmeticExpression | conditionalExpression ) DO statement
+    : WHILE expression DO statement?
     ;
 
 // Declarations
@@ -203,19 +203,19 @@ simpleDeclarationItem
     ;
 
 simpleDeclarationItemVariable
-    : identifier ( ':=' arithmeticExpression )?
+    : identifier ( ':=' expression )?
     ;
 
 simpleDeclarationItemPointer
-    : ( '.' EXT? ) identifier ( ':=' arithmeticExpression )?
+    : ( '.' EXT? ) identifier ( ':=' expression )?
     ;
 
 simpleDecalrationItemStructPointer
-    : ( '.' EXT? ) identifier '(' identifier ')' ( ':=' arithmeticExpression )?
+    : ( '.' EXT? ) identifier '(' identifier ')' ( ':=' expression )?
     ;
 
 simpleDeclarationItemArray
-    : ( '.' EXT? )? identifier '[' arithmeticExpression ':' arithmeticExpression ']' ( ':=' constantList )?
+    : ( '.' EXT? )? identifier '[' expression ':' expression ']' ( ':=' constantList )?
     ;
 
 readOnlyArrayDeclaration
@@ -223,11 +223,11 @@ readOnlyArrayDeclaration
     ;
 
 readOnlyArrayDeclarationItem
-    : identifier ( '[' arithmeticExpression ':' arithmeticExpression ']' )? '=' P_REGISTER ':=' constantList
+    : identifier ( '[' expression ':' expression ']' )? '=' P_REGISTER ':=' constantList
     ;
 
 structDeclaration
-    : STRUCT ( '.' EXT? )? identifier ( '[' arithmeticExpression ':' arithmeticExpression ']' )? ';' structDeclarationLayout
+    : STRUCT ( '.' EXT? )? identifier ( '[' expression ':' expression ']' )? ';' structDeclarationLayout
     ;
 
 structTemplateDeclaration
@@ -235,15 +235,15 @@ structTemplateDeclaration
     ;
 
 structReferralDeclaration
-    : STRUCT ( '.' EXT? )? identifier '(' identifier ')' ( '[' arithmeticExpression ':' arithmeticExpression ']' )? ';'
+    : STRUCT ( '.' EXT? )? identifier '(' identifier ')' ( '[' expression ':' expression ']' )? ';'
     ;
 
 subStructDeclaration // with optional redefinition
-    : STRUCT structIdentifier ( '[' arithmeticExpression ':' arithmeticExpression ']' )? ( '=' structIdentifier )? ';' structDeclarationLayout
+    : STRUCT structIdentifier ( '[' expression ':' expression ']' )? ( '=' structIdentifier )? ';' structDeclarationLayout
     ;
 
 subStructReferralDeclaration // with optional redefinition
-    : STRUCT structIdentifier '(' identifier ')' ( '[' arithmeticExpression ':' arithmeticExpression ']' )? ( '=' structIdentifier )? ';'
+    : STRUCT structIdentifier '(' identifier ')' ( '[' expression ':' expression ']' )? ( '=' structIdentifier )? ';'
     ;
 
 structDeclarationLayout
@@ -258,20 +258,21 @@ structDeclarationLayoutDeclaration
     | ( STRUCT | INT ) ( '.' EXT? ) structIdentifier '(' structIdentifier ')' ( ',' ( '.' EXT? ) structIdentifier '(' structIdentifier ')' )* ';' // struct pointers
     | ( STRUCT | INT ) ( '.' EXT? ) structIdentifier '(' structIdentifier ')' '=' structIdentifier ';' // struct pointers with optional redefinition
     | ( FILLER | BIT_FILLER ) INT_CONSTANT ';'
-    | dataType structIdentifier ( '[' arithmeticExpression ':' arithmeticExpression ']' )? '=' structIdentifier ';' // redefinition
+    | dataType structIdentifier ( '[' expression ':' expression ']' )? '=' structIdentifier ';' // redefinition
     ;
 
 structDeclarationLayoutDeclarationItem
     : ( '.' EXT? )? structIdentifier // simple variable or pointer
-    | structIdentifier '[' arithmeticExpression ':' arithmeticExpression ']' // array variable
+    | structIdentifier '[' expression ':' expression ']' // array variable
     ;
 
 literalDeclaration
     : LITERAL literalDeclarationItem ( ',' literalDeclarationItem )* ';'
     ;
 
+// literal can be define using other literals and arithmetic expressions
 literalDeclarationItem
-    : literalDefineIdentifier ( '=' constant )?
+    : literalDefineIdentifier ( '=' expression )?
     ;
 
 defineDeclaration
@@ -279,17 +280,40 @@ defineDeclaration
     ;
 
 defineDeclarationItem
-    : literalDefineIdentifier defineParamList? '=' ( STRING_LITERAL | ANY )* '#'
+    : literalDefineIdentifier defineParamList? '=' defineBody '#'
     ;
 
 defineParamList
     : '(' identifier ( ',' identifier )* ')'
     ;
 
+defineBody
+    : ~( '#' | ',' | ';' )* // Anything can go inside define, stop at any terminator
+    ;
+
 // Expressions
 expression
-    : arithmeticExpression
-    | conditionalExpression
+    : unaryOperator expression
+    | expression ( LEFT_SHIFT | RIGHT_SHIFT ) expression
+    | expression ( ULEFT_SHIFT | URIGHT_SHIFT ) expression
+    | expression ( MULT | DIV  ) expression
+    | expression ( UMULT | UDIV | MOD ) expression
+    | expression ( PLUS | MINUS ) expression
+    | expression ( UPLUS | UMINUS ) expression
+    | expression ( LOR | LAND | XOR ) expression
+    | expression relationalOperator expression
+    | NOT expression
+    | expression AND expression
+    | expression OR expression
+    | groupComparisonExpression
+    | relationalOperator // e.g. if < then...
+    | ifExpression // special arithmetic expression
+    | caseExpression // special arithmetic expression
+    | assignmentExpression // special arithmetic expression
+    | procInvocation
+    | variable
+    | constant
+    | '(' expression ')' BIT_EXTRACT
     | '(' expression ')'
     ;
 
@@ -299,19 +323,16 @@ groupComparisonExpression
     ;
 
 groupComparisonOperand
-    : variable FOR arithmeticExpression ( BYTES | WORDS | ELEMENTS )? ( '->' variable )?
-    | constant | identifier // identifier is a stand-in for declared literal
-    | '[' constant | identifier ']'
+    : ( variable | procInvocation ) FOR expression ( BYTES | WORDS | ELEMENTS )? ( '->' variable )?
+    | constant
+    | literalDefineIdentifier // literal
+    | '[' ( constant | literalDefineIdentifier ) ']'
     | constantList
     ;
 
 // E.g. var := if length > 0 then 10 else 20;
 ifExpression
-    : IF ifExpressionElement THEN ifExpressionElement ( ELSE ifExpressionElement )?
-    ;
-
-ifExpressionElement
-    : ( arithmeticExpression | conditionalExpression )
+    : IF expression THEN expression ( ELSE expression )?
     ;
 
 // E.g.
@@ -322,48 +343,16 @@ ifExpressionElement
 //          otherwise -1;
 //          end;
 caseExpression
-    : CASE arithmeticExpression OF BEGIN caseExpressionElement+ ( OTHERWISE caseExpressionElement )? END
+    : CASE expression OF BEGIN caseExpressionElement+ ( OTHERWISE caseExpressionElement )? END
     ;
 
 caseExpressionElement
-    : ( arithmeticExpression | conditionalExpression ) ';'
+    : expression ';'
     ;
 
 // E.g. if (a := a - 1) then...
 assignmentExpression
-    : ( variable BIT_EXTRACT? ':=' )+ ( arithmeticExpression | conditionalExpression )
-    ;
-
-// E.g. a and not b or c
-conditionalExpression
-    : NOT conditionalExpression
-    | conditionalExpression AND conditionalExpression
-    | conditionalExpression OR conditionalExpression
-    | '(' conditionalExpression ')'
-    | groupComparisonExpression
-    | arithmeticExpression
-    | relationalOperator // e.g. if < then...
-    ;
-
-arithmeticExpression
-    : arithmeticExpression BIT_EXTRACT
-    | unaryOperator arithmeticExpression
-    | arithmeticExpression ( LEFT_SHIFT | RIGHT_SHIFT ) arithmeticExpression
-    | arithmeticExpression ( ULEFT_SHIFT | URIGHT_SHIFT ) arithmeticExpression
-    | arithmeticExpression ( MULT | DIV  ) arithmeticExpression
-    | arithmeticExpression ( UMULT | UDIV | MOD ) arithmeticExpression
-    | arithmeticExpression ( PLUS | MINUS ) arithmeticExpression
-    | arithmeticExpression ( UPLUS | UMINUS ) arithmeticExpression
-    | arithmeticExpression ( LOR | LAND | XOR ) arithmeticExpression
-    | arithmeticExpression relationalOperator arithmeticExpression
-    | ifExpression // special arithmetic expression
-    | caseExpression // special arithmetic expression
-    | assignmentExpression // special arithmetic expression
-    | '(' expression ')'
-    | procInvocation
-    | stdlibInvocation
-    | variable
-    | constant
+    : ( variable BIT_EXTRACT? ':=' )+ expression
     ;
 
 relationalOperator
@@ -394,7 +383,7 @@ variable
     ;
 
 arrayVariable
-    : identifier '[' arithmeticExpression ']'
+    : identifier '[' expression ']'
     ;
 
 pointerVariable
@@ -421,12 +410,12 @@ constantList
 
 repetitionConstantList
     : INT_CONSTANT '*' '[' constantListSequence ']'
+    | procInvocation '*' '[' constantListSequence ']'
     ;
 
 constantListSequence
-    : numericConstant ( ',' constantListSequence )*
-    | STRING_LITERAL ( ',' constantListSequence )*
-    | repetitionConstantList ( ',' constantListSequence )*
+    : ( numericConstant | literalDefineIdentifier | STRING_LITERAL | repetitionConstantList )
+      ( ',' ( numericConstant | literalDefineIdentifier | STRING_LITERAL | repetitionConstantList ) )*
     ;
 
 // Data types
@@ -471,6 +460,10 @@ identifier
     | PASCAL
     ;
 
+stdlibIdentifier
+    : STDLIB_IDENTIFIER
+    ;
+
 structIdentifier
     : IDENTIFIER
     | EXT
@@ -501,6 +494,8 @@ literalDefineIdentifier
     ;
 
 // LEXER
+
+STDLIB_IDENTIFIER : '$' [a-zA-Z]+ ;
 
 UNSIGNED : U N S I G N E D WS? '(' WS? DIGIT_SEQUENCE WS? ')';
 STRING : S T R I N G;
@@ -584,6 +579,8 @@ LANGUAGE : L A N G U A G E;          // function declaration
 UNSPECIFIED : U N S P E C I F I E D; // function declaration
 PASCAL : P A S C A L;                // function declaration
 
+ARROW : '->';
+
 // Operators
 LESS : '<';
 ULESS : '\'<\'';
@@ -603,6 +600,13 @@ ULEFT_SHIFT : '\'<<\'';
 RIGHT_SHIFT : '>>';
 URIGHT_SHIFT : '\'>>\'';
 
+ASSIGN : ':=';
+
+MOVE
+    : '\':=\''
+    | '\'=:\''
+    ;
+
 PLUS : '+';
 UPLUS : '\'+\'';
 MINUS : '-';
@@ -620,12 +624,20 @@ NOT : N O T;
 XOR : X O R;
 
 P_REGISTER : '\'' P '\'';
+BASE_ADDRESS : '\'' ( G | L | S ) '\'';
 BIT_EXTRACT : '.<' DIGIT_SEQUENCE ( ':' DIGIT_SEQUENCE )? '>';
 
-MOVE
-    : '\':=\''
-    | '\'=:\''
-    ;
+AT : '@';
+POUND : '#';
+LPAREN : '(';
+RPAREN : ')';
+LBRACKET : '[';
+RBRACKET : ']';
+COLON : ':';
+SEMI : ';';
+COMA : ',';
+DEFINE_COMA : '\',\'';
+DOT : '.';
 
 // Skip directives
 DIRECTIVE
@@ -634,7 +646,7 @@ DIRECTIVE
 
 fragment
 DIRECTIVE_START
-    : '?' { this.charPositionInLine === 0; }
+    : { this.charPositionInLine === 0; }? '?'
     ;
 
 // Skip unit name
@@ -898,4 +910,15 @@ fragment Z
    : ('z' | 'Z')
    ;
 
-ANY : .;
+// Illegal Characters
+//
+// This is an illegal character trap which is always the last rule in the
+// lexer specification. It matches a single character of any value and being
+// the last rule in the file will match when no other rule knows what to do
+// about the character. It is reported as an error but is not passed on to the
+// parser. This means that the parser to deal with the gramamr file anyway
+// but we will not try to analyse or code generate from a file with lexical
+// errors.
+ERRCHAR
+   : . -> skip
+   ;
