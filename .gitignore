@@ -2,5 +2,4 @@ node_modules
 *.vsix
 out/
 .vscode-test/
-src/talengine/.antlr/
-src/talengine/antlr/
+src/talparser/

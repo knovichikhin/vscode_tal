@@ -109,7 +109,7 @@
         "compile": "tsc -p ./",
         "lint": "eslint . --ext .ts,.tsx",
         "watch": "tsc -watch -p ./",
-        "antlr4ts": "antlr4ts -visitor ./src/talengine/TAL.g4 -o ./src/talengine/antlr",
+        "antlr4ts": "antlr4ts -visitor -Xexact-output-dir ./grammar/TAL.g4 -o ./src/talparser",
         "prettier-watch": "onchange \"**/*\" -- prettier --write --ignore-unknown {{changed}}",
         "pretest": "npm run compile",
         "test": "node ./out/test/runTest.js"
