@@ -25,6 +25,17 @@
                 "type" : "npm",
                 "script": "pretest"
             }
+        },
+        {
+            "name": "Debug ANTLR4 grammar",
+            "type": "antlr-debug",
+            "request": "launch",
+            "input": "grammar/problem.tal",
+            "grammar": "grammar/TAL.g4",
+            "actionFile": "",
+            "startRule": "program",
+            "printParseTree": true,
+            "visualParseTree": true
         }
     ]
 }
