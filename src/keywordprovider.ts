@@ -6,6 +6,7 @@ import {
   talKeywordCompletionItems,
   talLibCompletionItems,
 } from "./keywords";
+import { TALBackend } from "./talbackend/backend";
 
 export class TALCompletionItemProvider implements vscode.CompletionItemProvider {
   public provideCompletionItems(
@@ -33,5 +34,19 @@ export class TACLCompletionItemProvider implements vscode.CompletionItemProvider
     context: vscode.CompletionContext
   ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
     return taclBuiltinKeywords;
+  }
+}
+
+export class TALCompletionItemProviderContext implements vscode.CompletionItemProvider {
+  public constructor(private backend: TALBackend) {}
+
+  public provideCompletionItems(
+    document: vscode.TextDocument,
+    position: vscode.Position,
+    token: vscode.CancellationToken,
+    context: vscode.CompletionContext
+  ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
+    const result = this.backend.getCodeCompletionCandidates(document, position);
+    return result;
   }
 }

@@ -2,20 +2,35 @@
 
 import * as vscode from "vscode";
 import { TALFoldingProvider } from "./foldingprovider";
-import { TACLCompletionItemProvider, TALCompletionItemProvider } from "./keywordprovider";
-import { getTALLanguageConfiguration } from "./languageconfiguration";
 import {
-  ANTLRTALDocumentSemanticTokensProvider,
-  TALSemanticTokensLegend,
-} from "./semanticprovider";
+  TACLCompletionItemProvider,
+  TALCompletionItemProvider,
+  TALCompletionItemProviderContext,
+} from "./keywordprovider";
+import { getTALLanguageConfiguration } from "./languageconfiguration";
 import { TALDocumentSymbolProvider } from "./symbolprovider";
+import { TALBackend } from "./talbackend/backend";
 
 export function activate(context: vscode.ExtensionContext) {
+  const talBackend = new TALBackend();
+
   const talCompletionItemProvider = vscode.languages.registerCompletionItemProvider(
     "tal",
     new TALCompletionItemProvider()
   );
   context.subscriptions.push(talCompletionItemProvider);
+
+  context.subscriptions.push(
+    vscode.languages.registerCompletionItemProvider(
+      "tal",
+      new TALCompletionItemProviderContext(talBackend),
+      " ",
+      ".",
+      "@",
+      "(",
+      "[",
+    )
+  );
 
   const taclCompletionItemProvider = vscode.languages.registerCompletionItemProvider(
     "tacl",
@@ -37,13 +52,6 @@ export function activate(context: vscode.ExtensionContext) {
     new TALFoldingProvider()
   );
   context.subscriptions.push(talFoldingProvider);
-
-  const talDocumentSemanticTokensProvider = vscode.languages.registerDocumentSemanticTokensProvider(
-    "tal",
-    new ANTLRTALDocumentSemanticTokensProvider(),
-    TALSemanticTokensLegend
-  );
-  context.subscriptions.push(talDocumentSemanticTokensProvider);
 
   vscode.languages.setLanguageConfiguration("tal", getTALLanguageConfiguration());
 }

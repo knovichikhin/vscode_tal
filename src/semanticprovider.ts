@@ -10,9 +10,9 @@ import {
   RuleNode,
   ErrorNode,
 } from "antlr4ts/tree";
-import { TALLexer } from "./talengine/antlr/TALLexer";
-import { ProcDeclarationContext, TALParser } from "./talengine/antlr/TALParser";
-import { TALVisitor } from "./talengine/antlr/TALVisitor";
+import { TALLexer } from "./talparser/TALLexer";
+import { ProcDeclarationContext, TALParser } from "./talparser/TALParser";
+import { TALVisitor } from "./talparser/TALVisitor";
 
 /*
 export class TALDocumentSemanticTokensProvider

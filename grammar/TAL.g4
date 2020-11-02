@@ -637,6 +637,7 @@ COLON : ':';
 SEMI : ';';
 COMA : ',';
 DEFINE_COMA : '\',\'';
+CASE_RANGE : '..';
 DOT : '.';
 
 // Skip directives
