@@ -12,6 +12,6 @@ export class TALSourceListener implements TALListener {
   // Collect proc names
   public enterProcDeclarationIdentifier(ctx: ProcDeclarationIdentifierContext): void {
     this.talSymbolTable.addNewSymbolOfType(ProcIdentifierSymbol, undefined, ctx.text);
-    console.log(ctx.text);
+    //console.log(ctx.text);
   }
 }

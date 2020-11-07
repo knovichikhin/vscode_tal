@@ -10,18 +10,22 @@ import { ProcIdentifierSymbol, TALSymbolTable } from "./symbol";
 import { TALSourceListener as TALDetailsListener } from "./listener";
 
 export class TALBackend {
-  private talSymbolTable = new TALSymbolTable();
+  private talSymbolTable: TALSymbolTable | undefined;
 
   private parse(tokenStream: antlr4ts.CommonTokenStream): TALParser {
     const parser = new TALParser(tokenStream);
-    this.talSymbolTable.clear();
+    this.talSymbolTable = new TALSymbolTable();
+    console.time("parse");
     this.talSymbolTable.tree = parser.program();
+    console.timeEnd("parse");
 
+    console.time("parse1");
     const listener = new TALDetailsListener(this.talSymbolTable);
     antlr4ts_tree.ParseTreeWalker.DEFAULT.walk(
       listener as antlr4ts_tree.ParseTreeListener,
       this.talSymbolTable.tree
     );
+    console.timeEnd("parse1");
     return parser;
   }
 
@@ -45,11 +49,13 @@ export class TALBackend {
     core.preferredRules = new Set([TALParser.RULE_statement]);
 
     // Search the token index which covers cursor position.
+    console.time("fill");
     tokenStream.fill();
+    console.timeEnd("fill");
     let index = 0;
+    console.time("car");
     for (; ; index++) {
       const token = tokenStream.get(index);
-      const t = token.text;
       //console.log(
       //  "For: " + token.text + " " + token.line + ":" + token.charPositionInLine
       //);
@@ -64,13 +70,14 @@ export class TALBackend {
         }
       }
     }
+    console.timeEnd("car");
 
     const candidates = core.collectCandidates(index);
     candidates.rules.forEach((callStack, key) => {
       console.log("R: " + parser.ruleNames[key]);
     });
 
-    this.talSymbolTable.getAllSymbols(ProcIdentifierSymbol).forEach((s) => {
+    this.talSymbolTable?.getAllSymbols(ProcIdentifierSymbol).forEach((s) => {
       result.push(new vscode.CompletionItem(s.name, vscode.CompletionItemKind.Class));
     });
 
