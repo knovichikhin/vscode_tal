@@ -23,12 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.languages.registerCompletionItemProvider(
       "tal",
-      new TALCompletionItemProviderContext(talBackend),
-      " ",
-      ".",
-      "@",
-      "(",
-      "[",
+      new TALCompletionItemProviderContext(talBackend)
     )
   );
 

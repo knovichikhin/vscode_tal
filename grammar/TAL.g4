@@ -1,8 +1,19 @@
 grammar TAL;
 
 program
-    : variableDeclaration*
-    | procDeclaration*
+    : ( variableDeclaration | procDeclaration | nameDeclaration | blockDeclaration )*
+    ;
+
+// Block Stuff
+nameDeclaration
+    : NAME nameIdentifier ';'
+    ;
+
+// Block optionally encapsulates variable declaration
+// For the purpose of parsing TAL treat it as a regular statement.
+blockDeclaration
+    : BLOCK blockIdentifier ( ( AT | BELOW ) '(' INT_CONSTANT ')' )? ';'
+    | END BLOCK ';'
     ;
 
 // Functions
@@ -23,8 +34,12 @@ procInvocationParam
     ;
 
 procDeclaration
-    : dataType? PROC identifier ( '=' STRING_LITERAL )? procDeclarationParamList? procDeclarationAttributes ';'
+    : dataType? PROC procDeclarationIdentifier ( '=' STRING_LITERAL )? procDeclarationParamList? procDeclarationAttributes ';'
       procDeclarationParamSpec* ( procDeclarationBody | EXTERNAL | FORWARD ) ';'
+    ;
+
+procDeclarationIdentifier
+    : identifier
     ;
 
 procDeclarationParamList
@@ -231,7 +246,7 @@ structDeclaration
     ;
 
 structTemplateDeclaration
-    : STRUCT identifier '(' '*' ')' ';' structDeclarationLayout
+    : STRUCT identifier '(' '*' ')' ( FIELDALIGN '(' SHARED2 ')' )? ';' structDeclarationLayout
     ;
 
 structReferralDeclaration
@@ -288,7 +303,7 @@ defineParamList
     ;
 
 defineBody
-    : ~( '#' | ',' | ';' )* // Anything can go inside define, stop at any terminator
+    : ~( '#' )* // Anything can go inside define, stop at terminator
     ;
 
 // Expressions
@@ -319,7 +334,7 @@ expression
 
 // E.g. if d_array = s_array for 10 elements -> @pointer
 groupComparisonExpression
-    : variable relationalOperator groupComparisonOperand
+    : ( variable | procInvocation ) relationalOperator groupComparisonOperand
     ;
 
 groupComparisonOperand
@@ -458,6 +473,13 @@ identifier
     | LANGUAGE
     | UNSPECIFIED
     | PASCAL
+    | AT
+    | BELOW
+    | BLOCK
+    | PRIVATE
+    | NAME
+    | FIELDALIGN
+    | SHARED2
     ;
 
 stdlibIdentifier
@@ -477,6 +499,13 @@ structIdentifier
     | LANGUAGE
     | UNSPECIFIED
     | PASCAL
+    | AT
+    | BELOW
+    | BLOCK
+    | PRIVATE
+    | NAME
+    | FIELDALIGN
+    | SHARED2
     ;
 
 literalDefineIdentifier
@@ -491,6 +520,57 @@ literalDefineIdentifier
     | LANGUAGE
     | UNSPECIFIED
     | PASCAL
+    | AT
+    | BELOW
+    | BLOCK
+    | PRIVATE
+    | NAME
+    | FIELDALIGN
+    | SHARED2
+    ;
+
+blockIdentifier
+    : IDENTIFIER
+    | EXT
+    | BIT_FILLER
+    | FILLER
+    | BYTES
+    | WORDS
+    | ELEMENTS
+    | COBOL
+    | EXTENSIBLE
+    | CLANG
+    | FORTRAN
+    | LANGUAGE
+    | UNSPECIFIED
+    | PASCAL
+    | PRIVATE
+    | NAME
+    | FIELDALIGN
+    | SHARED2
+    ;
+
+nameIdentifier
+    : IDENTIFIER
+    | EXT
+    | BIT_FILLER
+    | FILLER
+    | BYTES
+    | WORDS
+    | ELEMENTS
+    | COBOL
+    | EXTENSIBLE
+    | CLANG
+    | FORTRAN
+    | LANGUAGE
+    | UNSPECIFIED
+    | PASCAL
+    | AT
+    | BELOW
+    | BLOCK
+    | PRIVATE
+    | FIELDALIGN
+    | SHARED2
     ;
 
 // LEXER
@@ -555,12 +635,11 @@ VARIABLE : V A R I A B L E;
 WHILE : W H I L E;
 
 // Non-reserved keywords
-//block declaration -> AT : A T;
-//block declaration -> BELOW : B E L O W
-
-// do not use as identifier if name declaration is present
-//block declaration -> BLOCK : B L O C K
-//block declaration -> PRIVATE : P R I V A T E
+AT : A T;                //block declaration
+BELOW : B E L O W;       //block declaration
+BLOCK : B L O C K;       //block declaration
+PRIVATE : P R I V A T E; //block declaration
+NAME : N A M E;          //block declaration
 
 EXT : E X T;
 
@@ -578,6 +657,9 @@ FORTRAN : F O R T R A N;             // function declaration
 LANGUAGE : L A N G U A G E;          // function declaration
 UNSPECIFIED : U N S P E C I F I E D; // function declaration
 PASCAL : P A S C A L;                // function declaration
+
+FIELDALIGN : F I E L D A L I G N; // Emitted by DDL compiler
+SHARED2 : S H A R E D [2];        // Emitted by DDL compiler
 
 ARROW : '->';
 
@@ -599,6 +681,8 @@ LEFT_SHIFT : '<<';
 ULEFT_SHIFT : '\'<<\'';
 RIGHT_SHIFT : '>>';
 URIGHT_SHIFT : '\'>>\'';
+
+CONCATENATION : '&';
 
 ASSIGN : ':=';
 
@@ -627,7 +711,7 @@ P_REGISTER : '\'' P '\'';
 BASE_ADDRESS : '\'' ( G | L | S ) '\'';
 BIT_EXTRACT : '.<' DIGIT_SEQUENCE ( ':' DIGIT_SEQUENCE )? '>';
 
-AT : '@';
+ADDRESS_OF : '@';
 POUND : '#';
 LPAREN : '(';
 RPAREN : ')';
@@ -648,11 +732,6 @@ DIRECTIVE
 fragment
 DIRECTIVE_START
     : { this.charPositionInLine === 0; }? '?'
-    ;
-
-// Skip unit name
-NAME
-    : N A M E ( WS | NEWLINE )+ IDENTIFIER ';' -> skip
     ;
 
 IDENTIFIER
@@ -765,19 +844,19 @@ STRING_LITERAL
     ;
 
 BLOCKCOMMENT
-    : '!' ~[!\r\n]* ( '!' )? -> skip
+    : '!' ~[!\r\n]* ( '!' )? -> channel(HIDDEN)
     ;
 
 LINECOMMENT
-    : '--' ~[\r\n]* -> skip
+    : '--' ~[\r\n]* -> channel(HIDDEN)
     ;
 
 WS
-    : [ \f\t]+ -> skip
+    : [ \f\t]+ -> channel(HIDDEN)
     ;
 
 NEWLINE
-    : ( '\r' '\n'? | '\n' ) -> skip
+    : ( '\r' '\n'? | '\n' ) -> channel(HIDDEN)
     ;
 
 // TAL is case insensitive
