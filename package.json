@@ -80,7 +80,7 @@
             "properties": {
                 "tal.enableTalFunctionCompletion": {
                     "type": "boolean",
-                    "default": true,
+                    "default": false,
                     "description": "Complete standard TAL functions with their parameter signature."
                 },
                 "tal.enableDocumentSymbol": {
