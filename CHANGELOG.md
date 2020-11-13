@@ -1,4 +1,11 @@
 # Change Log
+## [0.7.5] - 2020-11-07
+- Remove TAL keyword completions. They are not very useful context-free.
+- Disable by default TAL built-in library completions. They are not very useful context-free.
+- Update TAL syntax to highlight call/proc/subproc as control keywords instead of regular keywords.
+- Update TAL syntax to highlight built-in functions as regular functions instead of support functions.
+- Update symbol provider to avoid matching external/forward keywords within strings.
+
 ## [0.7.4] - 2020-10-19
 - Handle mixed case `?if`, `?ifnot` and `?endif` folding ranges.
 

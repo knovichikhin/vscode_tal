@@ -14,12 +14,6 @@ import { TALBackend } from "./talbackend/backend";
 export function activate(context: vscode.ExtensionContext) {
   const talBackend = new TALBackend();
 
-  const talCompletionItemProvider = vscode.languages.registerCompletionItemProvider(
-    "tal",
-    new TALCompletionItemProvider()
-  );
-  context.subscriptions.push(talCompletionItemProvider);
-
   context.subscriptions.push(
     vscode.languages.registerCompletionItemProvider(
       "tal",
@@ -27,26 +21,36 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  const taclCompletionItemProvider = vscode.languages.registerCompletionItemProvider(
-    "tacl",
-    new TACLCompletionItemProvider()
-  );
-  context.subscriptions.push(taclCompletionItemProvider);
-
-  // Register document breadcrumbs provider if tal.enableDocumentSymbol is turned on
-  if (vscode.workspace.getConfiguration("tal").get("enableDocumentSymbol") === true) {
-    const talSymbolProvider = vscode.languages.registerDocumentSymbolProvider(
-      "tal",
-      new TALDocumentSymbolProvider()
+  if (
+    vscode.workspace.getConfiguration("tal").get("enableTalFunctionCompletion") === true
+  ) {
+    context.subscriptions.push(
+      vscode.languages.registerCompletionItemProvider(
+        "tal",
+        new TALCompletionItemProvider()
+      )
     );
-    context.subscriptions.push(talSymbolProvider);
   }
 
-  const talFoldingProvider = vscode.languages.registerFoldingRangeProvider(
-    "tal",
-    new TALFoldingProvider()
+  context.subscriptions.push(
+    vscode.languages.registerCompletionItemProvider(
+      "tacl",
+      new TACLCompletionItemProvider()
+    )
   );
-  context.subscriptions.push(talFoldingProvider);
+
+  if (vscode.workspace.getConfiguration("tal").get("enableDocumentSymbol") === true) {
+    context.subscriptions.push(
+      vscode.languages.registerDocumentSymbolProvider(
+        "tal",
+        new TALDocumentSymbolProvider()
+      )
+    );
+  }
+
+  context.subscriptions.push(
+    vscode.languages.registerFoldingRangeProvider("tal", new TALFoldingProvider())
+  );
 
   vscode.languages.setLanguageConfiguration("tal", getTALLanguageConfiguration());
 }

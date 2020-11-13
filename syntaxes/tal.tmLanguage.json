@@ -390,7 +390,7 @@
           "comment": "Match proc or subproc declaration",
           "begin": "(?i)\\b(?<!\\^)(subproc|proc)(?!\\^)\\b\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*(=\\s*\"[^\"]*\")?",
           "beginCaptures": {
-            "1": { "name": "keyword.tal keyword.control.tal keyword.function.tal" },
+            "1": { "name": "keyword.control.tal" },
             "2": { "name": "entity.name.function.tal" },
             "3": { "name": "string.quoted.double.public-name-spec.tal" }
           },
@@ -439,7 +439,7 @@
               "match": "(?i)\\b(?<!\\^)(language)(?!\\^)\\b\\s*\\b(?<!\\^)(c|cobol|fortran|pascal|unspecified)(?!\\^)\\b",
               "captures": {
                 "1": { "name": "keyword.tal" },
-                "2": { "name": "constant.tal constant.keyword.tal" }
+                "2": { "name": "keyword.tal" }
               }
             },
             {
@@ -452,7 +452,7 @@
         {
           "comment": "Match proc or subproc keyword. This is here, so that proc and subproc are flagged as keywords before function name is provided.",
           "match": "(?i)\\b(?<!\\^)(subproc|proc)(?!\\^)\\b",
-          "name": "keyword.tal keyword.control.tal keyword.function.tal"
+          "name": "keyword.control.tal"
         }
       ]
     },
@@ -463,7 +463,7 @@
           "comment": "Standard TAL functions start with a $. These functions require parameters.",
           "begin": "(?i)(?<![\\^_%$#])(\\$dbl|\\$dbll|\\$dblr|\\$dfix|\\$eflt|\\$efltr|\\$fix|\\$fixd|\\$fixi|\\$fixl|\\$fixr|\\$flt|\\$fltr|\\$high|\\$ifix|\\$int|\\$intr|\\$lfix|\\$udbl|\\$ladr|\\$xadr|\\$alpha|\\$numeric|\\$special|\\$lmax|\\$lmin|\\$max|\\$min|\\$point|\\$scale|\\$bitlength|\\$bitoffset|\\$len|\\$occurs|\\$offset|\\$type|\\$abs|\\$comp|\\$optional|\\$param|\\$usercode|\\$axadr|\\$bounds)(?!\\^)\\s*(\\()",
           "beginCaptures": {
-            "1": { "name": "support.function.lib-tal.tal" },
+            "1": { "name": "entity.name.function.tal" },
             "2": { "name": "punctuation.parenthesis.begin.tal" }
           },
           "end": "\\)",
@@ -491,7 +491,7 @@
           "comment": "Definite function call",
           "begin": "(?i)\\b(?<!\\^)(call)(?!\\^)\\b\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)\\s*(\\()",
           "beginCaptures": {
-            "1": { "name": "keyword.tal keyword.control.tal keyword.function.tal" },
+            "1": { "name": "keyword.control.tal" },
             "2": { "name": "entity.name.function.tal" },
             "3": { "name": "punctuation.parenthesis.begin.tal" }
           },
@@ -505,7 +505,7 @@
           "comment": "Definite function call without parameters",
           "match": "(?i)\\b(?<!\\^)(call)(?!\\^)\\b\\s*([a-zA-Z\\^_][a-zA-Z0-9\\^_]*)?",
           "captures": {
-            "1": { "name": "keyword.tal keyword.control.tal keyword.function.tal" },
+            "1": { "name": "keyword.control.tal" },
             "2": { "name": "entity.name.function.tal" }
           }
         }
@@ -544,7 +544,7 @@
     },
     "lib_tal": {
       "comment": "Standard TAL functions start with a $",
-      "name": "support.function.lib-tal.tal",
+      "name": "entity.name.function.tal",
       "match": "(?i)(?<![\\^_%$#])(\\$dbl|\\$dbll|\\$dblr|\\$dfix|\\$eflt|\\$efltr|\\$fix|\\$fixd|\\$fixi|\\$fixl|\\$fixr|\\$flt|\\$fltr|\\$high|\\$ifix|\\$int|\\$intr|\\$lfix|\\$udbl|\\$ladr|\\$xadr|\\$alpha|\\$numeric|\\$special|\\$lmax|\\$lmin|\\$max|\\$min|\\$point|\\$scale|\\$bitlength|\\$bitoffset|\\$len|\\$occurs|\\$offset|\\$type|\\$abs|\\$comp|\\$optional|\\$param|\\$usercode|\\$axadr|\\$bounds|\\$carry|\\$overflow|\\$readclock|\\$rp|\\$switches)(?!\\^)\\b"
     },
     "variable_parameter_id": {

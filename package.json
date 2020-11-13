@@ -2,7 +2,7 @@
     "name": "tal",
     "displayName": "Tandem TAL",
     "description": "Syntax highlighting for Transaction Application Language",
-    "version": "0.7.4",
+    "version": "0.7.5",
     "keywords": [
         "tal",
         "tandem",
@@ -80,7 +80,7 @@
             "properties": {
                 "tal.enableTalFunctionCompletion": {
                     "type": "boolean",
-                    "default": true,
+                    "default": false,
                     "description": "Complete standard TAL functions with their parameter signature."
                 },
                 "tal.enableDocumentSymbol": {
