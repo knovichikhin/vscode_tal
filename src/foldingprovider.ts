@@ -1,7 +1,7 @@
 "use strict";
 
 import * as vscode from "vscode";
-import { DocumentCache } from "./cache";
+import { TALBackend } from "./talbackend/backend";
 
 /**
  * ToggleFoldables contains results of ?if/?ifnot/?endif foldables.
@@ -55,7 +55,7 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
         "ig"
     );
 
-  private readonly _cache = new DocumentCache<vscode.FoldingRange>();
+  public constructor(private backend: TALBackend) {}
 
   public async provideFoldingRanges(
     document: vscode.TextDocument,
@@ -73,7 +73,7 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
     const foldableStacks: vscode.FoldingRange[] = [];
     let lineNum = 0;
 
-    const cached = this._cache.get(document);
+    const cached = this.backend.foldingRangeCache.get(document);
     if (cached) {
       return cached;
     }
@@ -104,7 +104,7 @@ export class TALFoldingProvider implements vscode.FoldingRangeProvider {
       result.push(foldableCommentBlock);
     }
 
-    this._cache.set(document, result);
+    this.backend.foldingRangeCache.set(document, result);
     return result;
   }
 

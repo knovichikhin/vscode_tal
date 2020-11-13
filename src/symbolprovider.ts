@@ -1,7 +1,7 @@
 "use strict";
 
 import * as vscode from "vscode";
-import { DocumentCache } from "./cache";
+import { TALBackend } from "./talbackend/backend";
 
 export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
   /**
@@ -100,7 +100,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
   // pageSymbolKind must be different from sectionSymbolKind
   private readonly pageSymbolKind = vscode.SymbolKind.String;
 
-  private readonly _cache = new DocumentCache<vscode.DocumentSymbol>();
+  public constructor(private backend: TALBackend) {}
 
   public async provideDocumentSymbols(
     document: vscode.TextDocument,
@@ -110,7 +110,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
     const sectionSymbols: vscode.DocumentSymbol[] = []; // Sections and pages symbols
     let lineNum = 0;
 
-    const cached = this._cache.get(document);
+    const cached = this.backend.documentSymbolCache.get(document);
     if (cached) {
       return cached;
     }
@@ -133,7 +133,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
     // If a document has procs/subprocs then present those.
     // If, however, it's a document without procs then present sections/pages instead.
     if (procSymbols.length > 0) {
-      this._cache.set(document, procSymbols);
+      this.backend.documentSymbolCache.set(document, procSymbols);
       return procSymbols;
     }
 
@@ -161,7 +161,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
       }
     }
 
-    this._cache.set(document, sectionSymbols);
+    this.backend.documentSymbolCache.set(document, sectionSymbols);
     return sectionSymbols;
   }
 

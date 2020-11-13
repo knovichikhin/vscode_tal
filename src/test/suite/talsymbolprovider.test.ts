@@ -3,9 +3,11 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import { TALDocumentSymbolProvider } from "../../symbolprovider";
+import { TALBackend } from "../../talbackend/backend";
 
 suite("TAL Symbol Provider Test", () => {
-  const talSymbolProvider = new TALDocumentSymbolProvider();
+  const talBackend = new TALBackend();
+  const talSymbolProvider = new TALDocumentSymbolProvider(talBackend);
   const tokenSource = new vscode.CancellationTokenSource();
   const token = tokenSource.token;
   const testFilesPath = __dirname + "/../../../src/test/suite/talsymbolprovider";

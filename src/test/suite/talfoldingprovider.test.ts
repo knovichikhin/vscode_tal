@@ -3,9 +3,11 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
 import { TALFoldingProvider } from "../../foldingprovider";
+import { TALBackend } from "../../talbackend/backend";
 
 suite("TAL Toggle Folding Provider Test", () => {
-  const talFoldingProvider = new TALFoldingProvider();
+  const talBackend = new TALBackend();
+  const talFoldingProvider = new TALFoldingProvider(talBackend);
   const context = <vscode.FoldingContext>{};
   const tokenSource = new vscode.CancellationTokenSource();
   const token = tokenSource.token;
@@ -149,7 +151,8 @@ suite("TAL Toggle Folding Provider Test", () => {
 });
 
 suite("TAL Comment Blocks Folding Provider Test", () => {
-  const talFoldingProvider = new TALFoldingProvider();
+  const talBackend = new TALBackend();
+  const talFoldingProvider = new TALFoldingProvider(talBackend);
   const context = <vscode.FoldingContext>{};
   const tokenSource = new vscode.CancellationTokenSource();
   const token = tokenSource.token;
@@ -245,7 +248,8 @@ suite("TAL Comment Blocks Folding Provider Test", () => {
 });
 
 suite("TAL Begin/End Blocks Folding Provider Test", () => {
-  const talFoldingProvider = new TALFoldingProvider();
+  const talBackend = new TALBackend();
+  const talFoldingProvider = new TALFoldingProvider(talBackend);
   const context = <vscode.FoldingContext>{};
   const tokenSource = new vscode.CancellationTokenSource();
   const token = tokenSource.token;

@@ -1,7 +1,7 @@
 "use strict";
 
 import * as vscode from "vscode";
-import { DocumentCache } from "./cache";
+import { DocumentCache } from "./talbackend/cache";
 import { CharStreams, CommonTokenStream } from "antlr4ts";
 import {
   AbstractParseTreeVisitor,

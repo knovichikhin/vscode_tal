@@ -43,13 +43,16 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
       vscode.languages.registerDocumentSymbolProvider(
         "tal",
-        new TALDocumentSymbolProvider()
+        new TALDocumentSymbolProvider(talBackend)
       )
     );
   }
 
   context.subscriptions.push(
-    vscode.languages.registerFoldingRangeProvider("tal", new TALFoldingProvider())
+    vscode.languages.registerFoldingRangeProvider(
+      "tal",
+      new TALFoldingProvider(talBackend)
+    )
   );
 
   vscode.languages.setLanguageConfiguration("tal", getTALLanguageConfiguration());
