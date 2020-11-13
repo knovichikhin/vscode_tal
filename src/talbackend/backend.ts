@@ -25,7 +25,9 @@ export class TALBackend {
 
     const source = this.getLocalSource(document, position);
     if (source === "") return result;
-
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    console.log(source);
+    console.log("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
     const inputStream = antlr4ts.CharStreams.fromString(source);
     const lexer = new TALLexer(inputStream);
     const tokenStream = new antlr4ts.CommonTokenStream(lexer);
@@ -33,7 +35,7 @@ export class TALBackend {
     const parser = this.parse(tokenStream);
 
     const core = new c3.CodeCompletionCore(parser);
-    core.showResult = true;
+    //core.showResult = true;
     core.ignoredTokens = new Set([
       -2, // An error in antlr4-c3
     ]);
@@ -51,7 +53,6 @@ export class TALBackend {
     let index = 0;
     for (; ; index++) {
       const token = tokenStream.get(index);
-      //console.log(token.text + " - " + token.line + ":" + token.charPositionInLine);
       if (token.type === antlr4ts.Token.EOF || token.line > position.line + 1) {
         break;
       }
@@ -59,6 +60,7 @@ export class TALBackend {
       if (token.line === position.line + 1) {
         const length = token.text?.length || 0;
         if (token.charPositionInLine + length >= position.character) {
+          console.log(token.text + " - " + token.line + ":" + token.charPositionInLine);
           break;
         }
       }
