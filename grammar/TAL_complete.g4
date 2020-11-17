@@ -1,4 +1,5 @@
-grammar TAL;
+// This grammar file is for strict TAL
+grammar TAL_complete;
 
 program
     : ( variableDeclaration | procDeclaration | nameDeclaration | blockDeclaration )*
@@ -31,12 +32,15 @@ procInvocationParamList
 procInvocationParam
     : expression ':' expression
     | expression
-    | ~( ',' | DEFINE_COMA | ')' )+ // Catch all for define invocations
     ;
 
 procDeclaration
-    : dataType? PROC identifier ( '=' STRING_LITERAL )? procDeclarationParamList? procDeclarationAttributes ';'
+    : dataType? PROC procDeclarationIdentifier ( '=' STRING_LITERAL )? procDeclarationParamList? procDeclarationAttributes ';'
       procDeclarationParamSpec* ( procDeclarationBody | EXTERNAL | FORWARD ) ';'
+    ;
+
+procDeclarationIdentifier
+    : identifier
     ;
 
 procDeclarationParamList
@@ -151,21 +155,12 @@ dropStatement
     ;
 
 forStatement
-    : forStatementForKeyword variable ':=' expression forStatementToKeyword expression ( forStatementByKeyword expression )? forStatementDoKeyword statement?
+    : FOR variable ':=' expression ( TO | DOWNTO ) expression ( BY expression )? DO statement
     ;
-
-forStatementForKeyword : FOR;
-forStatementToKeyword : TO | DOWNTO;
-forStatementByKeyword : BY;
-forStatementDoKeyword : DO;
 
 ifStatement
-    : ifStatementIfKeyword expression ifStatementThenKeyword statement? ( ifStatementElseKeyword statement? )?
+    : IF expression THEN statement? ( ELSE statement? )?
     ;
-
-ifStatementIfKeyword : IF;
-ifStatementThenKeyword : THEN;
-ifStatementElseKeyword : ELSE;
 
 moveStatement
     : variable MOVE moveStatementSource ( '&' moveStatementSource )* ( '->' variable )?

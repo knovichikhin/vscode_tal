@@ -1,19 +1,19 @@
 "use strict";
 
 import * as antlr4ts from "antlr4ts";
-import * as antlr4ts_tree from "antlr4ts/tree";
 import * as c3 from "antlr4-c3";
 import * as vscode from "vscode";
 import { TALLexer } from "../talparser/TALLexer";
-import { IdentifierContext, TALParser } from "../talparser/TALParser";
-import { ProcIdentifierSymbol, TALSymbolTable } from "./symbol";
-import { TALSourceListener as TALDetailsListener } from "./listener";
+import { TALParser } from "../talparser/TALParser";
 import { DocumentCache } from "./cache";
-import { Parser } from "antlr4ts";
+import { computeTokenIndex } from "./tokenposition";
+
+interface ILocalSource {
+  source: string;
+  position: vscode.Position;
+}
 
 export class TALBackend {
-  private talSymbolTable: TALSymbolTable | undefined;
-
   public readonly documentSymbolCache = new DocumentCache<vscode.DocumentSymbol[]>();
   public readonly foldingRangeCache = new DocumentCache<vscode.FoldingRange[]>();
 
@@ -23,68 +23,55 @@ export class TALBackend {
   ): vscode.CompletionItem[] {
     const result: vscode.CompletionItem[] = [];
 
-    const source = this.getLocalSource(document, position);
-    if (source === "") return result;
+    const scope = this.getLocalSource(document, position);
+    if (scope === undefined) {
+      return result;
+    }
+
     console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-    console.log(source);
+    const lines = scope.source.split(/\r?\n/);
+    for (let i = 0; i < lines.length; i++) console.log(i + ": " + lines[i]);
+    console.log("pos: " + scope.position.line);
     console.log("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-    const inputStream = antlr4ts.CharStreams.fromString(source);
+
+    const inputStream = antlr4ts.CharStreams.fromString(scope.source);
     const lexer = new TALLexer(inputStream);
     const tokenStream = new antlr4ts.CommonTokenStream(lexer);
 
-    const parser = this.parse(tokenStream);
+    console.time("parse");
+    const parser = new TALParser(tokenStream);
+    const tree = parser.program();
+    console.timeEnd("parse");
+
+    // Alternate search
+    console.time("altFill");
+    const index = computeTokenIndex(tree, scope.position.translate(1));
+    console.timeEnd("altFill");
+    if (index === undefined) {
+      return result;
+    }
+    const token = tokenStream.get(index);
+    console.log(
+      index + ">>" + token.text + " - " + token.line + ":" + token.charPositionInLine
+    );
 
     const core = new c3.CodeCompletionCore(parser);
     //core.showResult = true;
-    core.ignoredTokens = new Set([
-      -2, // An error in antlr4-c3
-    ]);
     core.preferredRules = new Set([
-      TALParser.RULE_forStatement,
-      TALParser.RULE_doStatement,
-      TALParser.RULE_ifStatement,
+      TALParser.RULE_forStatementForKeyword,
+      TALParser.RULE_forStatementToKeyword,
+      TALParser.RULE_forStatementByKeyword,
+      TALParser.RULE_forStatementDoKeyword,
+      TALParser.RULE_ifStatementIfKeyword,
+      TALParser.RULE_ifStatementThenKeyword,
+      TALParser.RULE_ifStatementElseKeyword,
     ]);
-
-    // Search the token index which covers cursor position.
-    console.time("fill");
-    tokenStream.fill();
-    console.timeEnd("fill");
-
-    let index = 0;
-    for (; ; index++) {
-      const token = tokenStream.get(index);
-      if (token.type === antlr4ts.Token.EOF || token.line > position.line + 1) {
-        break;
-      }
-
-      if (token.line === position.line + 1) {
-        const length = token.text?.length || 0;
-        if (token.charPositionInLine + length >= position.character) {
-          console.log(token.text + " - " + token.line + ":" + token.charPositionInLine);
-          break;
-        }
-      }
-    }
 
     const candidates = core.collectCandidates(index);
+    this.getCodeCompletionCandidatesItems(result, candidates);
+
     candidates.rules.forEach((callStack, key) => {
       console.log(document.version + " R: " + parser.ruleNames[key]);
-      switch(key) {
-        case TALParser.RULE_forStatement: {
-          result.push(new vscode.CompletionItem("for", vscode.CompletionItemKind.Keyword));
-          break;
-        }
-
-        case TALParser.RULE_ifStatement: {
-          result.push(new vscode.CompletionItem("if", vscode.CompletionItemKind.Keyword));
-          break;
-        }
-
-        case TALParser.RULE_doStatement: {
-          result.push(new vscode.CompletionItem("do", vscode.CompletionItemKind.Keyword));
-          break;
-        }
-      }
     });
 
     //this.talSymbolTable?.getAllSymbols(ProcIdentifierSymbol).forEach((s) => {
@@ -94,33 +81,63 @@ export class TALBackend {
     return result;
   }
 
-  private parse(tokenStream: antlr4ts.CommonTokenStream): TALParser {
-    const parser = new TALParser(tokenStream);
-    this.talSymbolTable = new TALSymbolTable();
-    console.time("parse");
-    this.talSymbolTable.tree = parser.program();
-    console.timeEnd("parse");
+  private getCodeCompletionCandidatesItems(
+    items: vscode.CompletionItem[],
+    candidates: c3.CandidatesCollection
+  ): void {
+    candidates.rules.forEach((callStack, key) => {
+      switch (key) {
+        // For statement
+        case TALParser.RULE_forStatementForKeyword:
+          items.push(new vscode.CompletionItem("for", vscode.CompletionItemKind.Keyword));
+          break;
+        case TALParser.RULE_forStatementToKeyword:
+          items.push(new vscode.CompletionItem("to", vscode.CompletionItemKind.Keyword));
+          items.push(
+            new vscode.CompletionItem("downto", vscode.CompletionItemKind.Keyword)
+          );
+          break;
+        case TALParser.RULE_forStatementByKeyword:
+          items.push(new vscode.CompletionItem("by", vscode.CompletionItemKind.Keyword));
+          break;
+        case TALParser.RULE_forStatementDoKeyword:
+          items.push(new vscode.CompletionItem("do", vscode.CompletionItemKind.Keyword));
+          break;
 
-    //console.time("parse1");
-    //const listener = new TALDetailsListener(this.talSymbolTable);
-    //antlr4ts_tree.ParseTreeWalker.DEFAULT.walk(
-    //  listener as antlr4ts_tree.ParseTreeListener,
-    //  this.talSymbolTable.tree
-    //);
-    //console.timeEnd("parse1");
-    return parser;
+        // If statement
+        case TALParser.RULE_ifStatementIfKeyword:
+          items.push(new vscode.CompletionItem("if", vscode.CompletionItemKind.Keyword));
+          break;
+        case TALParser.RULE_ifStatementThenKeyword:
+          items.push(
+            new vscode.CompletionItem("then", vscode.CompletionItemKind.Keyword)
+          );
+          break;
+        case TALParser.RULE_ifStatementElseKeyword:
+          items.push(
+            new vscode.CompletionItem("else", vscode.CompletionItemKind.Keyword)
+          );
+          break;
+      }
+    });
   }
 
+  // Get source local to cursor position
+  // Adjust document position to point to local position
   private getLocalSource(
     document: vscode.TextDocument,
     position: vscode.Position
-  ): string {
-    let result = "";
+  ): ILocalSource | undefined {
+    let result = undefined;
+
     const cached = this.documentSymbolCache.get(document, true);
     if (cached) {
-      for(const i of cached) {
-        if (i.range.contains(position)) {
-          result = document.getText(i.range);
+      for (let i = 0; i < cached.length; i++) {
+        if (cached[i].range.contains(position)) {
+          result = {
+            source: document.getText(cached[i].range),
+            position: position.translate(-cached[i].range.start.line),
+          };
           break;
         }
       }
