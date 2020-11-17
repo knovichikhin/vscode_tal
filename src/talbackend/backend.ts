@@ -14,6 +14,15 @@ interface ILocalSource {
 }
 
 export class TALBackend {
+  private readonly preferredRules = new Set([
+    TALParser.RULE_forStatementForKeyword,
+    TALParser.RULE_forStatementToKeyword,
+    TALParser.RULE_forStatementByKeyword,
+    TALParser.RULE_forStatementDoKeyword,
+    TALParser.RULE_ifStatementIfKeyword,
+    TALParser.RULE_ifStatementThenKeyword,
+    TALParser.RULE_ifStatementElseKeyword,
+  ]);
   public readonly documentSymbolCache = new DocumentCache<vscode.DocumentSymbol[]>();
   public readonly foldingRangeCache = new DocumentCache<vscode.FoldingRange[]>();
 
@@ -31,22 +40,22 @@ export class TALBackend {
     console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     const lines = scope.source.split(/\r?\n/);
     for (let i = 0; i < lines.length; i++) console.log(i + ": " + lines[i]);
-    console.log("pos: " + scope.position.line);
+    console.log("old pos line: " + document.lineAt(position.line).text);
+    console.log("old pos l/cl: " + position.line + ":" + position.character);
+    console.log("new pos line: " + lines[scope.position.line]);
+    console.log("new pos l/cl: " + scope.position.line + ":" + scope.position.character);
     console.log("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 
     const inputStream = antlr4ts.CharStreams.fromString(scope.source);
     const lexer = new TALLexer(inputStream);
     const tokenStream = new antlr4ts.CommonTokenStream(lexer);
 
-    console.time("parse");
+//    console.time(">> parse");
     const parser = new TALParser(tokenStream);
     const tree = parser.program();
-    console.timeEnd("parse");
+//    console.timeEnd(">> parse");
 
-    // Alternate search
-    console.time("altFill");
     const index = computeTokenIndex(tree, scope.position.translate(1));
-    console.timeEnd("altFill");
     if (index === undefined) {
       return result;
     }
@@ -57,15 +66,7 @@ export class TALBackend {
 
     const core = new c3.CodeCompletionCore(parser);
     //core.showResult = true;
-    core.preferredRules = new Set([
-      TALParser.RULE_forStatementForKeyword,
-      TALParser.RULE_forStatementToKeyword,
-      TALParser.RULE_forStatementByKeyword,
-      TALParser.RULE_forStatementDoKeyword,
-      TALParser.RULE_ifStatementIfKeyword,
-      TALParser.RULE_ifStatementThenKeyword,
-      TALParser.RULE_ifStatementElseKeyword,
-    ]);
+    core.preferredRules = this.preferredRules;
 
     const candidates = core.collectCandidates(index);
     this.getCodeCompletionCandidatesItems(result, candidates);
@@ -73,10 +74,6 @@ export class TALBackend {
     candidates.rules.forEach((callStack, key) => {
       console.log(document.version + " R: " + parser.ruleNames[key]);
     });
-
-    //this.talSymbolTable?.getAllSymbols(ProcIdentifierSymbol).forEach((s) => {
-    //  result.push(new vscode.CompletionItem(s.name, vscode.CompletionItemKind.Class));
-    //});
 
     return result;
   }
@@ -122,27 +119,69 @@ export class TALBackend {
     });
   }
 
-  // Get source local to cursor position
-  // Adjust document position to point to local position
+  // Return source local to cursor position and cursor position
+  // adjusted relatively to the new source snipper.
+  private readonly MAX_SCOPE_LINES = 300;
   private getLocalSource(
     document: vscode.TextDocument,
     position: vscode.Position
   ): ILocalSource | undefined {
-    let result = undefined;
-
     const cached = this.documentSymbolCache.get(document, true);
-    if (cached) {
-      for (let i = 0; i < cached.length; i++) {
-        if (cached[i].range.contains(position)) {
-          result = {
-            source: document.getText(cached[i].range),
-            position: position.translate(-cached[i].range.start.line),
-          };
-          break;
-        }
+
+    // If the document does not have any ranges get up to 300 lines before cursor
+    if (!cached || cached.length === 0) {
+      const startPos = new vscode.Position(
+        Math.max(0, position.line - this.MAX_SCOPE_LINES),
+        0
+      );
+      const endPos = document.lineAt(position.line).range.end;
+      const cursorPos = new vscode.Position(
+        Math.max(0, position.line - this.MAX_SCOPE_LINES), // FIXME
+        position.character
+      );
+
+      return {
+        source: document.getText(
+          document.validateRange(new vscode.Range(startPos, endPos))
+        ),
+        position: cursorPos,
+      };
+    }
+
+    // Source before the first region.
+    if (cached[0].range.start.isAfter(position)) {
+      return {
+        source: document.getText(
+          new vscode.Range(new vscode.Position(0, 0), cached[0].range.start.translate(-1))
+        ),
+        position: position,
+      };
+    }
+
+    // Source after the last region
+    if (cached[cached.length - 1].range.start.isBefore(position)) {
+      return {
+        source: document.getText(
+          new vscode.Range(
+            cached[0].range.end.translate(1),
+            document.lineAt(document.lineCount - 1).range.end
+          )
+        ),
+        position: position,
+      };
+    }
+
+    for (let i = 0; i < cached.length; i++) {
+      // Source from inside a region
+      if (cached[i].range.contains(position)) {
+        return {
+          source: document.getText(cached[i].range),
+          position: position.translate(-cached[i].range.start.line),
+        };
+        break;
       }
     }
 
-    return result;
+    return undefined;
   }
 }

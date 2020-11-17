@@ -118,7 +118,8 @@ assertStatement
     ;
 
 assignmentStatement
-    : ( variable BIT_EXTRACT? ':=' )+ expression
+    // procInvocation covers defines
+    : ( ( variable BIT_EXTRACT? | procInvocation ) ':=' )+ expression
     ;
 
 callStatement
@@ -168,7 +169,8 @@ ifStatementThenKeyword : THEN;
 ifStatementElseKeyword : ELSE;
 
 moveStatement
-    : variable MOVE moveStatementSource ( '&' moveStatementSource )* ( '->' variable )?
+    // procInvocation covers defines
+    : ( variable | procInvocation ) MOVE moveStatementSource ( '&' moveStatementSource )* ( '->' variable )?
     ;
 
 moveStatementSource
