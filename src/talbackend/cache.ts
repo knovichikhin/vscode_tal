@@ -21,12 +21,12 @@ interface CachedDocument<T> {
 export class DocumentCache<T> {
   private cachedDocuments = new Map<string, CachedDocument<T>>();
 
-  public get(document: vscode.TextDocument, latest = false): T | undefined {
+  public get(document: vscode.TextDocument, lastOk = false): T | undefined {
     const cachedDocument = this.cachedDocuments.get(document.uri.toString());
 
     if (cachedDocument) {
       if (cachedDocument.version !== document.version) {
-        if (latest) {
+        if (lastOk) {
           return cachedDocument.cache;
         }
         return undefined;

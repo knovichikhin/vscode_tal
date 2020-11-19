@@ -1,8 +1,6 @@
 "use strict";
 
 import * as vscode from "vscode";
-import { DocumentCache } from "./talbackend/cache";
-import { CharStreams, CommonTokenStream } from "antlr4ts";
 import {
   AbstractParseTreeVisitor,
   TerminalNode,
@@ -10,9 +8,9 @@ import {
   RuleNode,
   ErrorNode,
 } from "antlr4ts/tree";
-import { TALLexer } from "./talparser/TALLexer";
-import { ProcDeclarationContext, TALParser } from "./talparser/TALParser";
+import { ProcDeclarationContext } from "./talparser/TALParser";
 import { TALVisitor } from "./talparser/TALVisitor";
+import { TALBackend } from "./talbackend/backend";
 
 /*
 export class TALDocumentSemanticTokensProvider
@@ -59,44 +57,18 @@ class SemanticTALVisitor
   }
 }
 
-export class ANTLRTALDocumentSemanticTokensProvider
+export class TALDocumentSemanticTokensProvider
   implements vscode.DocumentSemanticTokensProvider {
-  private _cache = new DocumentCache<vscode.SemanticTokens>();
+  public constructor(private backend: TALBackend) {}
 
   async provideDocumentSemanticTokens(
     document: vscode.TextDocument,
-    token: vscode.CancellationToken
+    _: vscode.CancellationToken
   ): Promise<vscode.SemanticTokens> {
-    //const cached = this._cache.get(document);
-    //if (cached) {
-    //  return cached[0];
-    //}
-    console.log("sym==");
-    console.time("lex");
-    const stream = CharStreams.fromString(document.getText());
-    const lexer = new TALLexer(stream);
-    const tokenStream = new CommonTokenStream(lexer);
-    console.timeEnd("lex");
-
-    //tokenStream.fill();
-    //const t = tokenStream.getTokens();
-    //const v = lexer.vocabulary;
-    //console.log("LEXER========================================");
-    //t.forEach((i) => {
-    //  console.log(v.getSymbolicName(i.type) + " >> `" + i.text + "`");
-    //});
-
-    console.time("par");
-    const parser = new TALParser(tokenStream);
-    //const tree = parser.program();
-    //const visitor = new SemanticTALVisitor();
-    //visitor.visit(tree);
-    console.timeEnd("par");
-
+    console.log("semantic provide: " + document.version);
+    this.backend.getSemanticTokens(document);
     const builder = new vscode.SemanticTokensBuilder(TALSemanticTokensLegend);
     const result = builder.build();
-
-    //this._cache.set(document, new Array(result));
     return result;
   }
 }

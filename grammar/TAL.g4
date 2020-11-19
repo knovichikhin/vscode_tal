@@ -1,7 +1,7 @@
 grammar TAL;
 
 program
-    : ( variableDeclaration | procDeclaration | nameDeclaration | blockDeclaration )*
+    : ( variableDeclaration | procDeclaration | nameDeclaration | blockDeclaration )+
     ;
 
 // Block Stuff
@@ -13,7 +13,6 @@ nameDeclaration
 // For the purpose of parsing TAL treat it as a regular statement.
 blockDeclaration
     : BLOCK blockIdentifier ( ( AT | BELOW ) '(' INT_CONSTANT ')' )? ';'
-    | END BLOCK ';'
     ;
 
 // Functions
@@ -22,21 +21,36 @@ blockDeclaration
 procInvocation
     : stdlibIdentifier procInvocationParamList? // built-in
     | identifier procInvocationParamList
+    | identifier defineInvocationParamList
     ;
 
 procInvocationParamList
-    : '(' procInvocationParam? ( ( ',' | DEFINE_COMA ) procInvocationParam? )* ')'
+    : '(' procInvocationParam? ( ',' procInvocationParam? )* ')'
     ;
 
 procInvocationParam
     : expression ':' expression
     | expression
-    | ~( ',' | DEFINE_COMA | ')' )+ // Catch all for define invocations
+    ;
+
+defineInvocationParamList
+    : '(' defineInvocationParam? ( ( ',' | DEFINE_COMA ) defineInvocationParam? )* ')'
+    ;
+
+defineInvocationParam
+    : expression ':' expression
+    | expression
+    // Right hand side of move statement inside define invocation
+    | moveStatementSource ( '&' moveStatementSource )* ( '->' variable )?
     ;
 
 procDeclaration
-    : dataType? PROC identifier ( '=' STRING_LITERAL )? procDeclarationParamList? procDeclarationAttributes ';'
+    : dataType? procKeyword procIdentifier ( '=' STRING_LITERAL )? procDeclarationParamList? procDeclarationAttributes ';'
       procDeclarationParamSpec* ( procDeclarationBody | EXTERNAL | FORWARD ) ';'
+    ;
+
+procIdentifier
+    : identifier
     ;
 
 procDeclarationParamList
@@ -70,22 +84,22 @@ procDeclarationParamSpec
     ;
 
 procDeclarationBody
-    : BEGIN variableDeclaration* subprocDeclaration* statements END
+    : beginKeyword variableDeclaration* subprocDeclaration* statements? endKeyword
     ;
 
 subprocDeclaration
-    : dataType? SUBPROC identifier procDeclarationParamList? VARIABLE? ';'
+    : dataType? subprocKeyword identifier procDeclarationParamList? VARIABLE? ';'
       ( procDeclarationParamSpec )* ( subprocDeclarationBody | FORWARD ) ';'
     ;
 
 subprocDeclarationBody
-    : BEGIN variableDeclaration* statements END
+    : beginKeyword variableDeclaration* statements? endKeyword
     ;
 
 
 // Statements
 statements
-    : statement? ( ';' statement? )*
+    : statement ( ';' statement? )*
     ;
 
 statement
@@ -110,7 +124,7 @@ statement
     ;
 
 compoundStatement
-    : BEGIN statements END
+    : beginKeyword statements? endKeyword
     ;
 
 assertStatement
@@ -123,11 +137,14 @@ assignmentStatement
     ;
 
 callStatement
-    : CALL ( procInvocation | identifier )
+    : callKeyword ( procInvocation | identifier )
     ;
 
 labeledCaseStatement
-    : CASE expression OF BEGIN caseAlternative+ ( OTHERWISE '->' statement? ';' )? END
+    : caseKeyword expression ofKeyword
+      beginKeyword
+      caseAlternative* ( otherwiseKeyword '->' statement? ';' )?
+      endKeyword
     ;
 
 caseAlternative
@@ -140,37 +157,32 @@ caseLabel
     ;
 
 unlabledCaseStatement
-    : CASE expression OF BEGIN ( statement ';' )+ ( OTHERWISE statement? ';' )? END
+    : caseKeyword expression ofKeyword
+      beginKeyword
+      ( statement ';' )* ( otherwiseKeyword statement? ';' )?
+      endKeyword
     ;
 
 doStatement
-    : DO statement? UNTIL expression
+    : doKeyword statement? untilKeyword expression
     ;
 
 dropStatement
-    : DROP identifier ( ',' identifier )*
+    : dropKeyword identifier ( ',' identifier )*
     ;
 
 forStatement
-    : forStatementForKeyword variable ':=' expression forStatementToKeyword expression ( forStatementByKeyword expression )? forStatementDoKeyword statement?
+    : forKeyword variable ':=' expression toKeyword expression ( byKeyword expression )? doKeyword statement?
     ;
-
-forStatementForKeyword : FOR;
-forStatementToKeyword : TO | DOWNTO;
-forStatementByKeyword : BY;
-forStatementDoKeyword : DO;
 
 ifStatement
-    : ifStatementIfKeyword expression ifStatementThenKeyword statement? ( ifStatementElseKeyword statement? )?
+    : ifKeyword expression thenKeyword statement? ( elseKeyword statement? )?
     ;
-
-ifStatementIfKeyword : IF;
-ifStatementThenKeyword : THEN;
-ifStatementElseKeyword : ELSE;
 
 moveStatement
     // procInvocation covers defines
-    : ( variable | procInvocation ) MOVE moveStatementSource ( '&' moveStatementSource )* ( '->' variable )?
+    : ( variable | procInvocation ) MOVE
+      moveStatementSource ( '&' moveStatementSource )* ( '->' variable )?
     ;
 
 moveStatementSource
@@ -184,11 +196,11 @@ moveStatementSource
     ;
 
 returnStatement
-    : RETURN expression? ( ',' expression )?
+    : returnKeyword expression? ( ',' expression )?
     ;
 
 scanStatement
-    : ( SCAN | RSCAN ) variable ( WHILE | UNTIL ) expression ( '->' variable )?
+    : scanKeyword variable ( whileKeyword | untilKeyword ) expression ( '->' variable )?
     ;
 
 storeStatement
@@ -196,48 +208,44 @@ storeStatement
     ;
 
 useStatement
-    : USE identifier ( ',' identifier )*
+    : useKeyword identifier ( ',' identifier )*
     ;
 
 whileStatement
-    : WHILE expression DO statement?
+    : whileKeyword expression doKeyword statement?
     ;
 
 // Declarations
 variableDeclaration
-    : simpleDeclaration
+    : dataType simpleDeclaration ( ',' simpleDeclaration )* ';'
+    | STRUCT structReferralDeclaration ( ',' structReferralDeclaration )* ';'
+    | DEFINE defineDeclaration ( ',' defineDeclaration )* ';'
+    | LITERAL literalDeclaration ( ',' literalDeclaration )* ';'
     | readOnlyArrayDeclaration
     | structDeclaration
-    | structReferralDeclaration
     | structTemplateDeclaration
-    | defineDeclaration
-    | literalDeclaration
     ;
 
 simpleDeclaration
-    : dataType simpleDeclarationItem ( ',' simpleDeclarationItem )* ';'
+    : simpleDeclarationVariable
+    | simpleDeclarationPointer
+    | simpleDecalrationStructPointer
+    | simpleDeclarationArray
     ;
 
-simpleDeclarationItem
-    : simpleDeclarationItemVariable
-    | simpleDeclarationItemPointer
-    | simpleDecalrationItemStructPointer
-    | simpleDeclarationItemArray
-    ;
-
-simpleDeclarationItemVariable
+simpleDeclarationVariable
     : identifier ( ':=' expression )?
     ;
 
-simpleDeclarationItemPointer
+simpleDeclarationPointer
     : ( '.' EXT? ) identifier ( ':=' expression )?
     ;
 
-simpleDecalrationItemStructPointer
+simpleDecalrationStructPointer
     : ( '.' EXT? ) identifier '(' identifier ')' ( ':=' expression )?
     ;
 
-simpleDeclarationItemArray
+simpleDeclarationArray
     : ( '.' EXT? )? identifier '[' expression ':' expression ']' ( ':=' constantList )?
     ;
 
@@ -258,7 +266,7 @@ structTemplateDeclaration
     ;
 
 structReferralDeclaration
-    : STRUCT ( '.' EXT? )? identifier '(' identifier ')' ( '[' expression ':' expression ']' )? ';'
+    : ( '.' EXT? )? identifier '(' identifier ')' ( '[' expression ':' expression ']' )?
     ;
 
 subStructDeclaration // with optional redefinition
@@ -270,7 +278,7 @@ subStructReferralDeclaration // with optional redefinition
     ;
 
 structDeclarationLayout
-    : BEGIN structDeclarationLayoutDeclaration+ END ';'
+    : beginKeyword structDeclarationLayoutDeclaration+ endKeyword ';'
     ;
 
 structDeclarationLayoutDeclaration
@@ -289,20 +297,12 @@ structDeclarationLayoutDeclarationItem
     | structIdentifier '[' expression ':' expression ']' // array variable
     ;
 
-literalDeclaration
-    : LITERAL literalDeclarationItem ( ',' literalDeclarationItem )* ';'
-    ;
-
 // literal can be define using other literals and arithmetic expressions
-literalDeclarationItem
+literalDeclaration
     : literalDefineIdentifier ( '=' expression )?
     ;
 
 defineDeclaration
-    : DEFINE defineDeclarationItem ( ',' defineDeclarationItem )* ';'
-    ;
-
-defineDeclarationItem
     : literalDefineIdentifier defineParamList? '=' defineBody '#'
     ;
 
@@ -355,7 +355,7 @@ groupComparisonOperand
 
 // E.g. var := if length > 0 then 10 else 20;
 ifExpression
-    : IF expression THEN expression ( ELSE expression )?
+    : ifKeyword expression thenKeyword expression ( elseKeyword expression )?
     ;
 
 // E.g.
@@ -366,7 +366,10 @@ ifExpression
 //          otherwise -1;
 //          end;
 caseExpression
-    : CASE expression OF BEGIN caseExpressionElement+ ( OTHERWISE caseExpressionElement )? END
+    : caseKeyword expression ofKeyword
+      beginKeyword caseExpressionElement+
+      ( otherwiseKeyword caseExpressionElement )?
+      endKeyword
     ;
 
 caseExpressionElement
@@ -464,6 +467,29 @@ numericConstant
     | INT32_CONSTANT
     | INT_CONSTANT
     ;
+
+// Global Reserved Keywords - these rules trigger autocomplete
+beginKeyword : BEGIN;
+byKeyword : BY;
+callKeyword : CALL;
+caseKeyword : CASE;
+doKeyword : DO;
+toKeyword : TO | DOWNTO;
+dropKeyword : DROP;
+elseKeyword : ELSE;
+endKeyword : END;
+forKeyword : FOR;
+ifKeyword : IF;
+ofKeyword : OF;
+otherwiseKeyword : OTHERWISE;
+procKeyword : PROC;
+returnKeyword : RETURN;
+scanKeyword : RSCAN | SCAN;
+subprocKeyword : SUBPROC;
+thenKeyword : THEN;
+untilKeyword : UNTIL;
+useKeyword : USE;
+whileKeyword : WHILE;
 
 // Context-sensitive identifiers
 identifier
@@ -600,6 +626,9 @@ REAL : R E A L ( WS? '(' WS? '32' WS? ')' )?;
 LITERAL : L I T E R A L;
 STRUCT : S T R U C T;
 DEFINE : D E F I N E;
+
+// Skip end block to avoid ambiguity with end keyword
+END_BLOCK : WS? END WS+ BLOCK WS? ';' -> skip;
 
 // Global Reserved Keywords
 AND : A N D;
