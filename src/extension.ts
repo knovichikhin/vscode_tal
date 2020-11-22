@@ -7,7 +7,10 @@ import {
   TALCompletionItemProviderContext,
 } from "./keywordprovider";
 import { getTALLanguageConfiguration } from "./languageconfiguration";
-import { TALDocumentSemanticTokensProvider, TALSemanticTokensLegend } from "./semanticprovider";
+import {
+  TALDocumentSemanticTokensProvider,
+  TALSemanticTokensLegend,
+} from "./semanticprovider";
 import { TALDocumentSymbolProvider } from "./symbolprovider";
 import { TALBackend } from "./talbackend/backend";
 
@@ -28,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
         new TALDocumentSemanticTokensProvider(talBackend),
         TALSemanticTokensLegend
       )
-  );
+    );
   }
 
   context.subscriptions.push(

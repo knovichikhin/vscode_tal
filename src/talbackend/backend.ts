@@ -41,9 +41,7 @@ export class TALBackend {
   public readonly documentSymbolCache = new DocumentCache<vscode.DocumentSymbol[]>();
   public readonly foldingRangeCache = new DocumentCache<vscode.FoldingRange[]>();
 
-  public getSemanticTokens(
-    document: vscode.TextDocument,
-  ): void {
+  public getSemanticTokens(document: vscode.TextDocument): void {
     const inputStream = antlr4ts.CharStreams.fromString(document.getText());
     const lexer = new TALLexer(inputStream);
     const tokenStream = new antlr4ts.CommonTokenStream(lexer);
