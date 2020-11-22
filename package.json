@@ -78,10 +78,10 @@
         "configuration": {
             "title": "TAL",
             "properties": {
-                "tal.enableTalFunctionCompletion": {
+                "tal.experimental": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Complete standard TAL functions with their parameter signature."
+                    "description": "Enable experimental features."
                 },
                 "tal.enableDocumentSymbol": {
                     "type": "boolean",

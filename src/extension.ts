@@ -4,7 +4,6 @@ import * as vscode from "vscode";
 import { TALFoldingProvider } from "./foldingprovider";
 import {
   TACLCompletionItemProvider,
-  TALCompletionItemProvider,
   TALCompletionItemProviderContext,
 } from "./keywordprovider";
 import { getTALLanguageConfiguration } from "./languageconfiguration";
@@ -15,30 +14,21 @@ import { TALBackend } from "./talbackend/backend";
 export function activate(context: vscode.ExtensionContext) {
   const talBackend = new TALBackend();
 
-  context.subscriptions.push(
-    vscode.languages.registerCompletionItemProvider(
-      "tal",
-      new TALCompletionItemProviderContext(talBackend)
-    )
-  );
-
-  context.subscriptions.push(
-    vscode.languages.registerDocumentSemanticTokensProvider(
-      "tal",
-      new TALDocumentSemanticTokensProvider(talBackend),
-      TALSemanticTokensLegend
-    )
-  );
-
-  if (
-    vscode.workspace.getConfiguration("tal").get("enableTalFunctionCompletion") === true
-  ) {
+  if (vscode.workspace.getConfiguration("tal").get("enableDocumentSymbol") === true) {
     context.subscriptions.push(
       vscode.languages.registerCompletionItemProvider(
         "tal",
-        new TALCompletionItemProvider()
+        new TALCompletionItemProviderContext(talBackend)
       )
     );
+
+    context.subscriptions.push(
+      vscode.languages.registerDocumentSemanticTokensProvider(
+        "tal",
+        new TALDocumentSemanticTokensProvider(talBackend),
+        TALSemanticTokensLegend
+      )
+  );
   }
 
   context.subscriptions.push(

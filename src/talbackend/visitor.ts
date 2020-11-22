@@ -1,8 +1,5 @@
 "use strict";
 
-import { ScopedSymbol, SymbolTable } from "antlr4-c3";
-"use strict";
-
 import { AbstractParseTreeVisitor } from "antlr4ts/tree";
 import * as c3 from "antlr4-c3";
 import { TALVisitor } from "../talparser/TALVisitor";
