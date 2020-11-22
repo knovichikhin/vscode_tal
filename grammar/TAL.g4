@@ -148,7 +148,7 @@ labeledCaseStatement
     ;
 
 caseAlternative
-    : caseLabel ( ',' caseLabel )* '->' statement ';'
+    : caseLabel ( ',' caseLabel )* '->' statement? ';'
     ;
 
 caseLabel
@@ -246,7 +246,7 @@ simpleDecalrationStructPointer
     ;
 
 simpleDeclarationArray
-    : ( '.' EXT? )? identifier '[' expression ':' expression ']' ( ':=' constantList )?
+    : ( '.' EXT? )? identifier '[' expression ':' expression ']' ( ':=' ( constant | constantList ) )?
     ;
 
 readOnlyArrayDeclaration

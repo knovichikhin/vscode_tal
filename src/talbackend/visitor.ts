@@ -21,7 +21,6 @@ export class TALSymbolTableVisitor extends AbstractParseTreeVisitor<c3.SymbolTab
 
     public visitProcIdentifier(ctx: ProcIdentifierContext): c3.SymbolTable {
         this.symbolTable.addNewSymbolOfType(c3.ClassSymbol, this.scope, ctx.text);
-        console.log(ctx.text);
         return this.visitChildren(ctx);
     }
 }
