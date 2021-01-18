@@ -133,5 +133,9 @@
     "dependencies": {
         "antlr4-c3": "^1.1.12",
         "antlr4ts": "^0.5.0-alpha.3"
-    }
+    },
+    "files": [
+        "./node_modules/antlr4-c3",
+        "./node_modules/antlr4ts"
+    ]
 }
