@@ -20,6 +20,9 @@
       "include": "#function_call_std_lib"
     },
     {
+      "include": "#tacl_utils"
+    },
+    {
       "include": "#numbers"
     },
     {
@@ -152,7 +155,7 @@
         {
           "comment": "Match text between COMMENT and end of line",
           "name": "comment.block.tacl",
-          "begin": "^\\s*\\b(?<!\\^)(comment)(?!\\^)\\b",
+          "begin": "(?i)^\\s*\\b(?<!\\^)(comment)(?!\\^)\\b",
           "end": "[^\\&]$",
           "patterns": [
             {
@@ -538,6 +541,36 @@
           "comment": "Standard TACL functions that start with a #",
           "name": "entity.name.function.tacl",
           "match": "(?i)(?<!\\^)(#[a-zA-Z]*)(?!\\^)\\b"
+        }
+      ]
+    },
+    "tacl_utils": {
+      "patterns": [
+        {
+          "comment": ":UTILS:TACL commands: add define",
+          "match": "(?i)^\\s*\\b(?<!\\^)(add\\s+define)((\\s+\\=[a-z][a-z0-9\\-\\_\\^]{,22})+(\\s*(,)\\s*\\b(?<!\\^)(like)(?!\\^)\\b(\\s+\\=[a-z][a-z0-9\\-\\_\\^]{,22})?)?)?",
+          "captures": {
+            "0": { "name": "meta.tacl_utils.add_define.tacl" },
+            "1": { "name": "entity.name.function.tacl" },
+            "3": { "name": "entity.name.type.tacl.define" },
+            "5": { "name": "punctuation.separator.comma.tacl" },
+            "6": { "name": "entity.name.function.tacl" },
+            "7": { "name": "entity.name.type.tacl.define" }
+          }
+        },
+        {
+          "comment": ":UTILS:TACL commands: alter/delete define",
+          "match": "(?i)^\\s*\\b(?<!\\^)((alter|delete)\\s+define)(\\s+\\=[a-z*?][a-z0-9\\-\\_\\^*?]{,22})?",
+          "captures": {
+            "0": { "name": "meta.tacl_utils.alter_delete_define.tacl" },
+            "1": { "name": "entity.name.function.tacl" },
+            "3": { "name": "entity.name.type.tacl.define" }
+          }
+        },
+        {
+        "comment": ":UTILS:TACL commands",
+        "name": "entity.name.function.tacl",
+        "match": "(?i)^\\s*\\b(?<!\\^)(activate|add|adddsttransition|adduser|alter|altpri|assign|attachseg|backupcpu|break|builtins|buscmd|clear|columnize|compute|copydump|copyvar|create|createseg|debug|debugnow|default|delete|deluser|detachseg|env|exit|fileinfo|filenames|files|filetovar|help|history|home|info|initterm|inlecho|inleof|inlout|inlprefix|inlto|join|keep|keys|lights|load|loadedfiles|logoff|logon|o|obey|outvar|param|parse^status|password|pause|pmsearch|pmsg|pop|ppd|purge|push|rcvdump|receivedump|reload|remotepassword|rename|reset|rpasswrd|run(d|v)?|seginfo|set|setprompt|settime|show|sink|status|stop|stop\\^confirm|suspend|switch|system|systimes|time|timestamp_to_text|use|users|variables|varinfo|vartofile|vchange|vcopy|vdelete|vfind|vinsert|vlist|vmove|volume|vtree|wakeup|who|xbusdown|xbusup|ybusdown|ybusup|_comparev|_contime_to_text|_contime_to_text_date|_contime_to_text_time|_debugger|_execute|_longest|_month3)(?!\\^)\\b"
         }
       ]
     },
