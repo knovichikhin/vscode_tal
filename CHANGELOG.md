@@ -1,4 +1,7 @@
 # Change Log
+## [0.7.6] - 2021-01-26
+- Added basic :UTILS:TACL handling to TACL language.
+
 ## [0.7.5] - 2020-11-07
 - Remove TAL keyword completions. They are not very useful context-free.
 - Disable by default TAL built-in library completions. They are not very useful context-free.
