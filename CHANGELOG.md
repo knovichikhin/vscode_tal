@@ -1,4 +1,7 @@
 # Change Log
+## [0.7.7] - 2021-04-09
+- Updated [y18n](https://github.com/yargs/y18n) from 4.0.0 to 4.0.3 due to security fixes.
+
 ## [0.7.6] - 2021-01-26
 - Added basic :UTILS:TACL handling to TACL language.
 
