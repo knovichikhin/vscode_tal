@@ -1,4 +1,7 @@
 # Change Log
+## [0.7.8] - 2021-05-20
+- Updated [lodash](https://github.com/lodash/lodash) from 4.17.19 to 4.17.21 due to security fixes.
+
 ## [0.7.7] - 2021-04-09
 - Updated [y18n](https://github.com/yargs/y18n) from 4.0.0 to 4.0.3 due to security fixes.
 
