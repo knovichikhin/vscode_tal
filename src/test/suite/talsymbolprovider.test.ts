@@ -96,6 +96,76 @@ suite("TAL Symbol Provider Test", () => {
       });
   });
 
+  test("Test happy procs scenarios, procs_happy_commented_out.tal", async () => {
+    const uri = vscode.Uri.file(testFilesPath + "/procs_happy_commented_out.tal");
+    return vscode.workspace
+      .openTextDocument(uri)
+      .then(async (doc: vscode.TextDocument) => {
+        assert.ok(doc);
+
+        return talSymbolProvider
+          .provideDocumentSymbols(doc, token)
+          .then((symbols: vscode.DocumentSymbol[]) => {
+            assert.ok(symbols);
+            assert.strictEqual(symbols.length, 6);
+
+            assert.strictEqual(symbols[0].children.length, 0);
+            assert.strictEqual(symbols[0].detail, "");
+            assert.strictEqual(symbols[0].kind, vscode.SymbolKind.Class);
+            assert.strictEqual(symbols[0].name, "test_1");
+            assert.strictEqual(symbols[0].selectionRange.start.line, 0);
+            assert.strictEqual(symbols[0].selectionRange.end.line, 0);
+            assert.strictEqual(symbols[0].range.start.line, 0);
+            assert.strictEqual(symbols[0].range.end.line, 2);
+
+            assert.strictEqual(symbols[1].children.length, 0);
+            assert.strictEqual(symbols[1].detail, "");
+            assert.strictEqual(symbols[1].kind, vscode.SymbolKind.Class);
+            assert.strictEqual(symbols[1].name, "test_2");
+            assert.strictEqual(symbols[1].selectionRange.start.line, 3);
+            assert.strictEqual(symbols[1].selectionRange.end.line, 3);
+            assert.strictEqual(symbols[1].range.start.line, 3);
+            assert.strictEqual(symbols[1].range.end.line, 8);
+
+            assert.strictEqual(symbols[2].children.length, 0);
+            assert.strictEqual(symbols[2].detail, "external");
+            assert.strictEqual(symbols[2].kind, vscode.SymbolKind.Interface);
+            assert.strictEqual(symbols[2].name, "test_external_1");
+            assert.strictEqual(symbols[2].selectionRange.start.line, 9);
+            assert.strictEqual(symbols[2].selectionRange.end.line, 9);
+            assert.strictEqual(symbols[2].range.start.line, 9);
+            assert.strictEqual(symbols[2].range.end.line, 9);
+
+            assert.strictEqual(symbols[3].children.length, 0);
+            assert.strictEqual(symbols[3].detail, "external");
+            assert.strictEqual(symbols[3].kind, vscode.SymbolKind.Interface);
+            assert.strictEqual(symbols[3].name, "test_external_2");
+            assert.strictEqual(symbols[3].selectionRange.start.line, 10);
+            assert.strictEqual(symbols[3].selectionRange.end.line, 10);
+            assert.strictEqual(symbols[3].range.start.line, 10);
+            assert.strictEqual(symbols[3].range.end.line, 14);
+
+            assert.strictEqual(symbols[4].children.length, 0);
+            assert.strictEqual(symbols[4].detail, "forward");
+            assert.strictEqual(symbols[4].kind, vscode.SymbolKind.Interface);
+            assert.strictEqual(symbols[4].name, "test_forward_1");
+            assert.strictEqual(symbols[4].selectionRange.start.line, 15);
+            assert.strictEqual(symbols[4].selectionRange.end.line, 15);
+            assert.strictEqual(symbols[4].range.start.line, 15);
+            assert.strictEqual(symbols[4].range.end.line, 15);
+
+            assert.strictEqual(symbols[5].children.length, 0);
+            assert.strictEqual(symbols[5].detail, "forward");
+            assert.strictEqual(symbols[5].kind, vscode.SymbolKind.Interface);
+            assert.strictEqual(symbols[5].name, "test_forward_2");
+            assert.strictEqual(symbols[5].selectionRange.start.line, 16);
+            assert.strictEqual(symbols[5].selectionRange.end.line, 16);
+            assert.strictEqual(symbols[5].range.start.line, 16);
+            assert.strictEqual(symbols[5].range.end.line, 20);
+          });
+      });
+  });
+
   test("Test tricky procs scenarios, procs_tricky.tal", async () => {
     const uri = vscode.Uri.file(testFilesPath + "/procs_tricky.tal");
     return vscode.workspace
@@ -227,6 +297,67 @@ suite("TAL Symbol Provider Test", () => {
       });
   });
 
+  test("Test happy subprocs scenarios, subprocs_happy_commented_out.tal", async () => {
+    const uri = vscode.Uri.file(testFilesPath + "/subprocs_happy_commented_out.tal");
+    return vscode.workspace
+      .openTextDocument(uri)
+      .then(async (doc: vscode.TextDocument) => {
+        assert.ok(doc);
+
+        return talSymbolProvider
+          .provideDocumentSymbols(doc, token)
+          .then((symbols: vscode.DocumentSymbol[]) => {
+            assert.ok(symbols);
+            assert.strictEqual(symbols.length, 1);
+
+            assert.strictEqual(symbols[0].children.length, 4);
+            assert.strictEqual(symbols[0].detail, "");
+            assert.strictEqual(symbols[0].kind, vscode.SymbolKind.Class);
+            assert.strictEqual(symbols[0].name, "test_1");
+            assert.strictEqual(symbols[0].selectionRange.start.line, 0);
+            assert.strictEqual(symbols[0].selectionRange.end.line, 0);
+            assert.strictEqual(symbols[0].range.start.line, 0);
+            assert.strictEqual(symbols[0].range.end.line, 17);
+
+            assert.strictEqual(symbols[0].children[0].children.length, 0);
+            assert.strictEqual(symbols[0].children[0].detail, "");
+            assert.strictEqual(symbols[0].children[0].kind, vscode.SymbolKind.Method);
+            assert.strictEqual(symbols[0].children[0].name, "sub_test_1");
+            assert.strictEqual(symbols[0].children[0].selectionRange.start.line, 2);
+            assert.strictEqual(symbols[0].children[0].selectionRange.end.line, 2);
+            assert.strictEqual(symbols[0].children[0].range.start.line, 2);
+            assert.strictEqual(symbols[0].children[0].range.end.line, 4);
+
+            assert.strictEqual(symbols[0].children[1].children.length, 0);
+            assert.strictEqual(symbols[0].children[1].detail, "");
+            assert.strictEqual(symbols[0].children[1].kind, vscode.SymbolKind.Method);
+            assert.strictEqual(symbols[0].children[1].name, "sub_test_2");
+            assert.strictEqual(symbols[0].children[1].selectionRange.start.line, 6);
+            assert.strictEqual(symbols[0].children[1].selectionRange.end.line, 6);
+            assert.strictEqual(symbols[0].children[1].range.start.line, 6);
+            assert.strictEqual(symbols[0].children[1].range.end.line, 10);
+
+            assert.strictEqual(symbols[0].children[2].children.length, 0);
+            assert.strictEqual(symbols[0].children[2].detail, "");
+            assert.strictEqual(symbols[0].children[2].kind, vscode.SymbolKind.Method);
+            assert.strictEqual(symbols[0].children[2].name, "sub_test_3");
+            assert.strictEqual(symbols[0].children[2].selectionRange.start.line, 12);
+            assert.strictEqual(symbols[0].children[2].selectionRange.end.line, 12);
+            assert.strictEqual(symbols[0].children[2].range.start.line, 12);
+            assert.strictEqual(symbols[0].children[2].range.end.line, 15);
+
+            assert.strictEqual(symbols[0].children[3].children.length, 0);
+            assert.strictEqual(symbols[0].children[3].detail, "");
+            assert.strictEqual(symbols[0].children[3].kind, vscode.SymbolKind.Function);
+            assert.strictEqual(symbols[0].children[3].name, "main: " + symbols[0].name);
+            assert.strictEqual(symbols[0].children[3].selectionRange.start.line, 16);
+            assert.strictEqual(symbols[0].children[3].selectionRange.end.line, 16);
+            assert.strictEqual(symbols[0].children[3].range.start.line, 16);
+            assert.strictEqual(symbols[0].children[3].range.end.line, 17);
+          });
+      });
+  });
+
   test("Test tricky subprocs scenarios, subprocs_tricky.tal", async () => {
     const uri = vscode.Uri.file(testFilesPath + "/subprocs_tricky.tal");
     return vscode.workspace
@@ -238,7 +369,7 @@ suite("TAL Symbol Provider Test", () => {
           .provideDocumentSymbols(doc, token)
           .then((symbols: vscode.DocumentSymbol[]) => {
             assert.ok(symbols);
-            assert.strictEqual(symbols.length, 2);
+            assert.strictEqual(symbols.length, 3);
 
             assert.strictEqual(symbols[0].children.length, 4);
             assert.strictEqual(symbols[0].detail, "");
@@ -285,23 +416,50 @@ suite("TAL Symbol Provider Test", () => {
             assert.strictEqual(symbols[0].children[3].range.start.line, 18);
             assert.strictEqual(symbols[0].children[3].range.end.line, 28);
 
-            assert.strictEqual(symbols[1].children.length, 1);
+            assert.strictEqual(symbols[1].children.length, 2);
             assert.strictEqual(symbols[1].detail, "");
             assert.strictEqual(symbols[1].kind, vscode.SymbolKind.Class);
-            assert.strictEqual(symbols[1].name, "test_2");
+            assert.strictEqual(symbols[1].name, "test_3");
             assert.strictEqual(symbols[1].selectionRange.start.line, 32);
             assert.strictEqual(symbols[1].selectionRange.end.line, 32);
             assert.strictEqual(symbols[1].range.start.line, 32);
-            assert.strictEqual(symbols[1].range.end.line, 34);
+            assert.strictEqual(symbols[1].range.end.line, 37);
 
             assert.strictEqual(symbols[1].children[0].children.length, 0);
             assert.strictEqual(symbols[1].children[0].detail, "");
             assert.strictEqual(symbols[1].children[0].kind, vscode.SymbolKind.Method);
-            assert.strictEqual(symbols[1].children[0].name, "sub_no_body");
+            assert.strictEqual(symbols[1].children[0].name, "sub_test4");
             assert.strictEqual(symbols[1].children[0].selectionRange.start.line, 34);
             assert.strictEqual(symbols[1].children[0].selectionRange.end.line, 34);
             assert.strictEqual(symbols[1].children[0].range.start.line, 34);
-            assert.strictEqual(symbols[1].children[0].range.end.line, 34);
+            assert.strictEqual(symbols[1].children[0].range.end.line, 36);
+
+            assert.strictEqual(symbols[1].children[1].children.length, 0);
+            assert.strictEqual(symbols[1].children[1].detail, "");
+            assert.strictEqual(symbols[1].children[1].kind, vscode.SymbolKind.Function);
+            assert.strictEqual(symbols[1].children[1].name, "main: " + symbols[1].name);
+            assert.strictEqual(symbols[1].children[1].selectionRange.start.line, 37);
+            assert.strictEqual(symbols[1].children[1].selectionRange.end.line, 37);
+            assert.strictEqual(symbols[1].children[1].range.start.line, 37);
+            assert.strictEqual(symbols[1].children[1].range.end.line, 37);
+
+            assert.strictEqual(symbols[2].children.length, 1);
+            assert.strictEqual(symbols[2].detail, "");
+            assert.strictEqual(symbols[2].kind, vscode.SymbolKind.Class);
+            assert.strictEqual(symbols[2].name, "test_2");
+            assert.strictEqual(symbols[2].selectionRange.start.line, 39);
+            assert.strictEqual(symbols[2].selectionRange.end.line, 39);
+            assert.strictEqual(symbols[2].range.start.line, 39);
+            assert.strictEqual(symbols[2].range.end.line, 41);
+
+            assert.strictEqual(symbols[2].children[0].children.length, 0);
+            assert.strictEqual(symbols[2].children[0].detail, "");
+            assert.strictEqual(symbols[2].children[0].kind, vscode.SymbolKind.Method);
+            assert.strictEqual(symbols[2].children[0].name, "sub_no_body");
+            assert.strictEqual(symbols[2].children[0].selectionRange.start.line, 41);
+            assert.strictEqual(symbols[2].children[0].selectionRange.end.line, 41);
+            assert.strictEqual(symbols[2].children[0].range.start.line, 41);
+            assert.strictEqual(symbols[2].children[0].range.end.line, 41);
           });
       });
   });

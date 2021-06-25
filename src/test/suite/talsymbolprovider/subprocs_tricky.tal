@@ -30,6 +30,13 @@ proc test_1;
 
 subproc sub_outside_of_proc; ! top level subprocs are not allowed
 
+proc test_3; ! Subproc with commented out begin
+    begin
+    subproc sub_test4;
+        --end;
+        end;
+    end;
+
 proc test_2;
     begin
     subproc sub_no_body; ! EOF

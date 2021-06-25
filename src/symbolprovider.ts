@@ -116,7 +116,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
     }
 
     for (lineNum = 0; lineNum < document.lineCount; lineNum++) {
-      const line = document.lineAt(lineNum).text;
+      const line = this.removeComments(document.lineAt(lineNum).text);
 
       // Look for procs/subprocs while skipping lines.
       if (this.mapProc(document, lineNum, line, procSymbols)) {
@@ -224,8 +224,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
 
     // Start parsing proc at the line after the proc line
     for (lineNum += 1; lineNum < document.lineCount; lineNum++) {
-      line = document.lineAt(lineNum).text;
-      line = this.removeComments(line);
+      line = this.removeComments(document.lineAt(lineNum).text);
 
       // External and forward procs do not have begin/end body.
       // Therefore, once at least 1 begin is found external and forward
@@ -346,8 +345,7 @@ export class TALDocumentSymbolProvider implements vscode.DocumentSymbolProvider 
 
     // Start parsing subproc at the line after the subproc line
     for (lineNum += 1; lineNum < document.lineCount; lineNum++) {
-      let line: string = document.lineAt(lineNum).text;
-      line = this.removeComments(line);
+      const line: string = this.removeComments(document.lineAt(lineNum).text);
 
       // Get number of begins on the line
       stack += (line.match(this.beginRe) || []).length;
