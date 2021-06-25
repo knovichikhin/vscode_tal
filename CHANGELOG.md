@@ -1,4 +1,7 @@
 # Change Log
+## [0.7.9] - 2021-06-25
+- Handle comments that appear before proc/subproc declaration.
+
 ## [0.7.8] - 2021-05-20
 - Updated [lodash](https://github.com/lodash/lodash) from 4.17.19 to 4.17.21 due to security fixes.
 
