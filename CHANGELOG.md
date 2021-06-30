@@ -1,4 +1,8 @@
 # Change Log
+## [0.7.10] - 2021-06-29
+- Made source directive case-insensitive (as it should have been).
+- Added scope for single line search directive
+
 ## [0.7.9] - 2021-06-25
 - Handle comments that appear before proc/subproc declaration.
 
