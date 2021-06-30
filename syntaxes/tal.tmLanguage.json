@@ -187,9 +187,9 @@
           ]
         },
         {
-          "comment": "Multiline TAL source directive. Highlight sections inside.",
+          "comment": "Single line TAL source and search directives.",
           "name": "meta.preprocessor.singleline-directive.source.tal",
-          "match": "(?i)\\b(?<!\\^)(source)(?!\\^)\\b\\s*([a-z0-9\\-\\_\\.\\^*?=$\\\\]+)",
+          "match": "(?i)\\b(?<!\\^)(source|search)(?!\\^)\\b\\s*([a-z0-9\\-\\_\\.\\^*?=$\\\\]+)",
           "captures": {
             "1": { "name": "keyword.preprocessor.tal" },
             "2": { "name": "string.quoted.double.tal" }
