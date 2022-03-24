@@ -2,7 +2,7 @@
     "name": "tal",
     "displayName": "Tandem TAL",
     "description": "Syntax highlighting for Transaction Application Language",
-    "version": "0.7.10",
+    "version": "0.7.11",
     "keywords": [
         "tal",
         "tandem",
@@ -115,17 +115,17 @@
     },
     "devDependencies": {
         "@types/glob": "^7.1.3",
-        "@types/mocha": "^8.0.3",
+        "@types/mocha": "^9.1.0",
         "@types/node": "^12.12.0",
         "@types/vscode": "^1.42.0",
         "@typescript-eslint/eslint-plugin": "^3.0.2",
         "@typescript-eslint/parser": "^3.0.2",
+        "@vscode/test-electron": "^1.4.0",
         "eslint": "^7.1.0",
         "eslint-config-prettier": "^6.12.0",
         "glob": "^7.1.6",
-        "mocha": "^8.1.2",
+        "mocha": "^9.2.2",
         "prettier": "2.1.2",
-        "typescript": "^3.9.4",
-        "vscode-test": "^1.4.0"
+        "typescript": "^3.9.4"
     }
 }

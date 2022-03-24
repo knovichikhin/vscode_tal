@@ -1,4 +1,7 @@
 # Change Log
+## [0.7.11] - 2022-03-23
+- Update TACL string to match on a single line instead of multi-line.
+
 ## [0.7.10] - 2021-06-29
 - Made source directive case-insensitive (as it should have been).
 - Added scope for single line search directive

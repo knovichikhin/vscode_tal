@@ -358,24 +358,17 @@
       ]
     },
     "strings": {
+      "comment": "TACL uses double quotes to escape a quote. So, ignore double quotes inside the quotes.",
       "name": "string.quoted.double.tacl",
-      "begin": "\"",
-      "beginCaptures": {
-        "0": {
+      "match": "(\")[^\"]*(?:\"\"[^\"]*)*(\")",
+      "captures": {
+        "1": {
           "name": "punctuation.definition.string.begin.tacl"
-        }
-      },
-      "end": "\"",
-      "endCaptures": {
-        "0": {
+        },
+        "2": {
           "name": "punctuation.definition.string.end.tacl"
         }
-      },
-      "patterns": [
-        {
-          "include": "#line_continuation_character"
-        }
-      ]
+      }
     },
     "operators": {
       "patterns": [
